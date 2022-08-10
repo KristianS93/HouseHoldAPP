@@ -60,3 +60,6 @@ func (s *Server) Run() {
 		log.Fatalln("Failed to start a server, closing application.")
 	}
 }
+
+
+
