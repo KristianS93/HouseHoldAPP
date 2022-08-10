@@ -40,8 +40,9 @@ func (s *Server) Init() {
 		s.Routes(s.Router)
 	}
 
-	// Need to implement an init for
-	// s.Templates
+	if s.Templates == nil {
+		s.Templates = template.Must(template.ParseGlob("templates/*.gohtml"))
+	}
 
 	if s.Sessions == nil {
 		s.Sessions = make(map[string]Session)

@@ -16,5 +16,6 @@ func (s *Server) index(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(200)
-	w.Write([]byte("Welcome to the website."))
+	w.Header().Set("Content-Type", "text/html")
+	s.Templates.ExecuteTemplate(w, "index.gohtml", nil)
 }
