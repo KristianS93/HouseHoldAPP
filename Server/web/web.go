@@ -13,6 +13,11 @@ const (
 	SessionTimeOut = 1200
 )
 
+type Session struct {
+	LastActivity time.Time
+	UserID       string
+}
+
 type Server struct {
 	// Will serve as the router used to route incoming requests properly.
 	Router *http.ServeMux
@@ -25,7 +30,7 @@ type Server struct {
 	Templates *template.Template
 
 	// Keeping track of current sessions by logging last activity on cookie key.
-	Sessions map[string]time.Time
+	Sessions map[string]Session
 }
 
 func (s *Server) Init() {
@@ -39,7 +44,7 @@ func (s *Server) Init() {
 	// s.Templates
 
 	if s.Sessions == nil {
-		s.Sessions = make(map[string]time.Time)
+		s.Sessions = make(map[string]Session)
 	}
 
 	if s.HostName == "" {
