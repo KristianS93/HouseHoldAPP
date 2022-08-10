@@ -1,6 +1,7 @@
 package web
 
 import (
+	"log"
 	"net/http"
 	"text/template"
 	"time"
@@ -21,8 +22,41 @@ type Server struct {
 	HostPort string
 
 	// Storing all current templates, to be ready for execution.
-	Templates map[string]*template.Template
+	Templates *template.Template
 
 	// Keeping track of current sessions by logging last activity on cookie key.
 	Sessions map[string]time.Time
+}
+
+func (s *Server) Init() {
+	if s.Router == nil {
+		// This ensures that incoming traffic reaches the designated router.
+		s.Router = http.NewServeMux()
+		s.Routes(s.Router)
+	}
+
+	// Need to implement an init for
+	// s.Templates
+
+	if s.Sessions == nil {
+		s.Sessions = make(map[string]time.Time)
+	}
+
+	if s.HostName == "" {
+		s.HostName = "localhost"
+		log.Println("No HostName specified, defaulting to localhost")
+	}
+	if s.HostPort == "" {
+		s.HostPort = ":8888"
+		log.Println("No HostPort specified, defaulting to :8888")
+	}
+}
+
+// Run launches a LAS on the specified HostName and Port,
+// while using the Server.Router as the ServeMux.
+func (s *Server) Run() {
+	err := http.ListenAndServe((s.HostName + s.HostPort), s.Router)
+	if err != nil {
+		log.Fatalln("Failed to start a server, closing application.")
+	}
 }
