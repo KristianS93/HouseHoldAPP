@@ -5,9 +5,8 @@ services:
     image: mongo
     container_name: grocerydb
     ports:
-      - 27019:17019
+      - 27017:27017
     volumes:
       - mongodbdata:/data/db
 volumes:
   mongodbdata:
-
