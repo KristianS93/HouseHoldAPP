@@ -22,9 +22,9 @@ type Server struct {
 	Sessions map[string]time.Time
 }
 
-//Init initializing MUX settings
+// Init initializing MUX settings
 func (s *Server) Init() {
-	
+
 	//The pointer has to be zero when, running the program first time
 	//And we can create the Multiplexer so we can route.
 	if s.Router == nil {
@@ -47,11 +47,9 @@ func (s *Server) Run() {
 	}
 }
 
-//EnableCors take the pointer to the ResponseWriter and sets the CORS
+// EnableCors take the pointer to the ResponseWriter and sets the CORS
 // Input has to be an ADDRESS to a responsewriter.
 func EnableCors(w *http.ResponseWriter) {
 	//Setting the cors for the pointer to the responsewriter.
 	(*w).Header().Set("Access-Control-Allow-Origin", ConstAllowedCORS)
 }
-
-
