@@ -18,7 +18,7 @@ func (s *Server) Routes(r *http.ServeMux) {
 
 // facIcon serves the favourite icon for the web page.
 func (s *Server) favIcon(w http.ResponseWriter, r *http.Request) {
-	if wm := checkMethod(w, r, http.MethodGet); wm {
+	if m := checkMethod(w, r, http.MethodGet); !m {
 		return
 	}
 	http.ServeFile(w, r, "images/favicon.ico")
@@ -26,11 +26,10 @@ func (s *Server) favIcon(w http.ResponseWriter, r *http.Request) {
 
 // index handles the frontpage of the web app.
 func (s *Server) index(w http.ResponseWriter, r *http.Request) {
-	if wm := checkMethod(w, r, http.MethodGet); wm {
+	if m := checkMethod(w, r, http.MethodGet); !m {
 		return
 	}
-	w.WriteHeader(200)
-	w.Header().Set("Content-Type", "text/html")
+	w.WriteHeader(http.StatusOK)
 
 	// currently serves a string as the name, should serve whatever is associated with cookie value
 	// or a database fetch

@@ -2,11 +2,12 @@ package web
 
 import "net/http"
 
+// checkMethod returns true when http methods are the same, and false when not.
 func checkMethod(w http.ResponseWriter, r *http.Request, method string) bool {
 	if r.Method != method {
-		w.WriteHeader(405)
+		w.WriteHeader(http.StatusMethodNotAllowed)
 		w.Write([]byte("Wrong http method."))
-		return true
+		return false
 	}
-	return false
+	return true
 }
