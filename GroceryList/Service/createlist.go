@@ -1,8 +1,10 @@
 package service
 
 import (
+	"context"
 	"encoding/json"
-	"fmt"
+	"grocerylist/database"
+	"log"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -14,10 +16,10 @@ type dataForList struct {
 }
 
 type createList struct {
-	ListId      string
-	WeekNo      int
-	HouseholdId string
-	Items       []Item
+	ListId      string `bson:"ListId,omitempty"`
+	WeekNo      int    `bson:"WeekNo"`
+	HouseholdId string `bson:"HouseholdId, omitempty"`
+	Items       []Item `bson:"Items"`
 }
 
 func (s *Server) CreateList(w http.ResponseWriter, r *http.Request) {
@@ -34,5 +36,16 @@ func (s *Server) CreateList(w http.ResponseWriter, r *http.Request) {
 	cList.ListId = strListid
 	cList.WeekNo = cl.WeekNo
 	cList.HouseholdId = cl.HouseholdId
-	fmt.Printf("HouseHold: %s, Weekno: %d, ListId: %s", cList.HouseholdId, cList.WeekNo, cList.ListId)
+
+	var client database.MongClient
+	client.DbConnect()
+
+	_, err = client.Connection.InsertOne(context.TODO(), cList)
+	if err != nil {
+		log.Fatalln("Could not create list", err)
+		w.WriteHeader(400)
+		return
+	}
+
+	json.NewEncoder(w).Encode(cList.ListId)
 }
