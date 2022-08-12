@@ -1,0 +1,15 @@
+{{define "content"}}
+
+{{/* add item functionality */}}
+<div>
+  <form action="/additem" method="POST" class="input-group w-50 mx-auto"> 
+  <input type="text" aria-label="Item" class="form-control" placeholder="Apple" name="name" required>
+  <input type="number" aria-label="Quantity" class="form-control" placeholder="2" name="quantity" required>
+  <input type="text" aria-label="Unit" class="form-control" placeholder="pcs" name="unit" required>
+  <input class="btn btn-outline-success" type="submit" value="Add Item">
+  </form>
+</div>
+
+{{/* grocerylist functionality */}}
+
+{{end}}

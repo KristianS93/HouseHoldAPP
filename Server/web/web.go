@@ -16,6 +16,7 @@ const (
 type Session struct {
 	LastActivity time.Time
 	UserID       string
+	Name         string
 }
 
 type Server struct {
@@ -27,10 +28,21 @@ type Server struct {
 	HostPort string
 
 	// Storing all current templates, to be ready for execution.
-	Templates *template.Template
+	Templates map[string]*template.Template
 
 	// Keeping track of current sessions by logging last activity on cookie key.
 	Sessions map[string]Session
+}
+
+type UserData struct {
+	Name     string
+	LoggedIn bool
+}
+
+type TmplData struct {
+	Data   interface{}
+	Errors []Alert
+	User   UserData
 }
 
 func (s *Server) Init() {
@@ -40,8 +52,12 @@ func (s *Server) Init() {
 		s.Routes(s.Router)
 	}
 
-	// Need to implement an init for
-	// s.Templates
+	if s.Templates == nil {
+		s.Templates = make(map[string]*template.Template)
+		s.parseTemplate("grocerylist", "")
+		s.parseTemplate("index", "")
+		// new templates are parsed here
+	}
 
 	if s.Sessions == nil {
 		s.Sessions = make(map[string]Session)
