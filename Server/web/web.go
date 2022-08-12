@@ -16,6 +16,7 @@ const (
 type Session struct {
 	LastActivity time.Time
 	UserID       string
+	Name         string
 }
 
 type Server struct {

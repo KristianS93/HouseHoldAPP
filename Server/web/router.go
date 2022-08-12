@@ -1,8 +1,11 @@
 package web
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -74,14 +77,41 @@ func (s *Server) addItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	i := Item{
-		Name:     strings.ToLower(r.FormValue("Name")),
+		ItemName: strings.ToLower(r.FormValue("Name")),
 		Quantity: strings.ToLower(r.FormValue("Quantity")),
 		Unit:     strings.ToLower(r.FormValue("Unit")),
 	}
-	fmt.Println(i)
-	if i.Name == "" || i.Quantity == "" || i.Unit == "" {
+	// fmt.Println(i)
+	// if i.ItemName == "" || i.Quantity == "" || i.Unit == "" {
 
+	// }
+
+	mi, err := json.Marshal(i)
+	if err != nil {
+		fmt.Println("marshal went wrong")
 	}
-	http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
 
+	res, err := http.Post("localhost:5003/AddItem", "application/json", bytes.NewBuffer(mi))
+	if err != nil {
+		log.Println("request to additem failed")
+	}
+
+	type PayLoad struct {
+		Success string `json:"Succes"`
+		Error   string `json:"Error"`
+	}
+	var p PayLoad
+	err = json.NewDecoder(res.Body).Decode(&p)
+	if err != nil {
+		log.Println("failed to decode")
+	}
+	fmt.Println(p)
+
+	// if p.Success {
+
+	// } else {
+
+	// }
+
+	http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
 }

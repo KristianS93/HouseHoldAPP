@@ -5,7 +5,8 @@ const (
 )
 
 type Item struct {
-	Name     string
+	ListId   string
+	ItemName string
 	Quantity string
 	Unit     string
 }
