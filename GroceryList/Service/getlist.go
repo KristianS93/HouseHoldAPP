@@ -39,3 +39,14 @@ func (s *Server) GetList(w http.ResponseWriter, r *http.Request) {
 		log.Println("Failed encoding data to JSON, error code: ", err)
 	}
 }
+
+//######################
+// result.InsertedID
+// lookfor := idString
+// var results bson.M
+// filter := bson.D{{"_id", lookfor}}
+// if err = client.Connection.FindOne(context.TODO(), filter).Decode(&results); err != nil {
+// 	panic(err)
+// }
+// fmt.Println(results)
+//#################

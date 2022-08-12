@@ -2,10 +2,7 @@ module grocerylist
 
 go 1.19
 
-require (
-	github.com/google/uuid v1.3.0
-	go.mongodb.org/mongo-driver v1.10.1
-)
+require go.mongodb.org/mongo-driver v1.10.1
 
 require (
 	github.com/golang/snappy v0.0.1 // indirect
