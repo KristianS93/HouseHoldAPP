@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"grocerylist/database"
 	"io"
 	"net/http"
@@ -51,6 +52,7 @@ func (s *Server) AddItem(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(w, str)
 		return
 	}
+	fmt.Println(itemformat)
 
 	//Making sure data is not missing
 	if itemformat.ListId == "" || itemformat.Item == "" {
