@@ -56,7 +56,7 @@
   <body>
     <div class="container">
       {{range $error := .Errors}}
-        <div class="alert alert-{{$error.Level.String}} alert-dismissible fade show" role="alert">
+        <div class="alert alert-{{$error.Level}} alert-dismissible fade show" role="alert">
           {{$error.Message}}
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>

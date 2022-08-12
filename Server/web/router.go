@@ -55,13 +55,8 @@ func (s *Server) groceryList(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	tpl := TmplData{
-		Data: nil,
-		Errors: []Alert{
-			{
-				Level:   alertLevelWarning,
-				Message: "u don goofed",
-			},
-		},
+		Data:   nil,
+		Errors: getAlert(r),
 		User: UserData{
 			Name:     "Krath",
 			LoggedIn: true,
@@ -75,27 +70,30 @@ func (s *Server) addItem(w http.ResponseWriter, r *http.Request) {
 	if m := checkMethod(w, r, http.MethodPost); !m {
 		return
 	}
-	idDummy := "62f6d364793593edbbc198ef"
 	i := Item{
-		ListId:   idDummy,
+		ListId:   "62f6e4c5682d11242ec29b26",
 		ItemName: strings.ToLower(r.FormValue("name")),
 		Quantity: strings.ToLower(r.FormValue("quantity")),
 		Unit:     strings.ToLower(r.FormValue("unit")),
 	}
-	// fmt.Println(i)
-	// if i.ItemName == "" || i.Quantity == "" || i.Unit == "" {
 
-	// }
+	if i.ItemName == "" || i.Quantity == "" || i.Unit == "" {
+		addAlert(w, r, alertLevelWarning, "One field was empty, please fill all fields appropriately.")
+		http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
+		return
+	}
 
 	mi, err := json.Marshal(i)
 	if err != nil {
 		fmt.Println("marshal went wrong")
 	}
-	fmt.Println(string(mi))
 
+	// crashes program when external microservice is offline
+	// maybe fix with http.Client
 	res, err := http.Post("http://localhost:5003/AddItem", "application/json", bytes.NewBuffer(mi))
 	if err != nil {
 		log.Println("request to additem failed", err)
+		addAlert(w, r, alertLevelDanger, "The internal database is unresponsive.")
 	}
 
 	type PayLoad struct {
@@ -107,13 +105,12 @@ func (s *Server) addItem(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("failed to decode")
 	}
-	fmt.Println(p)
 
-	// if p.Success {
-
-	// } else {
-
-	// }
+	if p.Success != "" {
+		addAlert(w, r, alertLevelSuccess, "Item was successfully added to Grocery List.")
+	} else {
+		addAlert(w, r, alertLevelDanger, "The internal database is unresponsive.")
+	}
 
 	http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
 }
