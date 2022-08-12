@@ -50,6 +50,12 @@ func (s *Server) CreateList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if cl.HouseholdId == "" {
+		w.WriteHeader(400)
+		io.WriteString(w, `{"Error": "No household provided"}`)
+		return
+	}
+
 	//Instantiate a connection to mongo
 	var client database.MongClient
 	client.DbConnect()
