@@ -75,11 +75,12 @@ func (s *Server) addItem(w http.ResponseWriter, r *http.Request) {
 	if m := checkMethod(w, r, http.MethodPost); !m {
 		return
 	}
-
+	idDummy := "62f6d364793593edbbc198ef"
 	i := Item{
-		ItemName: strings.ToLower(r.FormValue("Name")),
-		Quantity: strings.ToLower(r.FormValue("Quantity")),
-		Unit:     strings.ToLower(r.FormValue("Unit")),
+		ListId:   idDummy,
+		ItemName: strings.ToLower(r.FormValue("name")),
+		Quantity: strings.ToLower(r.FormValue("quantity")),
+		Unit:     strings.ToLower(r.FormValue("unit")),
 	}
 	// fmt.Println(i)
 	// if i.ItemName == "" || i.Quantity == "" || i.Unit == "" {
@@ -90,10 +91,11 @@ func (s *Server) addItem(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println("marshal went wrong")
 	}
+	fmt.Println(string(mi))
 
-	res, err := http.Post("localhost:5003/AddItem", "application/json", bytes.NewBuffer(mi))
+	res, err := http.Post("http://localhost:5003/AddItem", "application/json", bytes.NewBuffer(mi))
 	if err != nil {
-		log.Println("request to additem failed")
+		log.Println("request to additem failed", err)
 	}
 
 	type PayLoad struct {
