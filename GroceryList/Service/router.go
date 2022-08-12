@@ -12,4 +12,5 @@ func (s *Server) Routes(r *http.ServeMux) {
 	r.HandleFunc("/DeleteItem", s.DeleteItem)
 	r.HandleFunc("/ChangeItem", s.ChangeItem)
 	r.HandleFunc("/CreateList", s.CreateList)
+	r.HandleFunc("/DeleteList", s.DeleteList)
 }

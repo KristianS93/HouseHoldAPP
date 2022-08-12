@@ -12,7 +12,7 @@ type MongClient struct {
 	Connection *mongo.Collection
 }
 
-func (m *MongClient) DbConnect() {
+func (m *MongClient) DbConnect(Collection string) {
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(ConstDbURI))
 	if err != nil {
 		panic(err)
@@ -22,5 +22,5 @@ func (m *MongClient) DbConnect() {
 		panic(err)
 	}
 
-	m.Connection = client.Database(ConstDatabase).Collection(ConstCollection)
+	m.Connection = client.Database(ConstDatabase).Collection(Collection)
 }

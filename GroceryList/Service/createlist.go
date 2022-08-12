@@ -12,7 +12,7 @@ import (
 )
 
 // Data structure to recieve householdID
-type dataForList struct {
+type DataForList struct {
 	HouseholdId string `json:"HouseholdId"`
 }
 
@@ -31,6 +31,7 @@ type createList struct {
 func (s *Server) CreateList(w http.ResponseWriter, r *http.Request) {
 
 	//In any case return a json format
+	EnableCors(&w)
 	w.Header().Set("Content-Type", "application/json")
 
 	//If the method is not post, return bad requst
@@ -41,7 +42,7 @@ func (s *Server) CreateList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Get the json body of the post and populate the dataforlist structure
-	var cl dataForList
+	var cl DataForList
 	err := json.NewDecoder(r.Body).Decode(&cl)
 	if err != nil {
 		str := `{"Error": "Bad request"}`
@@ -58,7 +59,7 @@ func (s *Server) CreateList(w http.ResponseWriter, r *http.Request) {
 
 	//Instantiate a connection to mongo
 	var client database.MongClient
-	client.DbConnect()
+	client.DbConnect(database.ConstGroceryListCollection)
 
 	//Check if the household allready has a grocery list
 	lookfor := cl.HouseholdId
@@ -87,8 +88,9 @@ func (s *Server) CreateList(w http.ResponseWriter, r *http.Request) {
 
 	//Format the return data and serve as json.
 	type returnData struct {
+		Succes string     `json:"Succes"`
 		ListId MyObjectID `json:"ListId"`
 	}
-	returnDataFormat := returnData{cList.ID}
+	returnDataFormat := returnData{"List Created", cList.ID}
 	json.NewEncoder(w).Encode(returnDataFormat)
 }
