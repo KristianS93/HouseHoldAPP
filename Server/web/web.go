@@ -39,10 +39,9 @@ type UserData struct {
 }
 
 type TmplData struct {
-	Template string
-	Data     interface{}
-	Errors   []Alert
-	User     UserData
+	Data   interface{}
+	Errors []Alert
+	User   UserData
 }
 
 func (s *Server) Init() {
@@ -55,8 +54,8 @@ func (s *Server) Init() {
 	if s.Templates == nil {
 		s.Templates = make(map[string]*template.Template)
 		s.parseTemplate("grocerylist", "")
-		//s.parseTemplate("navbar", "")
-		//s.parseTemplate("base", "")
+		s.parseTemplate("index", "")
+		// new templates are parsed here
 	}
 
 	if s.Sessions == nil {
