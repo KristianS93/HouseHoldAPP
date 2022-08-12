@@ -27,10 +27,22 @@ type Server struct {
 	HostPort string
 
 	// Storing all current templates, to be ready for execution.
-	Templates *template.Template
+	Templates map[string]*template.Template
 
 	// Keeping track of current sessions by logging last activity on cookie key.
 	Sessions map[string]Session
+}
+
+type UserData struct {
+	Name     string
+	LoggedIn bool
+}
+
+type TmplData struct {
+	Template string
+	Data     interface{}
+	Errors   []Alert
+	User     UserData
 }
 
 func (s *Server) Init() {
@@ -41,7 +53,10 @@ func (s *Server) Init() {
 	}
 
 	if s.Templates == nil {
-		s.Templates = template.Must(template.ParseGlob("templates/*.gohtml"))
+		s.Templates = make(map[string]*template.Template)
+		s.parseTemplate("grocerylist", "")
+		//s.parseTemplate("navbar", "")
+		//s.parseTemplate("base", "")
 	}
 
 	if s.Sessions == nil {
