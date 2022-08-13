@@ -34,12 +34,12 @@ func addAlert(w http.ResponseWriter, r *http.Request, alertType alertLevel, mess
 	c := http.Cookie{
 		Name:   alertType.String(),
 		Value:  message,
-		MaxAge: 5,
+		MaxAge: 3,
 	}
 	http.SetCookie(w, &c)
 }
 
-func getAlert(r *http.Request) []Alert {
+func getAlert(w http.ResponseWriter, r *http.Request) []Alert {
 	var Alerts []Alert
 	if cWarning, err := r.Cookie(alertLevelWarning.String()); err == nil {
 		Alerts = append(Alerts, Alert{

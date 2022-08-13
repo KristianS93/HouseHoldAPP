@@ -10,6 +10,10 @@ import (
 	"strings"
 )
 
+const (
+	AddItemURL string = "http://localhost:5003/AddItem"
+)
+
 // Routes is the Router of the server, spreading traffic to relevant handlerFuncs.
 // The input taken is the given request, which is also used to call a handleFunc on.
 func (s *Server) Routes(r *http.ServeMux) {
@@ -56,7 +60,7 @@ func (s *Server) groceryList(w http.ResponseWriter, r *http.Request) {
 
 	tpl := TmplData{
 		Data:   nil,
-		Errors: getAlert(r),
+		Errors: getAlert(w, r),
 		User: UserData{
 			Name:     "Krath",
 			LoggedIn: true,
@@ -90,10 +94,12 @@ func (s *Server) addItem(w http.ResponseWriter, r *http.Request) {
 
 	// crashes program when external microservice is offline
 	// maybe fix with http.Client
-	res, err := http.Post("http://localhost:5003/AddItem", "application/json", bytes.NewBuffer(mi))
+	res, err := http.Post(AddItemURL, "application/json", bytes.NewBuffer(mi))
 	if err != nil {
 		log.Println("request to additem failed", err)
-		addAlert(w, r, alertLevelDanger, "The internal database is unresponsive.")
+		addAlert(w, r, alertLevelDanger, "Internal error.")
+		http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
+		return
 	}
 
 	type PayLoad struct {
@@ -104,12 +110,15 @@ func (s *Server) addItem(w http.ResponseWriter, r *http.Request) {
 	err = json.NewDecoder(res.Body).Decode(&p)
 	if err != nil {
 		log.Println("failed to decode")
+		addAlert(w, r, alertLevelDanger, "Internal error.")
+		http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
+		return
 	}
 
 	if p.Success != "" {
 		addAlert(w, r, alertLevelSuccess, "Item was successfully added to Grocery List.")
 	} else {
-		addAlert(w, r, alertLevelDanger, "The internal database is unresponsive.")
+		addAlert(w, r, alertLevelDanger, "Internal error.")
 	}
 
 	http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
