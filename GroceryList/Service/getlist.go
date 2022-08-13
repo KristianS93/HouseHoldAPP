@@ -16,6 +16,7 @@ type ItemHolder struct {
 	Items  []ItemList `json:"Items"`
 }
 type ItemList struct {
+	ID       string `bson:"_id"`
 	ItemName string `json:"ItemName"`
 	Quantity string `json:"Quantity"`
 	Unit     string `json:"Unit"`
@@ -34,6 +35,11 @@ func (s *Server) GetList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if len(r.URL.Query()) == 0 {
+		w.WriteHeader(405)
+		io.WriteString(w, `{"Error": "No list provided"}`)
+		return
+	}
 	//Receive list id from s
 	recievedListId := r.URL.Query()["ListId"][0]
 
