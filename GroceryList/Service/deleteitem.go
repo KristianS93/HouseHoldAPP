@@ -15,10 +15,6 @@ type DeleteItem struct {
 }
 
 func (s *Server) DeleteItem(w http.ResponseWriter, r *http.Request) {
-	// #########################################
-	//NOTE FIRST VERSION DELETES 1 ITEM
-	// #########################################
-
 	//In any case return a json format
 	EnableCors(&w)
 	w.Header().Set("Content-Type", "application/json")
