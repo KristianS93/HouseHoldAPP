@@ -46,22 +46,14 @@ func (s *Server) ClearList(w http.ResponseWriter, r *http.Request) {
 	itemClient.DbConnect(database.ConstGroceryItemsCollection)
 
 	filter := bson.D{{Key: "ListId", Value: rli.ListId}}
+	//////////////////
+	// ÆNDRE TIL find one giver ikke mening at køre find kræver mange udnødvendige linjer kode
+	////////////
 
-	cur, err := itemClient.Connection.Find(context.TODO(), filter)
-	if err != nil {
-		w.WriteHeader(400)
-		io.WriteString(w, `{"Error": "Error finding list id in items"}`)
-		return
-	}
+	var results bson.D
 
-	var results []bson.D
-	if err = cur.All(context.TODO(), &results); err != nil {
-		w.WriteHeader(400)
-		io.WriteString(w, `{"Error": "Error writing items to array"}`)
-		return
-	}
-
-	if len(results) == 0 {
+	_ = itemClient.Connection.FindOne(context.TODO(), filter).Decode(&results)
+	if results == nil {
 		w.WriteHeader(400)
 		io.WriteString(w, `{"Error": "List is empty"}`)
 		return
