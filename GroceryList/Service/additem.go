@@ -25,11 +25,8 @@ type CreateItem struct {
 	Unit     string `bson:"Unit"`
 }
 
+// AddItem Create item/items for a list, the function needs a post request, with a json object of an array of item/items
 func (s *Server) AddItem(w http.ResponseWriter, r *http.Request) {
-	// #########################################
-	//NOTE FIRST VERSION INSERTS 1 ITEM
-	// #########################################
-
 	//In any case return a json format
 	EnableCors(&w)
 	w.Header().Set("Content-Type", "application/json")
@@ -42,7 +39,7 @@ func (s *Server) AddItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Get the json body of the post and populate the Item structure
-	var itemformat Item
+	var itemformat []Item
 	err := json.NewDecoder(r.Body).Decode(&itemformat)
 	if err != nil {
 		w.WriteHeader(400)
@@ -50,28 +47,34 @@ func (s *Server) AddItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//Making sure data is not missing
-	if itemformat.ListId == "" || itemformat.ItemName == "" {
-		w.WriteHeader(400)
-		io.WriteString(w, `{"Error": "Missing data"}`)
-		return
+	//Making sure data is not missing from any of the items
+	for _, v := range itemformat {
+		// i = index v = value hvilket er item her
+		if v.ListId == "" || v.ItemName == "" {
+			w.WriteHeader(400)
+			io.WriteString(w, `{"Error": "Missing data"}`)
+			return
+		}
 	}
 
 	//Instantiate a connection to mongo
 	var client database.MongClient
 	client.DbConnect(database.ConstGroceryItemsCollection)
 
-	//Consider Checking if an item is already
-	//How ever this might not be important.
+	var itemInsertFormat []CreateItem
 
-	//Generating item
-	newId := primitive.NewObjectID()
+	for _, v := range itemformat {
+		newId := primitive.NewObjectID()
+		insertObj := CreateItem{string(newId.Hex()), v.ListId, v.ItemName, v.Quantity, v.Unit}
+		itemInsertFormat = append(itemInsertFormat, insertObj)
+	}
 
-	cItem := CreateItem{string(newId.Hex()),
-		itemformat.ListId, itemformat.ItemName,
-		itemformat.Quantity, itemformat.Unit}
+	var insertItemQuery []interface{}
+	for _, v := range itemInsertFormat {
+		insertItemQuery = append(insertItemQuery, v)
+	}
 
-	_, err = client.Connection.InsertOne(context.TODO(), cItem)
+	_, err = client.Connection.InsertMany(context.TODO(), insertItemQuery)
 	if err != nil {
 		io.WriteString(w, `{"Error": "Failed creating item"}`)
 		w.WriteHeader(400)
