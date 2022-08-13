@@ -10,9 +10,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-//	type DeleteItem struct {
-//		ItemId primitive.ObjectID `bson:"ItemId"`
-//	}
 type DeleteItem struct {
 	ItemId string `json:"ItemId"`
 }

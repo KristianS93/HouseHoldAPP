@@ -34,27 +34,39 @@ func (s *Server) GetList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//Get the json body of the post and populate the GetListId structure
-	var dl GetListId
-	err := json.NewDecoder(r.Body).Decode(&dl)
-	if err != nil {
-		w.WriteHeader(400)
-		io.WriteString(w, `{"Error": "Bad request"}`)
-		return
-	}
+	//Receive list id from s
+	recievedListId := r.URL.Query()["ListId"][0]
 
-	if dl.ListId == "" {
+	//Check that list id is not empty
+	if recievedListId == "" {
 		w.WriteHeader(400)
 		io.WriteString(w, `{"Error": "No list provided"}`)
 		return
 	}
 
-	//Instantiate a connection to mongo
+	//Instantiate a connection to mongo to list collection
+	var listClient database.MongClient
+	listClient.DbConnect(database.ConstGroceryListCollection)
+
+	//check that list exist
+	// lookfor := di.ItemName
+	filterList := bson.D{{Key: "_id", Value: recievedListId}}
+	var resultList bson.D
+
+	//Checking if there is any matches on the house hold id, if so return 400
+	_ = listClient.Connection.FindOne(context.TODO(), filterList).Decode(&resultList)
+	if resultList == nil {
+		w.WriteHeader(400)
+		io.WriteString(w, `{"Error": "List does not exist"}`)
+		return
+	}
+
+	//Instantiate a connection to mongo items collection
 	var client database.MongClient
 	client.DbConnect(database.ConstGroceryItemsCollection)
 
 	//Get data from list
-	lookfor := dl.ListId
+	lookfor := recievedListId
 	filter := bson.D{primitive.E{Key: "ListId", Value: lookfor}}
 
 	res, err := client.Connection.Find(context.TODO(), filter)
@@ -74,3 +86,18 @@ func (s *Server) GetList(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode(returndata)
 }
+
+// //Get the json body of the post and populate the GetListId structure
+// var dl GetListId
+// err := json.NewDecoder(r.Body).Decode(&dl)
+// if err != nil {
+// 	w.WriteHeader(400)
+// 	io.WriteString(w, `{"Error": "Bad request"}`)
+// 	return
+// }
+
+// if dl.ListId == "" {
+// 	w.WriteHeader(400)
+// 	io.WriteString(w, `{"Error": "No list provided"}`)
+// 	return
+// }
