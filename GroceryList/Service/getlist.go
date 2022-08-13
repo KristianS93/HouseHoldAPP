@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"grocerylist/database"
 	"io"
 	"net/http"
@@ -11,6 +10,16 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
+
+type ItemHolder struct {
+	Succes string     `json:"Succes"`
+	Items  []ItemList `json:"Items"`
+}
+type ItemList struct {
+	ItemName string `json:"ItemName"`
+	Quantity string `json:"Quantity"`
+	Unit     string `json:"Unit"`
+}
 
 func (s *Server) GetList(w http.ResponseWriter, r *http.Request) {
 
@@ -49,36 +58,19 @@ func (s *Server) GetList(w http.ResponseWriter, r *http.Request) {
 	filter := bson.D{primitive.E{Key: "ListId", Value: lookfor}}
 
 	res, err := client.Connection.Find(context.TODO(), filter)
-	if res != nil {
+	if err != nil {
 		w.WriteHeader(400)
 		io.WriteString(w, `{"Error": "No items on the list"}`)
 		return
 	}
 
-	var itemsList []Item
+	var itemsList []ItemList
 	if err = res.All(context.TODO(), &itemsList); err != nil {
 		w.WriteHeader(400)
 		io.WriteString(w, `{"Error": "Could not retrieve list"}`)
 	}
 
-	fmt.Println("displaying all results from the search query")
-	for _, result := range itemsList {
-		fmt.Println(result)
-	}
+	var returndata = ItemHolder{"List Retrieved", itemsList}
 
-	// err := json.NewEncoder(w).Encode(test2)
-	// if err != nil {
-	// 	log.Println("Failed encoding data to JSON, error code: ", err)
-	// }
+	json.NewEncoder(w).Encode(returndata)
 }
-
-//######################
-// result.InsertedID
-// lookfor := idString
-// var results bson.M
-// filter := bson.D{{"_id", lookfor}}
-// if err = client.Connection.FindOne(context.TODO(), filter).Decode(&results); err != nil {
-// 	panic(err)
-// }
-// fmt.Println(results)
-//#################

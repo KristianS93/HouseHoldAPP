@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"grocerylist/database"
 	"io"
 	"net/http"
@@ -13,17 +12,17 @@ import (
 
 type Item struct {
 	ListId   string `json:"ListId"`
-	Item     string `json:"ItemName"`
+	ItemName string `json:"ItemName"`
 	Quantity string `json:"Quantity"`
 	Unit     string `json:"Unit"`
 }
 
 type CreateItem struct {
-	ID       MyObjectID `bson:"_id, omitempty"`
-	ListId   string     `bson:"ListId, omitempty"`
-	Item     string     `bson:"ItemName, omitempty"`
-	Quantity string     `bson:"Quantity"`
-	Unit     string     `bson:"Unit"`
+	ID       string `bson:"_id, omitempty"`
+	ListId   string `bson:"ListId, omitempty"`
+	Item     string `bson:"ItemName, omitempty"`
+	Quantity string `bson:"Quantity"`
+	Unit     string `bson:"Unit"`
 }
 
 func (s *Server) AddItem(w http.ResponseWriter, r *http.Request) {
@@ -46,16 +45,13 @@ func (s *Server) AddItem(w http.ResponseWriter, r *http.Request) {
 	var itemformat Item
 	err := json.NewDecoder(r.Body).Decode(&itemformat)
 	if err != nil {
-		str := `{"Error": "Bad request: Getting data"}`
-		// log.Println(err)
 		w.WriteHeader(400)
-		io.WriteString(w, str)
+		io.WriteString(w, `{"Error": "Bad request: Getting data"}`)
 		return
 	}
-	fmt.Println(itemformat)
 
 	//Making sure data is not missing
-	if itemformat.ListId == "" || itemformat.Item == "" {
+	if itemformat.ListId == "" || itemformat.ItemName == "" {
 		w.WriteHeader(400)
 		io.WriteString(w, `{"Error": "Missing data"}`)
 		return
@@ -71,8 +67,8 @@ func (s *Server) AddItem(w http.ResponseWriter, r *http.Request) {
 	//Generating item
 	newId := primitive.NewObjectID()
 
-	cItem := CreateItem{MyObjectID(newId.Hex()),
-		itemformat.ListId, itemformat.Item,
+	cItem := CreateItem{string(newId.Hex()),
+		itemformat.ListId, itemformat.ItemName,
 		itemformat.Quantity, itemformat.Unit}
 
 	_, err = client.Connection.InsertOne(context.TODO(), cItem)
