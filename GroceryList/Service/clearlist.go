@@ -46,9 +46,6 @@ func (s *Server) ClearList(w http.ResponseWriter, r *http.Request) {
 	itemClient.DbConnect(database.ConstGroceryItemsCollection)
 
 	filter := bson.D{{Key: "ListId", Value: rli.ListId}}
-	//////////////////
-	// ÆNDRE TIL find one giver ikke mening at køre find kræver mange udnødvendige linjer kode
-	////////////
 
 	var results bson.D
 
