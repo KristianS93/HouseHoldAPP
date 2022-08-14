@@ -22,7 +22,7 @@ func checkMethod(w http.ResponseWriter, r *http.Request, method string) bool {
 
 func (s *Server) serveSite(w http.ResponseWriter, r *http.Request, tplName string, data interface{}) {
 
-	err := s.Templates[tplName].ExecuteTemplate(w, "base", data)
+	err := s.templateGet(tplName).ExecuteTemplate(w, "base", data)
 	if err != nil {
 		fmt.Println("errServe: ", err)
 	}
@@ -75,4 +75,12 @@ func (s *Server) StartSession(w http.ResponseWriter, r *http.Request, userID, na
 		MaxAge: SessionTimeOut,
 	}
 	http.SetCookie(w, &c)
+}
+
+func (s *Server) templateGet(name string) *template.Template {
+	if _, ok := s.Templates[name]; !ok {
+		return s.Templates["404.tmpl"]
+	}
+
+	return s.Templates[name]
 }

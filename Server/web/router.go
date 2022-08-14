@@ -8,6 +8,8 @@ import (
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/gorilla/mux"
 )
 
 const (
@@ -16,10 +18,10 @@ const (
 
 // Routes is the Router of the server, spreading traffic to relevant handlerFuncs.
 // The input taken is the given request, which is also used to call a handleFunc on.
-func (s *Server) Routes(r *http.ServeMux) {
+func (s *Server) Routes(r *mux.Router) {
 	r.HandleFunc("/favicon.ico", s.favIcon)
 
-	r.HandleFunc("/", s.index)
+	r.HandleFunc("/", s.index).Methods("GET")
 	r.HandleFunc("/logout", s.logOut)
 	r.HandleFunc("/mealplanner", s.mealPlanner)
 	r.HandleFunc("/grocerylist", s.groceryList)

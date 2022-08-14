@@ -1,15 +1,43 @@
 {{define "content"}}
 
+<div class="container mx-auto w-50">
 {{/* add item functionality */}}
-<div>
-  <form action="/additem" method="POST" class="input-group w-50 mx-auto"> 
-  <input type="text" aria-label="Item" class="form-control" placeholder="Apple" name="name" required>
-  <input type="number" aria-label="Quantity" class="form-control" placeholder="2" name="quantity" required>
-  <input type="text" aria-label="Unit" class="form-control" placeholder="pcs" name="unit" required>
-  <input class="btn btn-outline-success" type="submit" value="Add Item">
-  </form>
+  <div>
+    <form action="/additem" method="POST" class="input-group w-50 mx-auto"> 
+    <input type="text" aria-label="Item" class="form-control" placeholder="Apple" name="name" required>
+    <input type="number" aria-label="Quantity" class="form-control" placeholder="2" name="quantity" required>
+    <input type="text" aria-label="Unit" class="form-control" placeholder="pcs" name="unit" required>
+    <input class="btn btn-outline-success" type="submit" value="Add Item">
+    </form>
+  </div>
+  <br>
+  {{/* grocerylist functionality */}}
+
+  <div class="container">
+    <div class="row mb-8">
+      <div class="col-md-6 col-12 mx-auto">
+        <div class="mb-4 border-bottom pb-2">
+          <h4 class="mb-0">Grocery List</h4>
+        </div>
+
+        <div class="row">
+          <div class="col-12">
+            <div class="d-flex justify-content-between">
+              <div>
+                <p class="text-dark">Guests</p>
+              </div>
+              <div class="input-group w-auto justify-content-end align-items-center">
+                <input type="button" value="-" class="button-minus border rounded-circle icon-shape icon-sm mx-1 " data-field="quantity">
+                <input type="numeric" step="1" value="1" name="quantity" class="quantity-field border-0 text-center w-25">
+                <input type="button" value="+" class="button-plus border rounded-circle icon-shape icon-sm " data-field="quantity">
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
 </div>
-
-{{/* grocerylist functionality */}}
-
 {{end}}

@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"text/template"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 const (
@@ -21,7 +23,7 @@ type Session struct {
 
 type Server struct {
 	// Will serve as the router used to route incoming requests properly.
-	Router *http.ServeMux
+	Router *mux.Router
 
 	// Domain and port, locally would be "localhost" and ":8080", or similar ports.
 	HostName string
@@ -48,7 +50,7 @@ type TmplData struct {
 func (s *Server) Init() {
 	if s.Router == nil {
 		// This ensures that incoming traffic reaches the designated router.
-		s.Router = http.NewServeMux()
+		s.Router = mux.NewRouter()
 		s.Routes(s.Router)
 	}
 
@@ -81,6 +83,3 @@ func (s *Server) Run() {
 		log.Fatalln("Failed to start a server, closing application.")
 	}
 }
-
-
-
