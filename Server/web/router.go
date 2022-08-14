@@ -19,6 +19,9 @@ const (
 // Routes is the Router of the server, spreading traffic to relevant handlerFuncs.
 // The input taken is the given request, which is also used to call a handleFunc on.
 func (s *Server) Routes(r *mux.Router) {
+	r.PathPrefix("/css/").Handler(http.StripPrefix("/css/", http.FileServer(http.Dir("./templates/static/css"))))
+	r.PathPrefix("/js/").Handler(http.StripPrefix("/js/", http.FileServer(http.Dir("./templates/static/js"))))
+
 	r.HandleFunc("/favicon.ico", s.favIcon)
 
 	r.HandleFunc("/", s.index).Methods("GET")
@@ -60,8 +63,21 @@ func (s *Server) groceryList(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusOK)
 
+	xi := []Item{
+		Item{
+			ItemName: "pølse",
+			Quantity: "3",
+			Unit:     "stk",
+		},
+		Item{
+			ItemName: "fladskærm",
+			Quantity: "42",
+			Unit:     "paller",
+		},
+	}
+
 	tpl := TmplData{
-		Data:   nil,
+		Data:   xi,
 		Errors: getAlert(w, r),
 		User: UserData{
 			Name:     "Krath",
@@ -76,6 +92,7 @@ func (s *Server) addItem(w http.ResponseWriter, r *http.Request) {
 	if m := checkMethod(w, r, http.MethodPost); !m {
 		return
 	}
+
 	i := Item{
 		ListId:   "62f6e4c5682d11242ec29b26",
 		ItemName: strings.ToLower(r.FormValue("name")),
