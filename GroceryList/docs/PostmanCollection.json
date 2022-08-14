@@ -8,7 +8,251 @@
 	"item": [
 		{
 			"name": "Item",
-			"item": []
+			"item": [
+				{
+					"name": "/AddItem",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n    {\r\n        \"ListId\": \"62f92d5b346d872d78f20e5e\",\r\n        \"ItemName\": \"item1\",\r\n        \"Quantity\": \"3\",\r\n        \"Unit\": \"pcs\"\r\n    }, \r\n    {\r\n        \"ListId\": \"62f92d5b346d872d78f20e5e\",\r\n        \"ItemName\": \"item2\",\r\n        \"Quantity\": \"6\",\r\n        \"Unit\": \"Pakker\"\r\n    }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/AddItem",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"AddItem"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Single Item",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "[\r\n    {\r\n    \"ListId\": \"62f6d364793593edbbc198ef\",\r\n    \"ItemName\": \"Cancer\",\r\n    \"Quantity\": \"3\",\r\n    \"Unit\": \"pcs\"\r\n    }\r\n]\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/AddItem",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"AddItem"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"Succes\": \"Item Created\"\r\n}"
+						},
+						{
+							"name": "Multiple Items",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "[\r\n    {\r\n        \"ListId\": \"62f6d364793593edbbc198ef\",\r\n        \"ItemName\": \"item1\",\r\n        \"Quantity\": \"3\",\r\n        \"Unit\": \"pcs\"\r\n    }, \r\n    {\r\n        \"ListId\": \"62f6d364793593edbbc198ef\",\r\n        \"ItemName\": \"item2\",\r\n        \"Quantity\": \"6\",\r\n        \"Unit\": \"Pakker\"\r\n    }\r\n]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/AddItem",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"AddItem"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"Succes\": \"Item Created\"\n}"
+						}
+					]
+				},
+				{
+					"name": "/ChangeItem",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"Id\": \"62f90cd2ecd6d17c8d4d97e3\",\r\n  \"ItemName\": \"item2\",\r\n  \"Quantity\": \"xD\",\r\n  \"Unit\": \"liter\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/ChangeItem",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ChangeItem"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Succes",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"Id\": \"62f90cd2ecd6d17c8d4d97e3\",\r\n  \"ItemName\": \"item2\",\r\n  \"Quantity\": \"xD\",\r\n  \"Unit\": \"liter\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/ChangeItem",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"ChangeItem"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Length",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"Succes\": \"Item Updated\"\r\n}"
+						}
+					]
+				},
+				{
+					"name": "/DeleteItem",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"ItemId\": \"62f90cd2ecd6d17c8d4d97e2\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/DeleteItem",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"DeleteItem"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Succes",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "//provide item id\r\n{\r\n    \"ItemId\": \"62f90cd2ecd6d17c8d4d97e2\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								}
+							},
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"Succes\": \"Item Deleted\"\n}"
+						}
+					]
+				}
+			]
 		},
 		{
 			"name": "List",
@@ -20,7 +264,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\r\n}",
+							"raw": "{\r\n    \"HouseholdId\": \"TesterNiggers\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -53,12 +297,10 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost:5003/CreateList",
-									"protocol": "http",
+									"raw": "{{baseUrl}}/CreateList",
 									"host": [
-										"localhost"
+										"{{baseUrl}}"
 									],
-									"port": "5003",
 									"path": [
 										"CreateList"
 									]
@@ -69,49 +311,223 @@
 							"_postman_previewlanguage": "json",
 							"header": [
 								{
-									"key": "",
-									"value": "",
+									"key": "Content-Type",
+									"value": "application/json",
 									"description": "",
 									"type": "text"
 								}
 							],
 							"cookie": [],
-							"body": "// Retuns a list Id\r\n{\r\n    \"ListId\": \"62f64a4edcae2113005c5115\"\r\n}"
+							"body": "// Retuns a list Id\r\n{\r\n    \"Succes\": \"List Created\",\r\n    \"ListId\": \"62f92d5b346d872d78f20e5e\"\r\n}"
 						}
 					]
 				},
 				{
 					"name": "/GetList",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
 					"request": {
 						"method": "GET",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "{{baseUrl}}/GetList",
+							"raw": "{{baseUrl}}/GetList?ListId=62f92d5b346d872d78f20e5e",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"GetList"
+							],
+							"query": [
+								{
+									"key": "ListId",
+									"value": "62f92d5b346d872d78f20e5e"
+								}
 							]
 						}
 					},
-					"response": []
+					"response": [
+						{
+							"name": "Succes",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "",
+										"value": "",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/GetList?ListId=62f92d5b346d872d78f20e5e",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"GetList"
+									],
+									"query": [
+										{
+											"key": "ListId",
+											"value": "62f92d5b346d872d78f20e5e"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": null,
+							"cookie": [],
+							"body": "{\r\n    \"Succes\": \"List Retrieved\",\r\n    \"Items\": [\r\n        {\r\n            \"ID\": \"62f92d9a346d872d78f20e62\",\r\n            \"ItemName\": \"item1\",\r\n            \"Quantity\": \"3\",\r\n            \"Unit\": \"pcs\"\r\n        },\r\n        {\r\n            \"ID\": \"62f92d9a346d872d78f20e63\",\r\n            \"ItemName\": \"item2\",\r\n            \"Quantity\": \"6\",\r\n            \"Unit\": \"Pakker\"\r\n        }\r\n    ]\r\n}"
+						}
+					]
 				},
 				{
 					"name": "/DeleteList",
 					"request": {
 						"method": "DELETE",
-						"header": []
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"ListId\": \"62f6d364793593edbbc198ef\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/DeleteList",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"DeleteList"
+							]
+						}
 					},
-					"response": []
+					"response": [
+						{
+							"name": "Succes",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "//Enter valid list id\r\n{\r\n    \"ListId\": \"62f6d364793593edbbc198e\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/DeleteList",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"DeleteList"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"Succes\": \"List Deleted\"\r\n}"
+						}
+					]
 				},
 				{
-					"name": "/ResetList",
+					"name": "/ClearList",
 					"request": {
-						"method": "GET",
-						"header": []
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"ListId\": \"62f6d364793593edbbc198ef\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/ClearList",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"ClearList"
+							]
+						}
 					},
-					"response": []
+					"response": [
+						{
+							"name": "Succes",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"ListId\": \"62f6d364793593edbbc198ef\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/ClearList",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"ClearList"
+									]
+								}
+							},
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"Succes\": \"List Cleared\"\r\n}"
+						}
+					]
 				}
 			]
 		}

@@ -1,10 +1,10 @@
 LIST FEATURES::
 CreateList              Func:   OK      Doc:    OK      Testing:    Not
 GetList                 Func:   OK      Doc:    Not     Testing:    Not
-DeleteList              Func:   Not     Doc:    Not     Testing:    Not
+DeleteList              Func:   Ok      Doc:    Not     Testing:    Not
 ClearList               Func:   OK      Doc:    Not     Testing:    Not
 
 ITEM FEATURES:
-AddItem                 Func:   Ok      Doc:    Not     Testing:    Not
+AddItem                 Func:   Ok      Doc:    OK      Testing:    Not
 DeleteItem              Func:   OK      Doc:    Not     Testing:    Not
-ChangeItem              Func:   Not     Doc:    Not     Testing:    Not
+ChangeItem              Func:   OK      Doc:    Not     Testing:    Not
