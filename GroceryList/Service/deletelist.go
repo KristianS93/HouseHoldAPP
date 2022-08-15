@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"grocerylist/database"
+	"grocerylist/service/assistants"
 	"io"
 	"net/http"
 
@@ -16,7 +17,8 @@ type GetListId struct {
 
 func (s *Server) DeleteList(w http.ResponseWriter, r *http.Request) {
 	//In any case return a json format
-	w.Header().Set("Content-Type", "application/json")
+	assistants.EnableCors(&w)
+	assistants.SetHeader(&w)
 
 	//If the method is not delete, return wrong method
 	if r.Method != http.MethodDelete {

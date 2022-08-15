@@ -4,42 +4,42 @@ import (
 	"context"
 	"encoding/json"
 	"grocerylist/database"
+	"grocerylist/service/assistants"
 	"io"
 	"net/http"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type Item struct {
-	ListId   string `json:"ListId"`
-	ItemName string `json:"ItemName"`
-	Quantity string `json:"Quantity"`
-	Unit     string `json:"Unit"`
-}
+// type Item struct {
+// 	ListId   string `json:"ListId"`
+// 	ItemName string `json:"ItemName"`
+// 	Quantity string `json:"Quantity"`
+// 	Unit     string `json:"Unit"`
+// }
 
 type CreateItem struct {
 	ID       string `bson:"_id, omitempty"`
-	ListId   string `bson:"ListId, omitempty"`
-	Item     string `bson:"ItemName, omitempty"`
-	Quantity string `bson:"Quantity"`
-	Unit     string `bson:"Unit"`
+	ListId   string `bson:"ListId, omitempty" json:"ListId"`
+	ItemName string `bson:"ItemName, omitempty" json:"ItemName"`
+	Quantity string `bson:"Quantity" json:"Quantity"`
+	Unit     string `bson:"Unit" json:"Unit"`
 }
 
 // AddItem Create item/items for a list, the function needs a post request, with a json object of an array of item/items
 func (s *Server) AddItem(w http.ResponseWriter, r *http.Request) {
 	//In any case return a json format
-	EnableCors(&w)
-	w.Header().Set("Content-Type", "application/json")
+	assistants.EnableCors(&w)
+	assistants.SetHeader(&w)
 
 	//If the method is not post, return bad requst
-	if r.Method != http.MethodPost {
-		w.WriteHeader(405)
-		io.WriteString(w, `{"Error": "Wrong method"}`)
+	//take the request pointer, pointer to response writer and the desired method.
+	if assistants.WrongMethod(r, &w, http.MethodPost) {
 		return
 	}
 
 	//Get the json body of the post and populate the Item structure
-	var itemformat []Item
+	var itemformat []CreateItem
 	err := json.NewDecoder(r.Body).Decode(&itemformat)
 	if err != nil {
 		w.WriteHeader(400)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"grocerylist/database"
+	"grocerylist/service/assistants"
 	"io"
 	"net/http"
 
@@ -17,8 +18,8 @@ type RecieveListId struct {
 func (s *Server) ClearList(w http.ResponseWriter, r *http.Request) {
 
 	//In any case return a json format
-	EnableCors(&w)
-	w.Header().Set("Content-Type", "application/json")
+	assistants.EnableCors(&w)
+	assistants.SetHeader(&w)
 
 	if r.Method != http.MethodDelete {
 		w.WriteHeader(405)

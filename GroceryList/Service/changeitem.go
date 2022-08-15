@@ -5,29 +5,24 @@ import (
 	"encoding/json"
 	"fmt"
 	"grocerylist/database"
+	"grocerylist/service/assistants"
 	"io"
 	"net/http"
 
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-type getItem struct {
-	ID       string `json:"Id"`
-	ItemName string `json:"ItemName"`
-	Quantity string `json:"Quantity"`
-	Unit     string `json:"Unit"`
-}
 type itemChange struct {
-	ID       string `bson:"_id"`
-	ItemName string `bson:"ItemName"`
-	Quantity string `bson:"Quantity"`
-	Unit     string `bson:"Unit"`
+	Id       string `bson:"_id"`
+	ItemName string `bson:"ItemName" json:"ItemName"`
+	Quantity string `bson:"Quantity" json:"Quantity"`
+	Unit     string `bson:"Unit" json:"Unit"`
 }
 
 func (s *Server) ChangeItem(w http.ResponseWriter, r *http.Request) {
 	//In any case return a json format
-	EnableCors(&w)
-	w.Header().Set("Content-Type", "application/json")
+	assistants.EnableCors(&w)
+	assistants.SetHeader(&w)
 
 	//If the method is not delete, return bad requst
 	if r.Method != http.MethodPatch {
@@ -37,7 +32,7 @@ func (s *Server) ChangeItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Get the json body of the post and populate the Item structure
-	var ui getItem
+	var ui itemChange
 	err := json.NewDecoder(r.Body).Decode(&ui)
 	if err != nil {
 		w.WriteHeader(400)
@@ -46,7 +41,7 @@ func (s *Server) ChangeItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// //Make sure items id is not missing
-	if ui.ID == "" {
+	if ui.Id == "" {
 		w.WriteHeader(400)
 		io.WriteString(w, `{"Error": "Missing data"}`)
 		return
@@ -57,7 +52,7 @@ func (s *Server) ChangeItem(w http.ResponseWriter, r *http.Request) {
 	client.DbConnect(database.ConstGroceryItemsCollection)
 
 	//Making sure the item exist
-	lookfor := ui.ID
+	lookfor := ui.Id
 
 	// lookfor := di.ItemName
 	filter := bson.D{{Key: "_id", Value: lookfor}}
@@ -73,7 +68,7 @@ func (s *Server) ChangeItem(w http.ResponseWriter, r *http.Request) {
 
 	//Item exist, update item
 
-	changeItem := itemChange{ui.ID, ui.ItemName, ui.Quantity, ui.Unit}
+	changeItem := itemChange{ui.Id, ui.ItemName, ui.Quantity, ui.Unit}
 
 	updateItem := bson.D{{Key: "$set", Value: changeItem}}
 

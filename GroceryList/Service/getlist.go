@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"grocerylist/database"
+	"grocerylist/service/assistants"
 	"io"
 	"net/http"
 
@@ -25,8 +26,8 @@ type ItemList struct {
 func (s *Server) GetList(w http.ResponseWriter, r *http.Request) {
 
 	//In any case return a json format and enable cors
-	EnableCors(&w)
-	w.Header().Set("Content-Type", "application/json")
+	assistants.EnableCors(&w)
+	assistants.SetHeader(&w)
 
 	//Check for correct method
 	if r.Method != http.MethodGet {

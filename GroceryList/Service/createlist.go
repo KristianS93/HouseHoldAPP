@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"grocerylist/database"
+	"grocerylist/service/assistants"
 	"io"
 	"net/http"
 
@@ -21,9 +22,9 @@ type MyObjectID string
 
 // data structure to populate and insert into the mongo db
 type createList struct {
-	ID          MyObjectID `bson:"_id"`
-	HouseholdId string     `bson:"HouseholdId, omitempty"`
-	Items       []Item     `bson:"Items"`
+	ID          MyObjectID   `bson:"_id"`
+	HouseholdId string       `bson:"HouseholdId, omitempty"`
+	Items       []CreateItem `bson:"Items"`
 }
 
 // CreateList has to be a post recieving a json object with HouseholdId, the house hold must now have a list beforehand.
@@ -31,8 +32,8 @@ type createList struct {
 func (s *Server) CreateList(w http.ResponseWriter, r *http.Request) {
 
 	//In any case return a json format
-	EnableCors(&w)
-	w.Header().Set("Content-Type", "application/json")
+	assistants.EnableCors(&w)
+	assistants.SetHeader(&w)
 
 	//If the method is not post, return bad requst
 	if r.Method != http.MethodPost {
