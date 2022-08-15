@@ -13,23 +13,43 @@ func TestMain(m *testing.M) {
 
 	//Initialize server settings¢
 	ServerIns.Init()
-	//Run server/service instance.
 
 	//addint test data
 	// AddTestData()
 
-	// ServerIns.Run()
+	code := m.Run()
 
-	os.Exit(m.Run())
+	os.Exit(code)
 }
 
 func TestGetList(t *testing.T) {
-	// req, _ := http.NewRequest("GET", "/product?ListId=62fa8c527abec12155c907c3", nil)
-	req, _ := http.NewRequest("GET", "/product?ListId=62fa8c527abec12155c907c3", nil)
 
-	res := executeRequest(req)
+	type ExtraData struct {
+		method string
+		url    string
+	}
 
-	checkResCode(t, http.StatusBadRequest, res.Code)
+	type GetListTests struct {
+		Name   string
+		Input  ExtraData
+		Output int
+	}
+
+	testcases := []GetListTests{
+		{"Correct request should output 200", ExtraData{"GET", "/GetList?ListId=62fa8c527abec12155c907c3"}, http.StatusOK},
+		{"Wrong listId should output 400", ExtraData{"GET", "/GetList?ListId=62fa8c527abec12155c90c3"}, http.StatusBadRequest},
+		{"Wrong request method should output 405", ExtraData{"POST", "/GetList?ListId=62fa8c527abec12155c907c3"}, http.StatusMethodNotAllowed},
+		{"Wrong url param should output 400", ExtraData{"GET", "/GetList?Id=62fa8c527abec12155c907c3"}, http.StatusBadRequest},
+	}
+
+	for _, v := range testcases {
+		req, _ := http.NewRequest(v.Input.method, v.Input.url, nil)
+		res := executeRequest(req)
+		checkResCode(t, v.Output, res.Code)
+	}
+
+	//Delete data from test
+
 }
 
 func executeRequest(req *http.Request) *httptest.ResponseRecorder {

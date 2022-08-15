@@ -11,11 +11,11 @@ import (
 func AddTestData() {
 	//Create test DB items collection.
 	var ItemClient database.MongClient
-	ItemClient.DbConnect("testItems")
+	ItemClient.DbConnect(database.ConstGroceryItemsCollection)
 
 	//Create test DB items collection.
 	var ListClient database.MongClient
-	ListClient.DbConnect("testList")
+	ListClient.DbConnect(database.ConstGroceryListCollection)
 	// ListClient.DbDisconnect()
 
 	// To test getList we will need a list
