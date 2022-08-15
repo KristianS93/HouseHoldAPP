@@ -11,3 +11,8 @@ icon-shape {
     height: 2rem;
     
 }
+
+input[readonly] {
+    border: none;
+    outline: none;
+}

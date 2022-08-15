@@ -29,6 +29,7 @@ func (s *Server) Routes(r *mux.Router) {
 	r.HandleFunc("/mealplanner", s.mealPlanner)
 	r.HandleFunc("/grocerylist", s.groceryList)
 
+	r.HandleFunc("/updatelist", s.updatelist).Methods("POST")
 	r.HandleFunc("/additem", s.addItem)
 }
 
@@ -65,11 +66,13 @@ func (s *Server) groceryList(w http.ResponseWriter, r *http.Request) {
 
 	xi := []Item{
 		Item{
+			ItemID:   "nigger",
 			ItemName: "pølse",
 			Quantity: "3",
 			Unit:     "stk",
 		},
 		Item{
+			ItemID:   "black ones",
 			ItemName: "fladskærm",
 			Quantity: "42",
 			Unit:     "paller",
@@ -94,7 +97,8 @@ func (s *Server) addItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	i := Item{
-		ListId:   "62f6e4c5682d11242ec29b26",
+		ItemID:   "",
+		ListID:   "62f6e4c5682d11242ec29b26",
 		ItemName: strings.ToLower(r.FormValue("name")),
 		Quantity: strings.ToLower(r.FormValue("quantity")),
 		Unit:     strings.ToLower(r.FormValue("unit")),
@@ -141,4 +145,10 @@ func (s *Server) addItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
+}
+
+func (s *Server) updatelist(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	log.Println(r.Form)
+	log.Println(r.PostForm["name"])
 }

@@ -60,11 +60,12 @@ func (s *Server) RenewSession(w http.ResponseWriter, c *http.Cookie) {
 
 // StartSession begins a session on the server, generating a UUID cookie value,
 // should be called after a login has been verified.
-func (s *Server) StartSession(w http.ResponseWriter, r *http.Request, userID, name string) {
+func (s *Server) StartSession(w http.ResponseWriter, r *http.Request, listid, householdid, name string) {
 	id := uuid.New()
 	ses := Session{
 		LastActivity: time.Now(),
-		UserID:       userID,
+		ListID:       listid,
+		HouseHoldID:  householdid,
 		Name:         name,
 	}
 	s.Sessions[id.String()] = ses

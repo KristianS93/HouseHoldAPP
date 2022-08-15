@@ -17,7 +17,8 @@ const (
 
 type Session struct {
 	LastActivity time.Time
-	UserID       string
+	ListID       string
+	HouseHoldID  string
 	Name         string
 }
 
