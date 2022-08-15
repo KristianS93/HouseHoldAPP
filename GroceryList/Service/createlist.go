@@ -21,7 +21,7 @@ type DataForList struct {
 type MyObjectID string
 
 // data structure to populate and insert into the mongo db
-type createList struct {
+type CreateList struct {
 	ID          MyObjectID   `bson:"_id"`
 	HouseholdId string       `bson:"HouseholdId, omitempty"`
 	Items       []CreateItem `bson:"Items"`
@@ -78,7 +78,7 @@ func (s *Server) CreateList(w http.ResponseWriter, r *http.Request) {
 	//Household doesnt have a list create one
 	newId := primitive.NewObjectID()
 
-	cList := createList{MyObjectID(newId.Hex()), cl.HouseholdId, nil}
+	cList := CreateList{MyObjectID(newId.Hex()), cl.HouseholdId, nil}
 
 	_, err = client.Connection.InsertOne(context.TODO(), cList)
 	if err != nil {
