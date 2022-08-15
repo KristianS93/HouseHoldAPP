@@ -32,8 +32,8 @@ func AddTestData() {
 	//insert items to test db.
 
 	var itemformat []CreateItem
-	obj1 := CreateItem{"", "62f6d364793593edbbc198ef", "Test item1", "4", "pakker"}
-	obj2 := CreateItem{"", "62f6d364793593edbbc198ef", "Test item2", "5", "stk"}
+	obj1 := CreateItem{"", "62fa8c527abec12155c907c3", "Test item1", "4", "pakker"}
+	obj2 := CreateItem{"", "62fa8c527abec12155c907c3", "Test item2", "5", "stk"}
 
 	itemformat = append(itemformat, obj1)
 	itemformat = append(itemformat, obj2)
