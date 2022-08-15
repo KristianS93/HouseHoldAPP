@@ -10,72 +10,42 @@
     <input class="btn btn-outline-success" type="submit" value="Add Item">
     </form>
   </div>
-  <br>
-  {{/* grocerylist functionality */}}
+<br>
+{{/* grocerylist functionality */}}
 
 <div class="container">
-  <table class="table table-borderless text-center">
-    <thead>
-      <tr>
-        <th scope="col">Item</th>
-        <th scope="col">Quantity</th>
-        <th scope="col">Unit</th>
-        <th scope="col">Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {{range .}}
-      <tr>
-        <td>{{.ItemName}}</td>
-        <td>
-          <div class="input-group justify-content-center w-25 mx-0 px-0">
-            <input type="button" value="-" class="button-minus border rounded-circle icon-shape icon-sm" data-field="quantity">
-            <input type="numeric" step="1" value="{{.Quantity}}" name="quantity" pattern="[0-9]+"  class="quantity-field border-0 text-center w-25">
-            <input type="button" value="+" class="button-plus border rounded-circle icon-shape icon-sm" data-field="quantity">
-          </div>
-        </td>
-        <td>{{.Unit}}</td>
-        <td> 
-          Coming soon!
-        </td>
-      </tr>
-      {{end}}
-    </tbody>
-  </table>
+  <div id="toggle_readonly">Click</div>
+  <form action="/updatelist" method="POST" name="grocerylist">
+    <table class="table table-borderless text-center w-75 mx-auto">
+      <thead>
+        <tr>
+          <th scope="col">Item</th>
+          <th scope="col">Quantity</th>
+          <th scope="col">Unit</th>
+          <th scope="col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{range .}}
+        <tr>
+          <td class="w-50">
+            <input type="text" id="textField" readonly aria-label="Item" class="form-control text-center" value="{{.ItemName}}" autocomplete="off" name="name" required>
+          </td>
+          <td class="w-25">
+            <input type="number" id="textField" readonly aria-label="Quantity" class="form-control text-center" value="{{.Quantity}}" autocomplete="off" pattern="[0-9]+" name="quantity" required>
+          </td>
+          <td class="w-25">
+            <input type="text" id="textField" readonly aria-label="Unit" class="form-control text-center" value="{{.Unit}}" autocomplete="off" name="unit" required>
+          </td>
+          <td class="align-middle"> 
+            <button type="button" class="btn-close" readonly aria-label="Close"></button>
+          </td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+  </form>
 </div>
-
-
-
-
-
-  {{/* <div class="container">
-    <div class="row mb-8">
-      <div class="col-md-6 col-12 mx-auto">
-        <div class="mb-4 border-bottom pb-2">
-          <h4 class="mb-0">Grocery List</h4>
-        </div>
-
-        <div class="row">
-          <div class="col-12">
-            <div class="d-flex justify-content-between">
-              <div>
-                <p class="text-dark">Guests</p>
-              </div>
-              <div class="input-group w-auto justify-content-end align-items-center">
-                <input type="button" value="-" class="button-minus border rounded-circle icon-shape icon-sm mx-1 " data-field="quantity">
-                <input type="numeric" step="1" value="1" name="quantity" pattern="[0-9]+"  class="quantity-field border-0 text-center w-25">
-                <input type="button" value="+" class="button-plus border rounded-circle icon-shape icon-sm " data-field="quantity">
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </div> */}}
-
-
-
 
 </div>
 
