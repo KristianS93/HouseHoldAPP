@@ -41,6 +41,12 @@ func (s *Server) GetList(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(w, `{"Error": "No list provided"}`)
 		return
 	}
+
+	if r.URL.Query()["ListId"] == nil {
+		w.WriteHeader(400)
+		io.WriteString(w, `{"Error": "Wrong url param"}`)
+		return
+	}
 	//Receive list id from s
 	recievedListId := r.URL.Query()["ListId"][0]
 

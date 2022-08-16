@@ -1,18 +1,14 @@
 package service
 
-import (
-	"net/http"
-)
-
 // Routes handles the routing/handling of endpoints for the service
 // The function is a method for the Server struct, and takes a pointer to a http.servemux type
-func (s *Server) Routes(r *http.ServeMux) {
-	r.HandleFunc("/AddItem", s.AddItem)
-	r.HandleFunc("/DeleteItem", s.DeleteItem)
-	r.HandleFunc("/ChangeItem", s.ChangeItem)
+func (s *Server) Routes() {
+	s.Router.HandleFunc("/AddItem", s.AddItem).Methods("POST")
+	s.Router.HandleFunc("/DeleteItem", s.DeleteItem).Methods("DELETE")
+	s.Router.HandleFunc("/ChangeItem", s.ChangeItem).Methods("PATCH")
 
-	r.HandleFunc("/GetList", s.GetList)
-	r.HandleFunc("/CreateList", s.CreateList)
-	r.HandleFunc("/DeleteList", s.DeleteList)
-	r.HandleFunc("/ClearList", s.ClearList)
+	s.Router.HandleFunc("/GetList", s.GetList).Methods("GET")
+	s.Router.HandleFunc("/CreateList", s.CreateList).Methods("POST")
+	s.Router.HandleFunc("/DeleteList", s.DeleteList).Methods("DELETE")
+	s.Router.HandleFunc("/ClearList", s.ClearList).Methods("DELETE")
 }
