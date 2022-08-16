@@ -8,6 +8,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+var TestItems = []CreateItem{}
+
 func AddTestData() {
 	//Create test DB items collection.
 	var ItemClient database.MongClient
@@ -31,16 +33,15 @@ func AddTestData() {
 
 	//insert items to test db.
 
-	var itemformat []CreateItem
 	obj1 := CreateItem{"", "62fa8c527abec12155c907c3", "Test item1", "4", "pakker"}
 	obj2 := CreateItem{"", "62fa8c527abec12155c907c3", "Test item2", "5", "stk"}
 
-	itemformat = append(itemformat, obj1)
-	itemformat = append(itemformat, obj2)
+	TestItems = append(TestItems, obj1)
+	TestItems = append(TestItems, obj2)
 
 	var itemInsertFormat []CreateItem
 
-	for _, v := range itemformat {
+	for _, v := range TestItems {
 		newId := primitive.NewObjectID()
 		insertObj := CreateItem{string(newId.Hex()), v.ListId, v.ItemName, v.Quantity, v.Unit}
 		itemInsertFormat = append(itemInsertFormat, insertObj)

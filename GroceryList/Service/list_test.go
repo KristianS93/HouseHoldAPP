@@ -2,6 +2,7 @@ package service
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"grocerylist/database"
 	"io"
@@ -104,10 +105,28 @@ func TestGetList(t *testing.T) {
 	//Test specific json:
 
 	//DENNE TEST ER EGENTLIG RIGTIG NOK MEN SOMEHOW DØR DEN I COMPARE, STRENGE TJEKKET I ANDET PROGRAM.
-	// req, _ := http.NewRequest("GET", "/GetList?ListId=62fa8c527abec12155c907c3", nil)
-	// res := executeRequest(req)
+	req, _ := http.NewRequest("GET", "/GetList?ListId=62fa8c527abec12155c907c3", nil)
+	res := executeRequest(req)
 
-	// expectedStr := `{"Succes":"List Retrieved","Items":[{"ID":"62faac9cad635f2233f86be3","ItemName":"Test item1","Quantity":"4","Unit":"pakker"},{"ID":"62faac9cad635f2233f86be4","ItemName":"Test item2","Quantity":"5","Unit":"stk"}]}`
+	// jsonBody := res.Body.String()
+	expectedStr := []byte(`{"Succes":"List Retrieved","Items":[{"ID":"62faac9cad635f2233f86be3","ItemName":"Test item1","Quantity":"4","Unit":"pakker"},{"ID":"62faac9cad635f2233f86be4","ItemName":"Test item2","Quantity":"5","Unit":"stk"}]}`)
+	jsonobj1, _ := json.Marshal(expectedStr)
+	// jsonobj, _ := json.Marshal(res.Body.Bytes())
+
+	var data string
+	_ = json.Unmarshal(jsonobj1, &data)
+	fmt.Println(data)
+
+	// fmt.Println(jsonobj)
+	// fmt.Println(jsonobj1)
+
+	// newjsonobj := json.Encoder(jsonBody)
+	var result string
+	json.Unmarshal(res.Body.Bytes(), &result)
+
+	// fmt.Println(result)
+
+	// // expectedStr := `{"Succes":"List Retrieved","Items":[{"ID":"62faac9cad635f2233f86be3","ItemName":"Test item1","Quantity":"4","Unit":"pakker"},{"ID":"62faac9cad635f2233f86be4","ItemName":"Test item2","Quantity":"5","Unit":"stk"}]}`
 	// if body := res.Body.String(); body != expectedStr {
 	// 	t.Errorf("Testing succesfull test json data. Got %s", body)
 	// }
@@ -133,4 +152,24 @@ func TestClearList(t *testing.T) {
 		checkResCode(t, v.Output, res.Code, v.Name)
 	}
 	fmt.Println("Passed ResetList Tests")
+}
+
+func TestDeleteList(t *testing.T) {
+	type DeleteListTest teststruct
+
+	testcasesStatusCode := []DeleteListTest{
+		{"Correct DeleteList request should return 200", ExtraData{"DELETE", "/DeleteList", `{"ListId": "62fa8c527abec12155c907c3"}`}, http.StatusOK},
+		{"Wrong method for DeleteList request should return 405", ExtraData{"GET", "/DeleteList", `{"ListId": "62fa8c527abec12155c907c3"}`}, http.StatusMethodNotAllowed},
+		{"No json for DeleteList request should return 400", ExtraData{"DELETE", "/DeleteList", `{}`}, http.StatusBadRequest},
+		{"List id empty for DeleteList request should return 400", ExtraData{"DELETE", "/DeleteList", `{"ListId": ""}`}, http.StatusBadRequest},
+		{"Non existing List id for DeleteList request should return 400", ExtraData{"DELETE", "/DeleteList", `{"ListId": "xxxxyyyy"}`}, http.StatusBadRequest},
+		{"Deleting already deleted list id request should return 400", ExtraData{"DELETE", "/DeleteList", `{"ListId": "62fa8c527abec12155c907c3"}`}, http.StatusBadRequest},
+	}
+
+	for _, v := range testcasesStatusCode {
+		req, _ := http.NewRequest(v.Input.method, v.Input.url, CreateReader(v.Input.body))
+		res := executeRequest(req)
+		checkResCode(t, v.Output, res.Code, v.Name)
+	}
+	fmt.Println("Passed DeleteList Tests")
 }
