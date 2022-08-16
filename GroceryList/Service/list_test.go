@@ -1,9 +1,10 @@
 package service
 
 import (
-	"context"
+	"bytes"
 	"fmt"
 	"grocerylist/database"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -20,9 +21,8 @@ func TestMain(m *testing.M) {
 
 	//Db connection
 	//Create test DB items collection.
-	ListClient.DbConnect(database.ConstGroceryListCollection)
 	//addint test data
-	// AddTestData()
+	AddTestData()
 
 	code := m.Run()
 	//clearData()
@@ -41,40 +41,57 @@ func checkResCode(t *testing.T, expected, actual int, testname string) {
 	}
 }
 
+type ExtraData struct {
+	method string
+	url    string
+	body   string
+}
+
+type teststruct struct {
+	Name   string
+	Input  ExtraData
+	Output int
+}
+
+type reader io.Reader
+
+func CreateReader(str string) reader {
+	var jsonStr = []byte(str)
+	return bytes.NewBuffer(jsonStr)
+}
+
 func TestCreateList(t *testing.T) {
 
-	type CreateListTests struct {
+	type CreateListTests teststruct
+
+	testcasesStatusCode := []CreateListTests{
+		{"Correct request should output 200", ExtraData{"POST", "/CreateList", `{"HouseholdId": "TestId"}`}, http.StatusOK},
+		{"Wrong method should return 405", ExtraData{"GET", "/CreateList", `{"HouseholdId": "TestId"}`}, http.StatusMethodNotAllowed},
+		{"Wrong json should return 400", ExtraData{"POST", "/CreateList", `"HouseholdId": "TestId"}`}, http.StatusBadRequest},
+		{"Correct request no household id should return 400", ExtraData{"POST", "/CreateList", `{"HouseholdId": ""}`}, http.StatusBadRequest},
+		{"Correct request with already existing household id should return 400", ExtraData{"POST", "/CreateList", `{"HouseholdId": "TestId"}`}, http.StatusBadRequest},
 	}
 
-	cList := CreateList{"62fa8c527abec12155c907c3", "testhouse", nil}
-
-	_, err := ListClient.Connection.InsertOne(context.TODO(), cList)
-	if err != nil {
-		fmt.Println("failed inserting")
-		return
+	for _, v := range testcasesStatusCode {
+		req, _ := http.NewRequest(v.Input.method, v.Input.url, CreateReader(v.Input.body))
+		res := executeRequest(req)
+		checkResCode(t, v.Output, res.Code, v.Name)
 	}
+
+	fmt.Println("Passed CreateList Tests")
 }
 
 func TestGetList(t *testing.T) {
 
-	type ExtraData struct {
-		method string
-		url    string
-	}
-
-	type GetListTests struct {
-		Name   string
-		Input  ExtraData
-		Output int
-	}
+	type GetListTests teststruct
 
 	testcasesStatusCode := []GetListTests{
-		{"Correct request should output 200", ExtraData{"GET", "/GetList?ListId=62fa8c527abec12155c907c3"}, http.StatusOK},
-		{"Wrong listId should output 400", ExtraData{"GET", "/GetList?ListId=62fa8c527abec12155c90c3"}, http.StatusBadRequest},
-		{"Wrong request method should output 405", ExtraData{"POST", "/GetList?ListId=62fa8c527abec12155c907c3"}, http.StatusMethodNotAllowed},
-		{"Wrong url param should output 400", ExtraData{"GET", "/GetList?Id=62fa8c527abec12155c907c3"}, http.StatusBadRequest},
-		{"No list id provided should output 400", ExtraData{"GET", "/GetList?ListId="}, http.StatusBadRequest},
-		{"No url params should output 405", ExtraData{"GET", "/GetList"}, http.StatusMethodNotAllowed},
+		{"Correct request should output 200", ExtraData{"GET", "/GetList?ListId=62fa8c527abec12155c907c3", ""}, http.StatusOK},
+		{"Wrong listId should output 400", ExtraData{"GET", "/GetList?ListId=62fa8c527abec12155c90c3", ""}, http.StatusBadRequest},
+		{"Wrong request method should output 405", ExtraData{"POST", "/GetList?ListId=62fa8c527abec12155c907c3", ""}, http.StatusMethodNotAllowed},
+		{"Wrong url param should output 400", ExtraData{"GET", "/GetList?Id=62fa8c527abec12155c907c3", ""}, http.StatusBadRequest},
+		{"No list id provided should output 400", ExtraData{"GET", "/GetList?ListId=", ""}, http.StatusBadRequest},
+		{"No url params should output 405", ExtraData{"GET", "/GetList", ""}, http.StatusMethodNotAllowed},
 	}
 
 	for _, v := range testcasesStatusCode {
@@ -82,6 +99,7 @@ func TestGetList(t *testing.T) {
 		res := executeRequest(req)
 		checkResCode(t, v.Output, res.Code, v.Name)
 	}
+	fmt.Println("Passed GetList Tests")
 
 	//Test specific json:
 
@@ -95,4 +113,24 @@ func TestGetList(t *testing.T) {
 	// }
 
 	//Delete data from test
+}
+
+func TestClearList(t *testing.T) {
+	type ClearListTest teststruct
+
+	testcasesStatusCode := []ClearListTest{
+		{"Correct ClearList request should return 200", ExtraData{"DELETE", "/ClearList", `{"ListId": "62fa8c527abec12155c907c3"}`}, http.StatusOK},
+		{"Wrong request method should return 405", ExtraData{"GET", "/ClearList", `{"ListId": "62fa8c527abec12155c907c3"}`}, http.StatusMethodNotAllowed},
+		{"Wrong json in request should return 400", ExtraData{"DELETE", "/ClearList", `{}`}, http.StatusBadRequest},
+		{"No list id in request should return 400", ExtraData{"DELETE", "/ClearList", `{"ListId": ""}`}, http.StatusBadRequest},
+		{"List id doesnt exist should return 400", ExtraData{"DELETE", "/ClearList", `{"ListId": "XXXXXXXXX"}`}, http.StatusBadRequest},
+		{"List is empty should return 400", ExtraData{"DELETE", "/ClearList", `{"ListId": "62fa8c527abec12155c907c3"}`}, http.StatusBadRequest},
+	}
+
+	for _, v := range testcasesStatusCode {
+		req, _ := http.NewRequest(v.Input.method, v.Input.url, CreateReader(v.Input.body))
+		res := executeRequest(req)
+		checkResCode(t, v.Output, res.Code, v.Name)
+	}
+	fmt.Println("Passed ResetList Tests")
 }

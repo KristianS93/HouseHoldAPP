@@ -21,7 +21,7 @@ func AddTestData() {
 	// To test getList we will need a list
 	// and a items.
 
-	cList := CreateList{"62fa8c527abec12155c907c3", "testhouse", nil}
+	cList := CreateList{"62fa8c527abec12155c907c3", "TestHouse", nil}
 
 	_, err := ListClient.Connection.InsertOne(context.TODO(), cList)
 	if err != nil {
