@@ -6,7 +6,6 @@ const (
 
 type Item struct {
 	ItemID   string
-	ListID   string
 	ItemName string
 	Quantity string
 	Unit     string

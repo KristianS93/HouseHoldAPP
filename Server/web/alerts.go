@@ -7,9 +7,9 @@ import (
 type alertLevel uint8
 
 const (
-	alertLevelSuccess alertLevel = iota
-	alertLevelWarning
-	alertLevelDanger
+	Success alertLevel = iota
+	Warning
+	Danger
 )
 
 type Alert struct {
@@ -19,17 +19,18 @@ type Alert struct {
 
 func (a alertLevel) String() string {
 	switch a {
-	case alertLevelSuccess:
+	case Success:
 		return "success"
-	case alertLevelDanger:
+	case Danger:
 		return "danger"
-	case alertLevelWarning:
+	case Warning:
 		return "warning"
 	default:
 		return ""
 	}
 }
 
+// maybe refactor constants for error messages on alerts
 func addAlert(w http.ResponseWriter, r *http.Request, alertType alertLevel, message string) {
 	c := http.Cookie{
 		Name:   alertType.String(),
@@ -41,19 +42,19 @@ func addAlert(w http.ResponseWriter, r *http.Request, alertType alertLevel, mess
 
 func getAlert(w http.ResponseWriter, r *http.Request) []Alert {
 	var Alerts []Alert
-	if cWarning, err := r.Cookie(alertLevelWarning.String()); err == nil {
+	if cWarning, err := r.Cookie(Warning.String()); err == nil {
 		Alerts = append(Alerts, Alert{
 			Level:   cWarning.Name,
 			Message: cWarning.Value,
 		})
 	}
-	if cDanger, err := r.Cookie(alertLevelDanger.String()); err == nil {
+	if cDanger, err := r.Cookie(Danger.String()); err == nil {
 		Alerts = append(Alerts, Alert{
 			Level:   cDanger.Name,
 			Message: cDanger.Value,
 		})
 	}
-	if cSuccess, err := r.Cookie(alertLevelSuccess.String()); err == nil {
+	if cSuccess, err := r.Cookie(Success.String()); err == nil {
 		Alerts = append(Alerts, Alert{
 			Level:   cSuccess.Name,
 			Message: cSuccess.Value,
