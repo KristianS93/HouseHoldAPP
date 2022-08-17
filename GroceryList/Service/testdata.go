@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"grocerylist/database"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -54,7 +55,21 @@ func AddTestData() {
 
 	_, err = ItemClient.Connection.InsertMany(context.TODO(), insertItemQuery)
 	if err != nil {
-		fmt.Println("error inserting items")
+		fmt.Println("error inserting  test items")
 		return
 	}
+}
+
+func DeleteTestData() {
+	//Create test DB items collection.
+	var ListClient database.MongClient
+	ListClient.DbConnect(database.ConstGroceryListCollection)
+
+	filter := bson.D{{Key: "HouseholdId", Value: "TestId"}}
+	_, err := ListClient.Connection.DeleteOne(context.TODO(), filter)
+	if err != nil {
+		fmt.Println("error deleting test list")
+		return
+	}
+
 }

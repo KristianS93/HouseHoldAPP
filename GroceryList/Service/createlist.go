@@ -88,10 +88,10 @@ func (s *Server) CreateList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Format the return data and serve as json.
-	type returnData struct {
+	type ReturnData struct {
 		Succes string     `json:"Succes"`
 		ListId MyObjectID `json:"ListId"`
 	}
-	returnDataFormat := returnData{"List Created", cList.ID}
+	returnDataFormat := ReturnData{"List Created", cList.ID}
 	json.NewEncoder(w).Encode(returnDataFormat)
 }

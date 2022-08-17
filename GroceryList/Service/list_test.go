@@ -26,6 +26,7 @@ func TestMain(m *testing.M) {
 	AddTestData()
 
 	code := m.Run()
+	DeleteTestData()
 	//clearData()
 	os.Exit(code)
 }
