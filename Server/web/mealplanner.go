@@ -5,10 +5,10 @@ const (
 )
 
 type Item struct {
-	ItemID   string
-	ItemName string
-	Quantity string
-	Unit     string
+	ID       string `json:"ID"`
+	ItemName string `json:"ItemName"`
+	Quantity string `json:"Quantity"`
+	Unit     string `json:"Unit"`
 }
 
 type MealPlan struct {

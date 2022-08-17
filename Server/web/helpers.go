@@ -10,18 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// checkMethod returns true when http methods are the same, and false when not.
-func checkMethod(w http.ResponseWriter, r *http.Request, method string) bool {
-	if r.Method != method {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		w.Write([]byte("Wrong http method."))
-		return false
-	}
-	return true
-}
-
 func (s *Server) serveSite(w http.ResponseWriter, r *http.Request, tplName string, data interface{}) {
-
 	err := s.templateGet(tplName).ExecuteTemplate(w, "base", data)
 	if err != nil {
 		fmt.Println("errServe: ", err)

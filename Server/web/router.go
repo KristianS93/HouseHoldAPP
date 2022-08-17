@@ -16,6 +16,7 @@ import (
 const (
 	AddItemURL    string = "http://localhost:5003/AddItem"
 	ChangeItemURL string = "http://localhost:5003/ChangeItem"
+	GetListURL    string = "http://localhost:5003/GetList"
 )
 
 // Routes is the Router of the server, spreading traffic to relevant handlerFuncs.
@@ -45,7 +46,6 @@ func (s *Server) favIcon(w http.ResponseWriter, r *http.Request) {
 
 // index handles the frontpage.
 func (s *Server) index(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
 	s.serveSite(w, r, "index", nil)
 }
 
@@ -58,25 +58,31 @@ func (s *Server) mealplanner(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) groceryList(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
+	res, err := http.Get(GetListURL + "?ListId=" + "62fd4bc950c4443769551c49")
+	if err != nil {
+		addAlert(w, r, Danger, "Internal error.")
+		log.Println("bad getlist: ", err)
+		http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
+		return
+	}
 
-	xi := []Item{
-		{
-			ItemID:   "xd",
-			ItemName: "pølse",
-			Quantity: "3",
-			Unit:     "stk",
-		},
-		{
-			ItemID:   "notthisone",
-			ItemName: "fladskærm",
-			Quantity: "42",
-			Unit:     "paller",
-		},
+	type GetList struct {
+		Success string `json:"Success"`
+		XI      []Item `json:"Items"`
+	}
+
+	var ItemHolder GetList
+
+	err = json.NewDecoder(res.Body).Decode(&ItemHolder)
+	if err != nil {
+		addAlert(w, r, Danger, "Internal error.")
+		log.Println("bad decode: ", err)
+		http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
+		return
 	}
 
 	tpl := TmplData{
-		Data:   xi,
+		Data:   ItemHolder.XI,
 		Errors: GetAlert(w, r),
 		User: UserData{
 			Name:     "Krath",
@@ -120,8 +126,9 @@ func (s *Server) additem(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
 		return
 	}
-
+	log.Println("statuscode:", res.StatusCode)
 	if res.StatusCode != http.StatusOK {
+		log.Println("additem wrong statuscode")
 		addAlert(w, r, Danger, "Internal error.")
 		http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
 		return
