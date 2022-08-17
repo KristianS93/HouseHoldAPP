@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"grocerylist/database"
+	"grocerylist/service/assistants"
 	"io"
 	"net/http"
 
@@ -12,11 +12,22 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+type ItemHolder struct {
+	Succes string     `json:"Succes"`
+	Items  []ItemList `json:"Items"`
+}
+type ItemList struct {
+	ID       string `bson:"_id"`
+	ItemName string `json:"ItemName"`
+	Quantity string `json:"Quantity"`
+	Unit     string `json:"Unit"`
+}
+
 func (s *Server) GetList(w http.ResponseWriter, r *http.Request) {
 
 	//In any case return a json format and enable cors
-	EnableCors(&w)
-	w.Header().Set("Content-Type", "application/json")
+	assistants.EnableCors(&w)
+	assistants.SetHeader(&w)
 
 	//Check for correct method
 	if r.Method != http.MethodGet {
@@ -25,60 +36,81 @@ func (s *Server) GetList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//Get the json body of the post and populate the GetListId structure
-	var dl GetListId
-	err := json.NewDecoder(r.Body).Decode(&dl)
-	if err != nil {
-		w.WriteHeader(400)
-		io.WriteString(w, `{"Error": "Bad request"}`)
+	if len(r.URL.Query()) == 0 {
+		w.WriteHeader(405)
+		io.WriteString(w, `{"Error": "No list provided"}`)
 		return
 	}
 
-	if dl.ListId == "" {
+	if r.URL.Query()["ListId"] == nil {
+		w.WriteHeader(400)
+		io.WriteString(w, `{"Error": "Wrong url param"}`)
+		return
+	}
+	//Receive list id from s
+	recievedListId := r.URL.Query()["ListId"][0]
+
+	//Check that list id is not empty
+	if recievedListId == "" {
 		w.WriteHeader(400)
 		io.WriteString(w, `{"Error": "No list provided"}`)
 		return
 	}
 
-	//Instantiate a connection to mongo
+	//Instantiate a connection to mongo to list collection
+	var listClient database.MongClient
+	listClient.DbConnect(database.ConstGroceryListCollection)
+
+	//check that list exist
+	// lookfor := di.ItemName
+	filterList := bson.D{{Key: "_id", Value: recievedListId}}
+	var resultList bson.D
+
+	//Checking if there is any matches on the house hold id, if so return 400
+	_ = listClient.Connection.FindOne(context.TODO(), filterList).Decode(&resultList)
+	if resultList == nil {
+		w.WriteHeader(400)
+		io.WriteString(w, `{"Error": "List does not exist"}`)
+		return
+	}
+
+	//Instantiate a connection to mongo items collection
 	var client database.MongClient
 	client.DbConnect(database.ConstGroceryItemsCollection)
 
 	//Get data from list
-	lookfor := dl.ListId
+	lookfor := recievedListId
 	filter := bson.D{primitive.E{Key: "ListId", Value: lookfor}}
 
 	res, err := client.Connection.Find(context.TODO(), filter)
-	if res != nil {
+	if err != nil {
 		w.WriteHeader(400)
 		io.WriteString(w, `{"Error": "No items on the list"}`)
 		return
 	}
 
-	var itemsList []Item
+	var itemsList []ItemList
 	if err = res.All(context.TODO(), &itemsList); err != nil {
 		w.WriteHeader(400)
 		io.WriteString(w, `{"Error": "Could not retrieve list"}`)
 	}
 
-	fmt.Println("displaying all results from the search query")
-	for _, result := range itemsList {
-		fmt.Println(result)
-	}
+	var returndata = ItemHolder{"List Retrieved", itemsList}
 
-	// err := json.NewEncoder(w).Encode(test2)
-	// if err != nil {
-	// 	log.Println("Failed encoding data to JSON, error code: ", err)
-	// }
+	json.NewEncoder(w).Encode(returndata)
 }
 
-//######################
-// result.InsertedID
-// lookfor := idString
-// var results bson.M
-// filter := bson.D{{"_id", lookfor}}
-// if err = client.Connection.FindOne(context.TODO(), filter).Decode(&results); err != nil {
-// 	panic(err)
+// //Get the json body of the post and populate the GetListId structure
+// var dl GetListId
+// err := json.NewDecoder(r.Body).Decode(&dl)
+// if err != nil {
+// 	w.WriteHeader(400)
+// 	io.WriteString(w, `{"Error": "Bad request"}`)
+// 	return
 // }
-// fmt.Println(results)
-//#################
+
+// if dl.ListId == "" {
+// 	w.WriteHeader(400)
+// 	io.WriteString(w, `{"Error": "No list provided"}`)
+// 	return
+// }

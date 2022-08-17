@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"grocerylist/database"
+	"grocerylist/service/assistants"
 	"io"
 	"net/http"
 
@@ -20,10 +21,10 @@ type DataForList struct {
 type MyObjectID string
 
 // data structure to populate and insert into the mongo db
-type createList struct {
-	ID          MyObjectID `bson:"_id"`
-	HouseholdId string     `bson:"HouseholdId, omitempty"`
-	Items       []Item     `bson:"Items"`
+type CreateList struct {
+	ID          MyObjectID   `bson:"_id"`
+	HouseholdId string       `bson:"HouseholdId, omitempty"`
+	Items       []CreateItem `bson:"Items"`
 }
 
 // CreateList has to be a post recieving a json object with HouseholdId, the house hold must now have a list beforehand.
@@ -31,8 +32,8 @@ type createList struct {
 func (s *Server) CreateList(w http.ResponseWriter, r *http.Request) {
 
 	//In any case return a json format
-	EnableCors(&w)
-	w.Header().Set("Content-Type", "application/json")
+	assistants.EnableCors(&w)
+	assistants.SetHeader(&w)
 
 	//If the method is not post, return bad requst
 	if r.Method != http.MethodPost {
@@ -77,7 +78,7 @@ func (s *Server) CreateList(w http.ResponseWriter, r *http.Request) {
 	//Household doesnt have a list create one
 	newId := primitive.NewObjectID()
 
-	cList := createList{MyObjectID(newId.Hex()), cl.HouseholdId, nil}
+	cList := CreateList{MyObjectID(newId.Hex()), cl.HouseholdId, nil}
 
 	_, err = client.Connection.InsertOne(context.TODO(), cList)
 	if err != nil {
@@ -87,10 +88,10 @@ func (s *Server) CreateList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Format the return data and serve as json.
-	type returnData struct {
+	type ReturnData struct {
 		Succes string     `json:"Succes"`
 		ListId MyObjectID `json:"ListId"`
 	}
-	returnDataFormat := returnData{"List Created", cList.ID}
+	returnDataFormat := ReturnData{"List Created", cList.ID}
 	json.NewEncoder(w).Encode(returnDataFormat)
 }

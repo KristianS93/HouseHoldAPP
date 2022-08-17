@@ -1,5 +1,7 @@
 package service
 
+import "grocerylist/service/assistants"
+
 // ####-Server settings-#####
 const ConstHost = "localhost"
 const ConstPort = ":5003"
@@ -10,10 +12,9 @@ const ConstPort = ":5003"
 // Setting the timeout for the cookie
 const ConstSessionTimeOut = 1200
 
-// Sets a string with the allowed clients '*' means EVERY origin has access
-const ConstAllowedCORS = "*"
-
 //###########################
+// Sets a string with the allowed clients '*' means EVERY origin has access
+const ConstAllowedCORS = assistants.ConstAllowedCORS
 
 //#####-Mongo Settings-######
 

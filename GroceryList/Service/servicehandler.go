@@ -1,17 +1,18 @@
 package service
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 const SessionTimeOut = ConstSessionTimeOut
 
 type Server struct {
 	//Router will be a pointer to the http request multiplexer
-	Router *http.ServeMux
+	Router *mux.Router
 
 	//Setting the host
 	HostName string
@@ -27,24 +28,30 @@ func (s *Server) Init() {
 
 	//The pointer has to be zero when, running the program first time
 	//And we can create the Multiplexer so we can route.
-	if s.Router == nil {
-		s.Router = http.NewServeMux()
+	// if s.Router == nil {
+	// 	s.Router = http.NewServeMux()
 
-		//Getting the routes for this service
-		s.Routes(s.Router)
-	}
+	// 	//Getting the routes for this service
+	// 	s.Routes(s.Router)
+	// }
 
 	//Setting the specified host and port
 	s.HostName = ConstHost
 	s.HostPort = ConstPort
+
+	s.Router = mux.NewRouter()
+	s.Routes()
 }
 
-func (s *Server) Run() {
-	fmt.Println("Service starting up at: http://" + s.HostName + s.HostPort)
-	err := http.ListenAndServe((s.HostName + s.HostPort), s.Router)
-	if err != nil {
-		log.Fatalln("Failed to start GroceryList service, exiting.")
-	}
+func (s *Server) Run(addr string) {
+	// fmt.Println("Service starting up at: http://" + s.HostName + s.HostPort)
+	// err := http.ListenAndServe((s.HostName + s.HostPort), s.Router)
+	// if err != nil {
+	// 	log.Fatalln("Failed to start GroceryList service, exiting.")
+	// }
+
+	log.Fatal(http.ListenAndServe(addr, s.Router))
+
 }
 
 // EnableCors take the pointer to the ResponseWriter and sets the CORS

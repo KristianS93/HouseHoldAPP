@@ -3,79 +3,78 @@ package service
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"grocerylist/database"
+	"grocerylist/service/assistants"
 	"io"
 	"net/http"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type Item struct {
-	ListId   string `json:"ListId"`
-	Item     string `json:"ItemName"`
-	Quantity string `json:"Quantity"`
-	Unit     string `json:"Unit"`
-}
+// type Item struct {
+// 	ListId   string `json:"ListId"`
+// 	ItemName string `json:"ItemName"`
+// 	Quantity string `json:"Quantity"`
+// 	Unit     string `json:"Unit"`
+// }
 
 type CreateItem struct {
-	ID       MyObjectID `bson:"_id, omitempty"`
-	ListId   string     `bson:"ListId, omitempty"`
-	Item     string     `bson:"ItemName, omitempty"`
-	Quantity string     `bson:"Quantity"`
-	Unit     string     `bson:"Unit"`
+	ID       string `bson:"_id, omitempty"`
+	ListId   string `bson:"ListId, omitempty" json:"ListId"`
+	ItemName string `bson:"ItemName, omitempty" json:"ItemName"`
+	Quantity string `bson:"Quantity" json:"Quantity"`
+	Unit     string `bson:"Unit" json:"Unit"`
 }
 
+// AddItem Create item/items for a list, the function needs a post request, with a json object of an array of item/items
 func (s *Server) AddItem(w http.ResponseWriter, r *http.Request) {
-	// #########################################
-	//NOTE FIRST VERSION INSERTS 1 ITEM
-	// #########################################
-
 	//In any case return a json format
-	EnableCors(&w)
-	w.Header().Set("Content-Type", "application/json")
+	assistants.EnableCors(&w)
+	assistants.SetHeader(&w)
 
 	//If the method is not post, return bad requst
-	if r.Method != http.MethodPost {
-		w.WriteHeader(405)
-		io.WriteString(w, `{"Error": "Wrong method"}`)
+	//take the request pointer, pointer to response writer and the desired method.
+	if assistants.WrongMethod(r, &w, http.MethodPost) {
 		return
 	}
 
 	//Get the json body of the post and populate the Item structure
-	var itemformat Item
+	var itemformat []CreateItem
 	err := json.NewDecoder(r.Body).Decode(&itemformat)
 	if err != nil {
-		str := `{"Error": "Bad request: Getting data"}`
-		// log.Println(err)
 		w.WriteHeader(400)
-		io.WriteString(w, str)
+		io.WriteString(w, `{"Error": "Bad request: Getting data"}`)
 		return
 	}
-	fmt.Println(itemformat)
 
-	//Making sure data is not missing
-	if itemformat.ListId == "" || itemformat.Item == "" {
-		w.WriteHeader(400)
-		io.WriteString(w, `{"Error": "Missing data"}`)
-		return
+	//Making sure data is not missing from any of the items
+	for _, v := range itemformat {
+		// i = index v = value hvilket er item her
+		if v.ListId == "" || v.ItemName == "" {
+			w.WriteHeader(400)
+			io.WriteString(w, `{"Error": "Missing data"}`)
+			return
+		}
 	}
 
 	//Instantiate a connection to mongo
 	var client database.MongClient
 	client.DbConnect(database.ConstGroceryItemsCollection)
 
-	//Consider Checking if an item is already
-	//How ever this might not be important.
+	var itemInsertFormat []CreateItem
 
-	//Generating item
-	newId := primitive.NewObjectID()
+	for _, v := range itemformat {
+		newId := primitive.NewObjectID()
+		insertObj := CreateItem{string(newId.Hex()), v.ListId, v.ItemName, v.Quantity, v.Unit}
+		itemInsertFormat = append(itemInsertFormat, insertObj)
+	}
 
-	cItem := CreateItem{MyObjectID(newId.Hex()),
-		itemformat.ListId, itemformat.Item,
-		itemformat.Quantity, itemformat.Unit}
+	var insertItemQuery []interface{}
+	for _, v := range itemInsertFormat {
+		insertItemQuery = append(insertItemQuery, v)
+	}
 
-	_, err = client.Connection.InsertOne(context.TODO(), cItem)
+	_, err = client.Connection.InsertMany(context.TODO(), insertItemQuery)
 	if err != nil {
 		io.WriteString(w, `{"Error": "Failed creating item"}`)
 		w.WriteHeader(400)

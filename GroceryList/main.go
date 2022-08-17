@@ -9,5 +9,5 @@ func main() {
 	//Initialize server settings
 	Server.Init()
 	//Run server/service instance.
-	Server.Run()
+	Server.Run(":5003")
 }
