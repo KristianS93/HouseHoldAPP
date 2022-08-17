@@ -5,16 +5,15 @@
   <div>
     <form action="/additem" method="POST" class="input-group w-50 mx-auto"> 
     <input type="text" aria-label="Item" class="form-control" placeholder="Apple" onfocus="this.placeholder = ''"" onblur="this.placeholder = 'Apple'" autocomplete="off" name="name" required>
-    <input type="number" aria-label="Quantity" class="form-control" placeholder="2" onfocus="this.placeholder = ''"" onblur="this.placeholder = '2'" autocomplete="off" pattern="[0-9]+" name="quantity" required>
+    <input type="number" aria-label="Quantity" class="form-control" placeholder="2" onfocus="this.placeholder = ''"" onblur="this.placeholder = '2'" min="1" autocomplete="off" pattern="[0-9]+" name="quantity" required>
     <input type="text" aria-label="Unit" class="form-control" placeholder="pcs" onfocus="this.placeholder = ''"" onblur="this.placeholder = 'pcs'" autocomplete="off" name="unit" required>
     <input class="btn btn-outline-success" type="submit" value="Add Item">
     </form>
   </div>
 <br>
-{{/* grocerylist functionality */}}
 
+{{/* grocerylist functionality */}}
 <div class="container">
-  <form action="/updatelist" method="POST" name="grocerylist">
     <div class="container w-75">
       <div class="row">
         <div class="col">
@@ -22,10 +21,8 @@
         </div>
         <div class="col text-end">
           <div class="btn-group justify-content-center">
-            <input class="btn btn-success" type="submit" value="Submit">
-            <input class="btn btn-info" type="button" value="Edit" id="toggle_readonly">
-            <a href="/resetlist" class="btn btn-warning" role="button">Reset</a>
-            <a href="/deletelist" class="btn btn-danger" role="button">Delete</a>
+            <a href="/resetlist" class="btn btn-outline-secondary" role="button">Reset</a>
+            <a href="/deletelist" class="btn btn-outline-danger" role="button">Delete</a>
           </div>
         </div>
       </div>
@@ -42,28 +39,34 @@
         </tr>
       </thead>
       <tbody>
-        {{range .}}
+        {{range $index, $value := .}}
         <tr>
           <td class="w-50">
-            <input type="text" id="textField" readonly aria-label="Item" class="form-control text-center" value="{{.ItemName}}" autocomplete="off" name="name" required>
+            <input type="text" id="{{$value.ItemID}}" readonly aria-label="Item" class="form-control text-center" value="{{$value.ItemName}}" autocomplete="off" name="name" required>
           </td>
           <td class="w-25">
-            <input type="number" id="textField" readonly aria-label="Quantity" class="form-control text-center" value="{{.Quantity}}" autocomplete="off" pattern="[0-9]+" name="quantity" required>
+            <input type="number" id="{{$value.ItemID}}" readonly aria-label="Quantity" class="form-control text-center" value="{{$value.Quantity}}" autocomplete="off" pattern="[0-9]+" name="quantity" required>
           </td>
           <td class="w-25">
-            <input type="text" id="textField" readonly aria-label="Unit" class="form-control text-center" value="{{.Unit}}" autocomplete="off" name="unit" required>
+            <input type="text" id="{{$value.ItemID}}" readonly aria-label="Unit" class="form-control text-center" value="{{$value.Unit}}" autocomplete="off" name="unit" required>
           </td>
           <td class="align-middle">
-            <a href="/deleteitem?{{.ItemID}}" class="btn-close btn-danger" role="button"></a>
-          </td>
-          <td>
-            <input type="text" hidden readonly required name="itemid" value="{{.ItemID}}">
+            <div class="btn-group justify-content-center">
+              <button id="{{$value.ItemID}}0" class="btn btn-outline-success border-0 shadow-none" role="button" type="button" onclick="changeItem('{{$value.ItemID}}')" disabled>
+                <i class="bi bi-check-square"></i>
+              </button>
+              <button id="{{$value.ItemID}}1" class="btn btn-outline-warning border-0 shadow-none" role="button" type="button" onclick="toggleRead('{{$value.ItemID}}')">
+                <i class="bi bi-pencil-square"></i>
+              </button>
+              <button id="{{$value.ItemID}}2" class="btn btn-outline-danger border-0 shadow-none" role="button" type="button" onclick="deleteItem">
+                <i class="bi bi-x-square"></i>
+              </button>
+            </div>
           </td>
         </tr>
         {{end}}
       </tbody>
     </table>
-  </form>
 </div>
 </div>
 

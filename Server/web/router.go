@@ -7,15 +7,15 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gorilla/mux"
 )
 
 const (
-	AddItemURL string = "http://localhost:5003/AddItem"
-	// maybe new name
-	UpdateListURL string = "http://localhost:5003/UpdateList"
+	AddItemURL    string = "http://localhost:5003/AddItem"
+	ChangeItemURL string = "http://localhost:5003/ChangeItem"
 )
 
 // Routes is the Router of the server, spreading traffic to relevant handlerFuncs.
@@ -34,7 +34,7 @@ func (s *Server) Routes(r *mux.Router) {
 	r.HandleFunc("/grocerylist", s.groceryList).Methods("GET")
 
 	// form handlers
-	r.HandleFunc("/updatelist", s.updatelist).Methods("POST")
+	r.HandleFunc("/changeitem", s.ChangeItem).Methods("PATCH")
 	r.HandleFunc("/additem", s.additem).Methods("POST")
 }
 
@@ -77,7 +77,7 @@ func (s *Server) groceryList(w http.ResponseWriter, r *http.Request) {
 
 	tpl := TmplData{
 		Data:   xi,
-		Errors: getAlert(w, r),
+		Errors: GetAlert(w, r),
 		User: UserData{
 			Name:     "Krath",
 			LoggedIn: true,
@@ -121,100 +121,76 @@ func (s *Server) additem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// fix, bad approach
-	type PayLoad struct {
-		Success string `json:"Succes"`
-		Error   string `json:"Error"`
-	}
-	var p PayLoad
-	err = json.NewDecoder(res.Body).Decode(&p)
-	if err != nil {
-		log.Println("failed to decode")
+	if res.StatusCode != http.StatusOK {
 		addAlert(w, r, Danger, "Internal error.")
 		http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
 		return
-	}
-
-	if p.Success != "" {
-		addAlert(w, r, Success, "Item was successfully added to Grocery List.")
-	} else {
-		addAlert(w, r, Danger, "Internal error.")
 	}
 
 	http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
 }
 
-func (s *Server) updatelist(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
-		// refactor to make a handler for this, way too long and repetitive
-		log.Println("updatelist parseform: ", err)
-		addAlert(w, r, Danger, "Internal error.")
-		http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
+func (s *Server) ChangeItem(w http.ResponseWriter, r *http.Request) {
+	type changeItem struct {
+		Id       string `json:"Id"`
+		Name     string `json:"Name"`
+		Quantity string `json:"Quantity"`
+		Unit     string `json:"Unit"`
+	}
+	var uItem changeItem
+
+	err := json.NewDecoder(r.Body).Decode(&uItem)
+	if err != nil {
+		log.Println(err)
+	}
+
+	if uItem.Id == "" || uItem.Name == "" || uItem.Quantity == "" || uItem.Unit == "" {
+		addAlert(w, r, Warning, "One field was empty, please fill all fields appropriately.")
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	n := r.PostForm["name"]
-	q := r.PostForm["quantity"]
-	u := r.PostForm["unit"]
-	id := r.PostForm["itemid"]
 
-	updatedItems := make([]Item, len(id))
-	for i := 0; i < len(id); i++ {
-		updatedItems[i] = Item{
-			ItemName: n[i],
-			Quantity: q[i],
-			Unit:     u[i],
-			ItemID:   id[i],
-		}
-	}
-
-	// get list id from cookie and session
-	list := struct {
-		ListID string
-		Items  []Item
-	}{
-		ListID: "hulahoop",
-		Items:  updatedItems,
-	}
-
-	ml, err := json.Marshal(list)
+	n, err := strconv.Atoi(uItem.Quantity)
 	if err != nil {
 		addAlert(w, r, Danger, "Internal error.")
-		log.Println("updatelist failed to marshal: ", err)
-		http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	if n < 1 {
+		addAlert(w, r, Danger, "Quantity must be at least 1.")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	mi, err := json.Marshal(uItem)
+	if err != nil {
+		addAlert(w, r, Danger, "Internal error.")
+		log.Println("changeItem failed to marshal: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	req, err := http.NewRequest(http.MethodPatch, ChangeItemURL, bytes.NewBuffer(mi))
+	if err != nil {
+		addAlert(w, r, Danger, "Internal error.")
+		log.Println("changeItem newRequest: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	client := &http.Client{}
-
-	req, err := http.NewRequest(http.MethodPatch, UpdateListURL, bytes.NewBuffer(ml))
-	log.Println("errRequest", err)
-	if err != nil {
-		addAlert(w, r, Danger, "Internal error.")
-		log.Println("updatelist newRequest: ", err)
-		http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
-		return
-	}
-
 	res, err := client.Do(req)
 	if err != nil {
 		addAlert(w, r, Danger, "Internal error.")
-		log.Println("updatelist DO: ", err)
-		http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
+		log.Println("changeItem DO: ", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	if res.StatusCode != http.StatusOK {
 		addAlert(w, r, Danger, "Internal error.")
-		log.Println("updatelist unexpected status code")
-		http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
+		log.Println("changeItem unexpected status code")
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
-	// type PayLoad struct{}
-	// err = json.NewDecoder(res.Body).Decode(&p)
-	// if err != nil {
-	// 	addAlert(w, r, Danger, "Internal error.")
-	// 	log.Println("updatelist DO: ", err)
-	// 	http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
-	// 	return
-	// }
 }

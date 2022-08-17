@@ -40,7 +40,7 @@ func addAlert(w http.ResponseWriter, r *http.Request, alertType alertLevel, mess
 	http.SetCookie(w, &c)
 }
 
-func getAlert(w http.ResponseWriter, r *http.Request) []Alert {
+func GetAlert(w http.ResponseWriter, r *http.Request) []Alert {
 	var Alerts []Alert
 	if cWarning, err := r.Cookie(Warning.String()); err == nil {
 		Alerts = append(Alerts, Alert{
@@ -62,4 +62,8 @@ func getAlert(w http.ResponseWriter, r *http.Request) []Alert {
 	}
 
 	return Alerts
+}
+
+func AlertLog(w http.ResponseWriter, alertType, alertMessage, logMessage string, err error) {
+
 }
