@@ -94,13 +94,8 @@ func (s *Server) groceryList(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) additem(w http.ResponseWriter, r *http.Request) {
-	item := struct {
-		ListID   string
-		ItemName string
-		Quantity string
-		Unit     string
-	}{
-		ListID:   "",
+	item := Item{
+		ListId:   "62fd4bc950c4443769551c49",
 		ItemName: strings.ToLower(r.FormValue("name")),
 		Quantity: strings.ToLower(r.FormValue("quantity")),
 		Unit:     strings.ToLower(r.FormValue("unit")),
@@ -112,10 +107,13 @@ func (s *Server) additem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	mi, err := json.Marshal(item)
+	xi := []Item{item}
+
+	mi, err := json.Marshal(xi)
 	if err != nil {
 		fmt.Println("marshal went wrong")
 	}
+	fmt.Println(string(mi))
 
 	// crashes program when external microservice is offline
 	// maybe fix with http.Client
@@ -140,7 +138,7 @@ func (s *Server) additem(w http.ResponseWriter, r *http.Request) {
 func (s *Server) ChangeItem(w http.ResponseWriter, r *http.Request) {
 	type changeItem struct {
 		Id       string `json:"Id"`
-		Name     string `json:"Name"`
+		ItemName string `json:"ItemName"`
 		Quantity string `json:"Quantity"`
 		Unit     string `json:"Unit"`
 	}
@@ -151,7 +149,12 @@ func (s *Server) ChangeItem(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 	}
 
-	if uItem.Id == "" || uItem.Name == "" || uItem.Quantity == "" || uItem.Unit == "" {
+	// stripping leading a from html element
+	// leading a is important due to document.querySelectorAll
+	// not accepting id's with leading digits
+	uItem.Id = uItem.Id[1:]
+
+	if uItem.Id == "" || uItem.ItemName == "" || uItem.Quantity == "" || uItem.Unit == "" {
 		addAlert(w, r, Warning, "One field was empty, please fill all fields appropriately.")
 		w.WriteHeader(http.StatusBadRequest)
 		return

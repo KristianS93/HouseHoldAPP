@@ -1,5 +1,6 @@
 function toggleRead(id) {
     let list = document.querySelectorAll(`#${id}`)
+    console.log(list)
     for (let i = 0; i < list.length; i++) {
         if (list[i].readOnly === true) {
             list[i].readOnly = false
@@ -8,15 +9,22 @@ function toggleRead(id) {
         }
     }
     if (list[0].readOnly === false) {
-        toggleDisable(id)
-
+        toggleButtons(id)
     } else {
-        toggleDisable(id)
+        toggleButtons(id)
     }
+    
 }
 
-function toggleDisable(id) {
+function toggleButtons(id) {
     let btn = document.getElementById(id+0)
+    if (btn.disabled === true) {
+        btn.disabled = false
+    } else {
+        btn.disabled = true
+    }
+
+    btn = document.getElementById(id+1)
     if (btn.disabled === true) {
         btn.disabled = false
     } else {
@@ -32,11 +40,10 @@ async function changeItem(id) {
 
     let Item = {
         Id: id,
-        Name: name,
+        ItemName: name,
         Quantity: quantity,
         Unit: unit
     }
-    console.log(Item)
 
     let response = await fetch("http://localhost:8888/changeitem", 
     {
@@ -46,7 +53,6 @@ async function changeItem(id) {
         },
         body: JSON.stringify(Item)
     })
-
     if (response.status != 200) {
         location.reload()
     }

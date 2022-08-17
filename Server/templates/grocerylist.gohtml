@@ -43,23 +43,23 @@
           {{range $index, $value := .}}
             <tr>
               <td class="w-50">
-                <input type="text" id="{{$value.ID}}" readonly aria-label="Item" class="form-control text-center" value="{{$value.ItemName}}" autocomplete="off" name="name" required>
+                <input type="text" id="a{{$value.ID}}" readonly aria-label="Item" class="form-control text-center" value="{{$value.ItemName}}" autocomplete="off" name="name" required>
               </td>
               <td class="w-25">
-                <input type="number" id="{{$value.ID}}" readonly aria-label="Quantity" class="form-control text-center" value="{{$value.Quantity}}" autocomplete="off" pattern="[0-9]+" name="quantity" required>
+                <input type="number" id="a{{$value.ID}}" readonly aria-label="Quantity" class="form-control text-center" value="{{$value.Quantity}}" autocomplete="off" pattern="[0-9]+" name="quantity" required>
               </td>
               <td class="w-25">
-                <input type="text" id="{{$value.ID}}" readonly aria-label="Unit" class="form-control text-center" value="{{$value.Unit}}" autocomplete="off" name="unit" required>
+                <input type="text" id="a{{$value.ID}}" readonly aria-label="Unit" class="form-control text-center" value="{{$value.Unit}}" autocomplete="off" name="unit" required>
               </td>
               <td class="align-middle">
                 <div class="btn-group justify-content-center">
-                  <button id="{{$value.ID}}0" class="btn btn-outline-success border-0 shadow-none" role="button" type="button" onclick="changeItem('{{$value.ID}}')" disabled>
+                  <button id="a{{$value.ID}}0" class="btn btn-outline-success border-0 shadow-none" role="button" type="button" onclick="changeItem('a{{$value.ID}}')" disabled>
                     <i class="bi bi-check-square"></i>
                   </button>
-                  <button id="{{$value.ID}}1" class="btn btn-outline-warning border-0 shadow-none" role="button" type="button" onclick="toggleRead('{{$value.ID}}')">
+                  <button id="a{{$value.ID}}1" class="btn btn-outline-warning border-0 shadow-none" role="button" type="button" onclick="toggleRead('a{{$value.ID}}')">
                     <i class="bi bi-pencil-square"></i>
                   </button>
-                  <button id="{{$value.ID}}2" class="btn btn-outline-danger border-0 shadow-none" role="button" type="button" onclick="deleteItem">
+                  <button id="a{{$value.ID}}2" class="btn btn-outline-danger border-0 shadow-none" role="button" type="button" onclick="deleteItem">
                     <i class="bi bi-x-square"></i>
                   </button>
                 </div>

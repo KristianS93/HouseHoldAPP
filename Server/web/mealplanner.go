@@ -5,6 +5,7 @@ const (
 )
 
 type Item struct {
+	ListId   string `json:"ListId"`
 	ID       string `json:"ID"`
 	ItemName string `json:"ItemName"`
 	Quantity string `json:"Quantity"`
