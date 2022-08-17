@@ -100,38 +100,21 @@ func TestGetList(t *testing.T) {
 		res := executeRequest(req)
 		checkResCode(t, v.Output, res.Code, v.Name)
 	}
-	fmt.Println("Passed GetList Tests")
 
 	//Test specific json:
-
-	//DENNE TEST ER EGENTLIG RIGTIG NOK MEN SOMEHOW DØR DEN I COMPARE, STRENGE TJEKKET I ANDET PROGRAM.
 	req, _ := http.NewRequest("GET", "/GetList?ListId=62fa8c527abec12155c907c3", nil)
 	res := executeRequest(req)
 
-	// jsonBody := res.Body.String()
-	expectedStr := []byte(`{"Succes":"List Retrieved","Items":[{"ID":"62faac9cad635f2233f86be3","ItemName":"Test item1","Quantity":"4","Unit":"pakker"},{"ID":"62faac9cad635f2233f86be4","ItemName":"Test item2","Quantity":"5","Unit":"stk"}]}`)
-	jsonobj1, _ := json.Marshal(expectedStr)
-	// jsonobj, _ := json.Marshal(res.Body.Bytes())
+	var di ItemHolder
+	err := json.NewDecoder(res.Body).Decode(&di)
+	if err != nil {
+		t.Errorf("Test: %s - ", "Getting specific json")
+	}
 
-	var data string
-	_ = json.Unmarshal(jsonobj1, &data)
-	fmt.Println(data)
-
-	// fmt.Println(jsonobj)
-	// fmt.Println(jsonobj1)
-
-	// newjsonobj := json.Encoder(jsonBody)
-	var result string
-	json.Unmarshal(res.Body.Bytes(), &result)
-
-	// fmt.Println(result)
-
-	// // expectedStr := `{"Succes":"List Retrieved","Items":[{"ID":"62faac9cad635f2233f86be3","ItemName":"Test item1","Quantity":"4","Unit":"pakker"},{"ID":"62faac9cad635f2233f86be4","ItemName":"Test item2","Quantity":"5","Unit":"stk"}]}`
-	// if body := res.Body.String(); body != expectedStr {
-	// 	t.Errorf("Testing succesfull test json data. Got %s", body)
-	// }
-
-	//Delete data from test
+	if di.Succes != "List Retrieved" {
+		t.Errorf("Test: %s - ", "Getting specific json")
+	}
+	fmt.Println("Passed GetList Tests")
 }
 
 func TestClearList(t *testing.T) {
