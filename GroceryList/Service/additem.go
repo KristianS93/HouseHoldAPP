@@ -7,6 +7,7 @@ import (
 	"grocerylist/service/assistants"
 	"io"
 	"net/http"
+	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -35,6 +36,7 @@ func (s *Server) AddItem(w http.ResponseWriter, r *http.Request) {
 	//If the method is not post, return bad requst
 	//take the request pointer, pointer to response writer and the desired method.
 	if assistants.WrongMethod(r, &w, http.MethodPost) {
+		fmt.Println("Wrong method")
 		return
 	}
 
@@ -42,6 +44,7 @@ func (s *Server) AddItem(w http.ResponseWriter, r *http.Request) {
 	var itemformat []CreateItem
 	err := json.NewDecoder(r.Body).Decode(&itemformat)
 	if err != nil {
+		fmt.Println("Doesn't recieve json data")
 		w.WriteHeader(400)
 		io.WriteString(w, `{"Error": "Bad request: Getting data"}`)
 		return
@@ -51,6 +54,7 @@ func (s *Server) AddItem(w http.ResponseWriter, r *http.Request) {
 	for _, v := range itemformat {
 		// i = index v = value hvilket er item her
 		if v.ListId == "" || v.ItemName == "" {
+			fmt.Println("Data is missing in the recieved json")
 			w.WriteHeader(400)
 			io.WriteString(w, `{"Error": "Missing data"}`)
 			return
@@ -76,6 +80,7 @@ func (s *Server) AddItem(w http.ResponseWriter, r *http.Request) {
 
 	_, err = client.Connection.InsertMany(context.TODO(), insertItemQuery)
 	if err != nil {
+		fmt.Println("failed adding item")
 		io.WriteString(w, `{"Error": "Failed creating item"}`)
 		w.WriteHeader(400)
 		return
