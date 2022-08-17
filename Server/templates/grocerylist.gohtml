@@ -1,15 +1,76 @@
 {{define "content"}}
 
+<div class="container mx-auto w-50">
 {{/* add item functionality */}}
-<div>
-  <form action="/additem" method="POST" class="input-group w-50 mx-auto"> 
-  <input type="text" aria-label="Item" class="form-control" placeholder="Apple" name="name" required>
-  <input type="number" aria-label="Quantity" class="form-control" placeholder="2" name="quantity" required>
-  <input type="text" aria-label="Unit" class="form-control" placeholder="pcs" name="unit" required>
-  <input class="btn btn-outline-success" type="submit" value="Add Item">
-  </form>
-</div>
+  <div>
+    <form action="/additem" method="POST" class="input-group w-50 mx-auto"> 
+    <input type="text" aria-label="Item" class="form-control" placeholder="Apple" onfocus="this.placeholder = ''"" onblur="this.placeholder = 'Apple'" autocomplete="off" name="name" required>
+    <input type="number" aria-label="Quantity" class="form-control" placeholder="2" onfocus="this.placeholder = ''"" onblur="this.placeholder = '2'" min="1" autocomplete="off" pattern="[0-9]+" name="quantity" required>
+    <input type="text" aria-label="Unit" class="form-control" placeholder="pcs" onfocus="this.placeholder = ''"" onblur="this.placeholder = 'pcs'" autocomplete="off" name="unit" required>
+    <input class="btn btn-outline-success" type="submit" value="Add Item">
+    </form>
+  </div>
+<br>
 
 {{/* grocerylist functionality */}}
+<div class="container">
+    <div class="container w-75">
+      <div class="row">
+        <div class="col">
+          <h2>Grocery List</h2>
+        </div>
+        <div class="col text-end">
+          <div class="btn-group justify-content-center">
+            <a href="/resetlist" class="btn btn-outline-secondary" role="button">Reset</a>
+            <a href="/deletelist" class="btn btn-outline-danger" role="button">Delete</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <hr class="w-75 mx-auto">
 
+    <table class="table text-center w-75 mx-auto">
+      <thead>
+        <tr>
+          <th scope="col">Item</th>
+          <th scope="col">Quantity</th>
+          <th scope="col">Unit</th>
+          <th scope="col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {{range $index, $value := .}}
+        <tr>
+          <td class="w-50">
+            <input type="text" id="{{$value.ItemID}}" readonly aria-label="Item" class="form-control text-center" value="{{$value.ItemName}}" autocomplete="off" name="name" required>
+          </td>
+          <td class="w-25">
+            <input type="number" id="{{$value.ItemID}}" readonly aria-label="Quantity" class="form-control text-center" value="{{$value.Quantity}}" autocomplete="off" pattern="[0-9]+" name="quantity" required>
+          </td>
+          <td class="w-25">
+            <input type="text" id="{{$value.ItemID}}" readonly aria-label="Unit" class="form-control text-center" value="{{$value.Unit}}" autocomplete="off" name="unit" required>
+          </td>
+          <td class="align-middle">
+            <div class="btn-group justify-content-center">
+              <button id="{{$value.ItemID}}0" class="btn btn-outline-success border-0 shadow-none" role="button" type="button" onclick="changeItem('{{$value.ItemID}}')" disabled>
+                <i class="bi bi-check-square"></i>
+              </button>
+              <button id="{{$value.ItemID}}1" class="btn btn-outline-warning border-0 shadow-none" role="button" type="button" onclick="toggleRead('{{$value.ItemID}}')">
+                <i class="bi bi-pencil-square"></i>
+              </button>
+              <button id="{{$value.ItemID}}2" class="btn btn-outline-danger border-0 shadow-none" role="button" type="button" onclick="deleteItem">
+                <i class="bi bi-x-square"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+</div>
+</div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="/js/grocerylist.js"></script>
 {{end}}

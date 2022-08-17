@@ -10,19 +10,6 @@ import (
 	"github.com/google/uuid"
 )
 
-type alertLevel uint8
-
-const (
-	alertLevelSuccess alertLevel = iota
-	alertLevelWarning
-	alertLevelDanger
-)
-
-type Alert struct {
-	Level   alertLevel
-	Message string
-}
-
 // checkMethod returns true when http methods are the same, and false when not.
 func checkMethod(w http.ResponseWriter, r *http.Request, method string) bool {
 	if r.Method != method {
@@ -34,37 +21,11 @@ func checkMethod(w http.ResponseWriter, r *http.Request, method string) bool {
 }
 
 func (s *Server) serveSite(w http.ResponseWriter, r *http.Request, tplName string, data interface{}) {
-	tpl := TmplData{
-		Data: data,
-		Errors: []Alert{
-			{
-				Level:   alertLevelWarning,
-				Message: "u don goofed",
-			},
-		},
-		User: UserData{
-			Name:     "Krath",
-			LoggedIn: true,
-		},
-	}
 
-	err := s.Templates[tplName].ExecuteTemplate(w, "base", tpl)
+	err := s.templateGet(tplName).ExecuteTemplate(w, "base", data)
 	if err != nil {
 		fmt.Println("errServe: ", err)
 	}
-}
-
-func (a alertLevel) String() string {
-	switch a {
-	case alertLevelSuccess:
-		return "success"
-	case alertLevelDanger:
-		return "danger"
-	case alertLevelWarning:
-		return "warning"
-	}
-	// maybe change later
-	return "danger"
 }
 
 const (
@@ -85,7 +46,7 @@ func (s *Server) parseTemplate(name, path string) {
 	s.Templates[name] = template.Must(template.ParseFiles(templatesBasePath+"base"+templatesExt, templatesBasePath+name+templatesExt))
 }
 
-func (s *Server) UpdateCookie(w http.ResponseWriter, c *http.Cookie) {
+func (s *Server) RenewSession(w http.ResponseWriter, c *http.Cookie) {
 	v := c.Value
 	c.MaxAge = -1
 
@@ -99,11 +60,12 @@ func (s *Server) UpdateCookie(w http.ResponseWriter, c *http.Cookie) {
 
 // StartSession begins a session on the server, generating a UUID cookie value,
 // should be called after a login has been verified.
-func (s *Server) StartSession(w http.ResponseWriter, r *http.Request, userID, name string) {
+func (s *Server) StartSession(w http.ResponseWriter, r *http.Request, listid, householdid, name string) {
 	id := uuid.New()
 	ses := Session{
 		LastActivity: time.Now(),
-		UserID:       userID,
+		ListID:       listid,
+		HouseHoldID:  householdid,
 		Name:         name,
 	}
 	s.Sessions[id.String()] = ses
@@ -114,4 +76,12 @@ func (s *Server) StartSession(w http.ResponseWriter, r *http.Request, userID, na
 		MaxAge: SessionTimeOut,
 	}
 	http.SetCookie(w, &c)
+}
+
+func (s *Server) templateGet(name string) *template.Template {
+	if _, ok := s.Templates[name]; !ok {
+		return s.Templates["404.tmpl"]
+	}
+
+	return s.Templates[name]
 }
