@@ -13,7 +13,6 @@ function toggleRead(id) {
     } else {
         toggleButtons(id)
     }
-    
 }
 
 function toggleButtons(id) {
