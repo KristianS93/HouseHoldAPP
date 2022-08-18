@@ -12,7 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-type itemChange struct {
+type ItemChange struct {
 	Id       string `bson:"_id"`
 	ItemName string `bson:"ItemName" json:"ItemName"`
 	Quantity string `bson:"Quantity" json:"Quantity"`
@@ -26,13 +26,14 @@ func (s *Server) ChangeItem(w http.ResponseWriter, r *http.Request) {
 
 	//If the method is not delete, return bad requst
 	if r.Method != http.MethodPatch {
+		fmt.Println("method")
 		w.WriteHeader(405)
 		io.WriteString(w, `{"Error": "Wrong method"}`)
 		return
 	}
 
 	//Get the json body of the post and populate the Item structure
-	var ui itemChange
+	var ui ItemChange
 	err := json.NewDecoder(r.Body).Decode(&ui)
 	if err != nil {
 		w.WriteHeader(400)
@@ -68,7 +69,7 @@ func (s *Server) ChangeItem(w http.ResponseWriter, r *http.Request) {
 
 	//Item exist, update item
 
-	changeItem := itemChange{ui.Id, ui.ItemName, ui.Quantity, ui.Unit}
+	changeItem := ItemChange{ui.Id, ui.ItemName, ui.Quantity, ui.Unit}
 
 	updateItem := bson.D{{Key: "$set", Value: changeItem}}
 

@@ -11,6 +11,8 @@ import (
 
 var TestItems = []CreateItem{}
 
+var TestItemID string
+
 func AddTestData() {
 	//Create test DB items collection.
 	var ItemClient database.MongClient
@@ -58,6 +60,21 @@ func AddTestData() {
 		fmt.Println("error inserting  test items")
 		return
 	}
+
+	//Getting item id for test
+	filter := bson.D{primitive.E{Key: "ListId", Value: "62fa8c527abec12155c907c3"}}
+
+	res, err := ItemClient.Connection.Find(context.TODO(), filter)
+	if err != nil {
+		fmt.Println("No items on the list")
+		return
+	}
+
+	var itemsList []ItemList
+	if err = res.All(context.TODO(), &itemsList); err != nil {
+		fmt.Println("Could not retrieve list")
+	}
+	TestItemID = itemsList[0].ID
 }
 
 func DeleteTestData() {
