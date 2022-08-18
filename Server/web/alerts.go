@@ -1,6 +1,7 @@
 package web
 
 import (
+	"log"
 	"net/http"
 )
 
@@ -10,6 +11,13 @@ const (
 	Success alertLevel = iota
 	Warning
 	Danger
+)
+
+const (
+	InternalError = "Internal error."
+	EmptyField    = "One field was empty, please fill all fields appropriately."
+	ItemAdded     = "Item added successfully."
+	ListCleared   = "List cleared successfully."
 )
 
 type Alert struct {
@@ -31,10 +39,10 @@ func (a alertLevel) String() string {
 }
 
 // maybe refactor constants for error messages on alerts
-func addAlert(w http.ResponseWriter, r *http.Request, alertType alertLevel, message string) {
+func addAlert(w http.ResponseWriter, alertType alertLevel, alertMessage string) {
 	c := http.Cookie{
 		Name:   alertType.String(),
-		Value:  message,
+		Value:  alertMessage,
 		MaxAge: 3,
 	}
 	http.SetCookie(w, &c)
@@ -64,6 +72,12 @@ func GetAlert(w http.ResponseWriter, r *http.Request) []Alert {
 	return Alerts
 }
 
-func AlertLog(w http.ResponseWriter, alertType, alertMessage, logMessage string, err error) {
-
+// AlertLog adds an alert and logs a message, the log message should contain
+// any relevant errors for the given function call.
+// alertType must be one of the predefined constants of type alertLevel
+// alertMessage should utilize predefined constants such as InternalError,
+// however, it can also take string literals.
+func AlertLog(w http.ResponseWriter, alertType alertLevel, alertMessage, logMessage string) {
+	log.Println(logMessage)
+	addAlert(w, alertType, alertMessage)
 }

@@ -17,6 +17,7 @@ const (
 	AddItemURL    string = "http://localhost:5003/AddItem"
 	ChangeItemURL string = "http://localhost:5003/ChangeItem"
 	GetListURL    string = "http://localhost:5003/GetList"
+	ClearListURL  string = "http://localhost:5003/ClearList"
 )
 
 // Routes is the Router of the server, spreading traffic to relevant handlerFuncs.
@@ -28,15 +29,16 @@ func (s *Server) Routes(r *mux.Router) {
 
 	r.HandleFunc("/favicon.ico", s.favIcon).Methods("GET")
 
-	// all route endpoints
+	// site endpoints
 	r.HandleFunc("/", s.index).Methods("GET")
 	r.HandleFunc("/logout", s.logout)
 	r.HandleFunc("/mealplanner", s.mealplanner)
 	r.HandleFunc("/grocerylist", s.groceryList).Methods("GET")
 
-	// form handlers
+	// form handlers or similar non-site endpoints
 	r.HandleFunc("/changeitem", s.ChangeItem).Methods("PATCH")
 	r.HandleFunc("/additem", s.additem).Methods("POST")
+	r.HandleFunc("/clearlist", s.ClearList).Methods("GET")
 }
 
 // favIcon serves the favourite icon.
@@ -60,7 +62,7 @@ func (s *Server) mealplanner(w http.ResponseWriter, r *http.Request) {
 func (s *Server) groceryList(w http.ResponseWriter, r *http.Request) {
 	res, err := http.Get(GetListURL + "?ListId=" + "62fd4bc950c4443769551c49")
 	if err != nil {
-		addAlert(w, r, Danger, "Internal error.")
+		addAlert(w, Danger, "Internal error.")
 		log.Println("bad getlist: ", err)
 		http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
 		return
@@ -75,7 +77,7 @@ func (s *Server) groceryList(w http.ResponseWriter, r *http.Request) {
 
 	err = json.NewDecoder(res.Body).Decode(&ItemHolder)
 	if err != nil {
-		addAlert(w, r, Danger, "Internal error.")
+		addAlert(w, Danger, "Internal error.")
 		log.Println("bad decode: ", err)
 		http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
 		return
@@ -102,7 +104,7 @@ func (s *Server) additem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if item.ItemName == "" || item.Quantity == "" || item.Unit == "" {
-		addAlert(w, r, Warning, "One field was empty, please fill all fields appropriately.")
+		addAlert(w, Warning, "One field was empty, please fill all fields appropriately.")
 		http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
 		return
 	}
@@ -113,25 +115,25 @@ func (s *Server) additem(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println("marshal went wrong")
 	}
-	fmt.Println(string(mi))
 
 	// crashes program when external microservice is offline
 	// maybe fix with http.Client
 	res, err := http.Post(AddItemURL, "application/json", bytes.NewBuffer(mi))
 	if err != nil {
 		log.Println("request to additem failed", err)
-		addAlert(w, r, Danger, "Internal error.")
+		addAlert(w, Danger, "Internal error.")
 		http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
 		return
 	}
 	log.Println("statuscode:", res.StatusCode)
 	if res.StatusCode != http.StatusOK {
 		log.Println("additem wrong statuscode")
-		addAlert(w, r, Danger, "Internal error.")
+		addAlert(w, Danger, "Internal error.")
 		http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
 		return
 	}
 
+	addAlert(w, Success, "Item added successfully.")
 	http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
 }
 
@@ -155,26 +157,26 @@ func (s *Server) ChangeItem(w http.ResponseWriter, r *http.Request) {
 	uItem.Id = uItem.Id[1:]
 
 	if uItem.Id == "" || uItem.ItemName == "" || uItem.Quantity == "" || uItem.Unit == "" {
-		addAlert(w, r, Warning, "One field was empty, please fill all fields appropriately.")
+		addAlert(w, Warning, "One field was empty, please fill all fields appropriately.")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	n, err := strconv.Atoi(uItem.Quantity)
 	if err != nil {
-		addAlert(w, r, Danger, "Internal error.")
+		addAlert(w, Danger, "Internal error.")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	if n < 1 {
-		addAlert(w, r, Danger, "Quantity must be at least 1.")
+		addAlert(w, Danger, "Quantity must be at least 1.")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	mi, err := json.Marshal(uItem)
 	if err != nil {
-		addAlert(w, r, Danger, "Internal error.")
+		addAlert(w, Danger, "Internal error.")
 		log.Println("changeItem failed to marshal: ", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -182,7 +184,7 @@ func (s *Server) ChangeItem(w http.ResponseWriter, r *http.Request) {
 
 	req, err := http.NewRequest(http.MethodPatch, ChangeItemURL, bytes.NewBuffer(mi))
 	if err != nil {
-		addAlert(w, r, Danger, "Internal error.")
+		addAlert(w, Danger, "Internal error.")
 		log.Println("changeItem newRequest: ", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -191,16 +193,58 @@ func (s *Server) ChangeItem(w http.ResponseWriter, r *http.Request) {
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
-		addAlert(w, r, Danger, "Internal error.")
+		addAlert(w, Danger, "Internal error.")
 		log.Println("changeItem DO: ", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	if res.StatusCode != http.StatusOK {
-		addAlert(w, r, Danger, "Internal error.")
+		addAlert(w, Danger, "Internal error.")
 		log.Println("changeItem unexpected status code")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+}
+
+func (s *Server) ClearList(w http.ResponseWriter, r *http.Request) {
+	// the id should be retrieved from the session cookie
+	// and session runtime database
+	listID := "62fd4bc950c4443769551c49"
+	listObj := struct {
+		ListId string
+	}{
+		ListId: listID,
+	}
+
+	ml, err := json.Marshal(listObj)
+	if err != nil {
+		AlertLog(w, Danger, InternalError, fmt.Sprint("ClearList: Marshal gone bad.", err))
+		http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
+		return
+	}
+
+	nr, err := http.NewRequest(http.MethodDelete, ClearListURL, bytes.NewBuffer(ml))
+	if err != nil {
+		AlertLog(w, Danger, InternalError, fmt.Sprint("ClearList: Issue creating new request.", err))
+		http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
+		return
+	}
+
+	client := http.Client{}
+	res, err := client.Do(nr)
+	if err != nil {
+		AlertLog(w, Danger, InternalError, fmt.Sprint("ClearList: Issue performing new request.", err))
+		http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
+		return
+	}
+
+	if res.StatusCode != http.StatusOK {
+		AlertLog(w, Danger, InternalError, fmt.Sprint("ClearList: Wrong StatusCode in response.", err))
+		http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
+		return
+	}
+
+	addAlert(w, Success, ListCleared)
+	http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
 }
