@@ -48,6 +48,7 @@ func (s *Server) favIcon(w http.ResponseWriter, r *http.Request) {
 
 // index handles the frontpage.
 func (s *Server) index(w http.ResponseWriter, r *http.Request) {
+	// remember to get and add alerts
 	s.serveSite(w, r, "index", nil)
 }
 
@@ -64,7 +65,7 @@ func (s *Server) groceryList(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		addAlert(w, Danger, "Internal error.")
 		log.Println("bad getlist: ", err)
-		http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
 
