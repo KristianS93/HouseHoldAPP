@@ -11,13 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// type Item struct {
-// 	ListId   string `json:"ListId"`
-// 	ItemName string `json:"ItemName"`
-// 	Quantity string `json:"Quantity"`
-// 	Unit     string `json:"Unit"`
-// }
-
+// CreateItem struct that can be used to create an item as a DTO
 type CreateItem struct {
 	ID       string `bson:"_id, omitempty"`
 	ListId   string `bson:"ListId, omitempty" json:"ListId"`
