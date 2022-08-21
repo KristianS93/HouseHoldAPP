@@ -1,15 +1,22 @@
 # syntax=docker/dockerfile:1
 
+# GO version 1.19 with alpine
 FROM golang:1.19-alpine
 
+# Current working directory on alpine
 WORKDIR /app
 
-COPY . .
+#copy all to /app folder
+COPY . ./
 
-RUN go get -d -v
+#Download modules
+RUN go mod download
 
-RUN go build -o /grocerylist-service
+#Build the image with name docker-grocerylist name
+RUN go build -o /docker-grocerylist
 
+#Expose port 5003
 EXPOSE 5003
 
-CMD [ " /grocerylist-service" ]
+#Run the go image
+CMD [ "/docker-grocerylist" ]
