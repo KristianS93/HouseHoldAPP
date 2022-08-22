@@ -1,5 +1,21 @@
-version: '3.9'
+################## LOCAL TEST
 
+# version: '3.9'
+
+# services:
+#   mongo:
+#     image: mongo
+#     container_name: grocerydb
+#     ports:
+#       - 27017:27017
+#     volumes:
+#       - mongodbdata:/data/db
+# volumes:
+#   mongodbdata:
+
+################## COMPLETE SERVICE
+
+version: '3.9'
 services:
   mongo:
     image: mongo
@@ -11,7 +27,7 @@ services:
 
   app:
     container_name: grocerylist
-    build: 
+    build:
       dockerfile: Dockerfile
       context: .
     ports:
@@ -23,4 +39,5 @@ services:
 volumes:
   mongodbdata:
   grocerylist-service:
+
 

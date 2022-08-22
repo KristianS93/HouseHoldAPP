@@ -11,10 +11,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-type DeleteItem struct {
-	ItemId string `json:"ItemId"`
-}
-
 // DeleteItem takes a json object with ItemId from a DELETE request, and returns a json object with either error or succes.
 func (s *Server) DeleteItem(w http.ResponseWriter, r *http.Request) {
 	//In any case return a json format
@@ -29,7 +25,7 @@ func (s *Server) DeleteItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Get the json body of the post and populate the Item structure
-	var di DeleteItem
+	var di assistants.RecieveId
 	err := json.NewDecoder(r.Body).Decode(&di)
 	if err != nil {
 		w.WriteHeader(400)

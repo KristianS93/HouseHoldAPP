@@ -11,10 +11,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-type RecieveListId struct {
-	ListId string `json:"ListId"`
-}
-
 // ClearList take a ListId, in a json body from a DELETE request, based on this list id, it deletes all items associated with the ListId
 func (s *Server) ClearList(w http.ResponseWriter, r *http.Request) {
 
@@ -29,7 +25,7 @@ func (s *Server) ClearList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get list id
-	var rli RecieveListId
+	var rli assistants.RecieveId
 	err := json.NewDecoder(r.Body).Decode(&rli)
 	if err != nil {
 		w.WriteHeader(400)

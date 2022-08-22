@@ -11,10 +11,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-type GetListId struct {
-	ListId string `json:"ListId"`
-}
-
 // DeleteList takes a json object with a ListId from a DELETE request, based on this ListId, it deletes this id from the mongo db. Return an error or succes json object.
 func (s *Server) DeleteList(w http.ResponseWriter, r *http.Request) {
 	//In any case return a json format
@@ -29,7 +25,7 @@ func (s *Server) DeleteList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Get the json body of the post and populate the dataforlist structure
-	var dl GetListId
+	var dl assistants.RecieveId
 	err := json.NewDecoder(r.Body).Decode(&dl)
 	if err != nil {
 		w.WriteHeader(400)

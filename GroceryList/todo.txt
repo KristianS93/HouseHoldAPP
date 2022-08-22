@@ -13,28 +13,9 @@ ChangeItem              Func:   OK      Doc:    OK      Testing:    Ok
 
 
 Generelt: 
+
 Brug af environment variables:
 Command til at køre tests på docker:
 Evt. log beskeder, når et endpoint rammes, i stedet for json error/succes eller begge dele?
-Overvej om der skal laves en disconnect connection i mongo interface.
-
-
-
-Refactoring:
-Muligvis kan en datastruktur genbruges her.
-ChangeItem
-
-Her kan datastruktur også ændres til en tidligere brugt, som kan samles. 
-ClearList
-
-Muligvis refaktorering af datastruktur
-DeleteItem 
-
-Refaktorering
-DeleteList
-ekstra til deleteslist dette skal opdateres hvorhenne listid ellers er gemt usersystem/mealplanner i forhold til household. 
-
-Refaktorering, måske i forhold til substrukturen i itemholder.
-Getlist
 
 

@@ -22,9 +22,9 @@ type MyObjectID string
 
 // data structure to populate and insert into the mongo db
 type CreateList struct {
-	ID          MyObjectID   `bson:"_id"`
-	HouseholdId string       `bson:"HouseholdId, omitempty"`
-	Items       []CreateItem `bson:"Items"`
+	ID          MyObjectID              `bson:"_id"`
+	HouseholdId string                  `bson:"HouseholdId, omitempty"`
+	Items       []assistants.CreateItem `bson:"Items"`
 }
 
 // CreateList has to be a post recieving a json object with HouseholdId, the house hold must now have a list beforehand.
