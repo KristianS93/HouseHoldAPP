@@ -5,3 +5,7 @@
 
 
 ## Running mongo instance
+
+
+
+Mealplanner ----- backend ------ DB  ServerPORT: 5005   dbPORT:  27021
