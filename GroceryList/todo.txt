@@ -1,10 +1,42 @@
 LIST FEATURES::
-CreateList              Func:   OK      Doc:    OK      Testing:    Not
-GetList                 Func:   OK      Doc:    Not     Testing:    Not
-DeleteList              Func:   Ok      Doc:    Not     Testing:    Not
-ClearList               Func:   OK      Doc:    Not     Testing:    Not
+CreateList              Func:   OK      Doc:    OK      Testing:    Ok
+GetList                 Func:   OK      Doc:    Not     Testing:    Ok
+DeleteList              Func:   Ok      Doc:    Not     Testing:    Ok
+ClearList               Func:   OK      Doc:    Not     Testing:    Ok
 
 ITEM FEATURES:
-AddItem                 Func:   Ok      Doc:    OK      Testing:    Not
-DeleteItem              Func:   OK      Doc:    Not     Testing:    Not
-ChangeItem              Func:   OK      Doc:    Not     Testing:    Not
+AddItem                 Func:   Ok      Doc:    OK      Testing:    Ok
+DeleteItem              Func:   OK      Doc:    Not     Testing:    Ok
+ChangeItem              Func:   OK      Doc:    Not     Testing:    Ok
+
+
+
+
+Generelt: 
+Brug af environment variables:
+Command til at køre tests på docker:
+Tilføje start log, igen til servicehandler så man kan se den starter.
+Evt. log beskeder, når et endpoint rammes, i stedet for json error/succes eller begge dele?
+I assistants skal recieveddata fjernes, giver ikke mening og er ikke lykkedes.
+Overvej om der skal laves en disconnect connection i mongo interface.
+
+
+
+Refactoring:
+Muligvis kan en datastruktur genbruges her.
+ChangeItem
+
+Her kan datastruktur også ændres til en tidligere brugt, som kan samles. 
+ClearList
+
+Muligvis refaktorering af datastruktur
+DeleteItem 
+
+Refaktorering
+DeleteList
+ekstra til deleteslist dette skal opdateres hvorhenne listid ellers er gemt usersystem/mealplanner i forhold til household. 
+
+Refaktorering, måske i forhold til substrukturen i itemholder.
+Getlist
+
+
