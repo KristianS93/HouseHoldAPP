@@ -4,12 +4,13 @@ import (
 	"context"
 	"fmt"
 	"grocerylist/database"
+	"grocerylist/service/assistants"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-var TestItems = []CreateItem{}
+var TestItems = []assistants.CreateItem{}
 
 var TestItemID string
 
@@ -21,7 +22,6 @@ func AddTestData() {
 	//Create test DB items collection.
 	var ListClient database.MongClient
 	ListClient.DbConnect(database.ConstGroceryListCollection)
-	// ListClient.DbDisconnect()
 
 	// To test getList we will need a list
 	// and a items.
@@ -33,20 +33,19 @@ func AddTestData() {
 		fmt.Println("failed inserting")
 		return
 	}
-
 	//insert items to test db.
 
-	obj1 := CreateItem{"", "62fa8c527abec12155c907c3", "Test item1", "4", "pakker"}
-	obj2 := CreateItem{"", "62fa8c527abec12155c907c3", "Test item2", "5", "stk"}
+	obj1 := assistants.CreateItem{ID: "", ListId: "62fa8c527abec12155c907c3", ItemName: "Test item1", Quantity: "4", Unit: "pakker"}
+	obj2 := assistants.CreateItem{ID: "", ListId: "62fa8c527abec12155c907c3", ItemName: "Test item2", Quantity: "5", Unit: "stk"}
 
 	TestItems = append(TestItems, obj1)
 	TestItems = append(TestItems, obj2)
 
-	var itemInsertFormat []CreateItem
+	var itemInsertFormat []assistants.CreateItem
 
 	for _, v := range TestItems {
 		newId := primitive.NewObjectID()
-		insertObj := CreateItem{string(newId.Hex()), v.ListId, v.ItemName, v.Quantity, v.Unit}
+		insertObj := assistants.CreateItem{ID: string(newId.Hex()), ListId: v.ListId, ItemName: v.ItemName, Quantity: v.Quantity, Unit: v.Unit}
 		itemInsertFormat = append(itemInsertFormat, insertObj)
 	}
 
@@ -69,6 +68,7 @@ func AddTestData() {
 		fmt.Println("No items on the list")
 		return
 	}
+	defer ListClient.DbDisconnect()
 
 	var itemsList []ItemList
 	if err = res.All(context.TODO(), &itemsList); err != nil {
@@ -88,5 +88,6 @@ func DeleteTestData() {
 		fmt.Println("error deleting test list")
 		return
 	}
+	defer ListClient.DbDisconnect()
 
 }

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"grocerylist/database"
+	"grocerylist/service/assistants"
 	"net/http"
 	"os"
 	"testing"
@@ -64,9 +65,9 @@ func TestAddItem(t *testing.T) {
 func TestChangeItem(t *testing.T) {
 
 	type ChangeItemTests teststruct
-	te := ItemChange{TestItemID, "Changed name", "3", "stk"}
-	wr := ItemChange{"", "Changed name", "3", "stk"}
-	tr := ItemChange{"423424323", "Changed name", "3", "stk"}
+	te := assistants.ItemData{Id: TestItemID, ItemName: "Changed name", Quantity: "3", Unit: "stk"}
+	wr := assistants.ItemData{Id: "", ItemName: "Changed name", Quantity: "3", Unit: "stk"}
+	tr := assistants.ItemData{Id: "423424323", ItemName: "Changed name", Quantity: "3", Unit: "stk"}
 
 	genJson, _ := json.Marshal(te)
 	genjson2, _ := json.Marshal(wr)
@@ -96,6 +97,7 @@ func TestChangeItem(t *testing.T) {
 		t.Errorf("Test: Didnt change - Expected item %s. Got %s \n", "Changed name", yt.ItemName)
 
 	}
+	defer ItemClient.DbDisconnect()
 
 	fmt.Println("Passed ChangeItem tests")
 
@@ -105,9 +107,9 @@ func TestDeleteItem(t *testing.T) {
 
 	type DeleteItemTests teststruct
 
-	gt := DeleteItem{TestItemID}
-	gt2 := DeleteItem{""}
-	gt3 := DeleteItem{"34534523"}
+	gt := assistants.RecieveId{ListId: "", ItemId: TestItemID}
+	gt2 := assistants.RecieveId{ListId: "", ItemId: ""}
+	gt3 := assistants.RecieveId{ListId: "", ItemId: "34534523"}
 
 	genJson1, _ := json.Marshal(gt)
 	genJson2, _ := json.Marshal(gt2)
@@ -141,6 +143,7 @@ func TestDeleteItem(t *testing.T) {
 	if yt.ID != "" {
 		t.Errorf("Error deleting")
 	}
+	defer ItemClient.DbDisconnect()
 
 	fmt.Println("Passed DeleteItem tests")
 }

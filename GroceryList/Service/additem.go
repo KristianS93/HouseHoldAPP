@@ -11,15 +11,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// CreateItem struct that can be used to create an item as a DTO
-type CreateItem struct {
-	ID       string `bson:"_id, omitempty"`
-	ListId   string `bson:"ListId, omitempty" json:"ListId"`
-	ItemName string `bson:"ItemName, omitempty" json:"ItemName"`
-	Quantity string `bson:"Quantity" json:"Quantity"`
-	Unit     string `bson:"Unit" json:"Unit"`
-}
-
 // AddItem Create item/items for a list, the function needs a post request, with a json object of an array of item/items
 func (s *Server) AddItem(w http.ResponseWriter, r *http.Request) {
 	//In any case return a json format
@@ -35,7 +26,7 @@ func (s *Server) AddItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Get the json body of the post and populate the Item structure
-	var itemformat []CreateItem
+	var itemformat []assistants.CreateItem
 	err := json.NewDecoder(r.Body).Decode(&itemformat)
 	if err != nil {
 		w.WriteHeader(400)
@@ -58,19 +49,19 @@ func (s *Server) AddItem(w http.ResponseWriter, r *http.Request) {
 	client.DbConnect(database.ConstGroceryItemsCollection)
 
 	//We insert the data obtained, into createitem datastructure, with a bson created id, for mongo.
-	var itemInsertFormat []CreateItem
+	var itemInsertFormat []assistants.CreateItem
 	for _, v := range itemformat {
 		newId := primitive.NewObjectID()
-		insertObj := CreateItem{string(newId.Hex()), v.ListId, v.ItemName, v.Quantity, v.Unit}
+		insertObj := assistants.CreateItem{ID: string(newId.Hex()), ListId: v.ListId, ItemName: v.ItemName, Quantity: v.Quantity, Unit: v.Unit}
 		itemInsertFormat = append(itemInsertFormat, insertObj)
 	}
-	
+
 	//To insert many each item has to be appended to slice of interface
 	var insertItemQuery []interface{}
 	for _, v := range itemInsertFormat {
 		insertItemQuery = append(insertItemQuery, v)
 	}
-	
+
 	//Insertmany query
 	_, err = client.Connection.InsertMany(context.TODO(), insertItemQuery)
 	if err != nil {
@@ -78,7 +69,8 @@ func (s *Server) AddItem(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)
 		return
 	}
-	
+	defer client.DbDisconnect()
+
 	//Create json response for succes.
 	str := make(map[string]string)
 	str["Succes"] = "Item Created"
