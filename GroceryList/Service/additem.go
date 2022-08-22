@@ -57,26 +57,29 @@ func (s *Server) AddItem(w http.ResponseWriter, r *http.Request) {
 	var client database.MongClient
 	client.DbConnect(database.ConstGroceryItemsCollection)
 
+	//We insert the data obtained, into createitem datastructure, with a bson created id, for mongo.
 	var itemInsertFormat []CreateItem
-
 	for _, v := range itemformat {
 		newId := primitive.NewObjectID()
 		insertObj := CreateItem{string(newId.Hex()), v.ListId, v.ItemName, v.Quantity, v.Unit}
 		itemInsertFormat = append(itemInsertFormat, insertObj)
 	}
-
+	
+	//To insert many each item has to be appended to slice of interface
 	var insertItemQuery []interface{}
 	for _, v := range itemInsertFormat {
 		insertItemQuery = append(insertItemQuery, v)
 	}
-
+	
+	//Insertmany query
 	_, err = client.Connection.InsertMany(context.TODO(), insertItemQuery)
 	if err != nil {
 		io.WriteString(w, `{"Error": "Failed creating item"}`)
 		w.WriteHeader(400)
 		return
 	}
-
+	
+	//Create json response for succes.
 	str := make(map[string]string)
 	str["Succes"] = "Item Created"
 	json.NewEncoder(w).Encode(str)
