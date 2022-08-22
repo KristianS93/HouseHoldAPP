@@ -43,6 +43,7 @@ func (s *Server) Init() {
 	s.Routes()
 }
 
+//Run creates the listen and serve, which turns on the server, and then awaits requests.
 func (s *Server) Run(addr string) {
 	// fmt.Println("Service starting up at: http://" + s.HostName + s.HostPort)
 	// err := http.ListenAndServe((s.HostName + s.HostPort), s.Router)
