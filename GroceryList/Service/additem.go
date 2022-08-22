@@ -7,25 +7,9 @@ import (
 	"grocerylist/service/assistants"
 	"io"
 	"net/http"
-	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
-
-// type Item struct {
-// 	ListId   string `json:"ListId"`
-// 	ItemName string `json:"ItemName"`
-// 	Quantity string `json:"Quantity"`
-// 	Unit     string `json:"Unit"`
-// }
-
-type CreateItem struct {
-	ID       string `bson:"_id, omitempty"`
-	ListId   string `bson:"ListId, omitempty" json:"ListId"`
-	ItemName string `bson:"ItemName, omitempty" json:"ItemName"`
-	Quantity string `bson:"Quantity" json:"Quantity"`
-	Unit     string `bson:"Unit" json:"Unit"`
-}
 
 // AddItem Create item/items for a list, the function needs a post request, with a json object of an array of item/items
 func (s *Server) AddItem(w http.ResponseWriter, r *http.Request) {
@@ -36,15 +20,15 @@ func (s *Server) AddItem(w http.ResponseWriter, r *http.Request) {
 	//If the method is not post, return bad requst
 	//take the request pointer, pointer to response writer and the desired method.
 	if assistants.WrongMethod(r, &w, http.MethodPost) {
-		fmt.Println("Wrong method")
+		w.WriteHeader(400)
+		io.WriteString(w, `{"Error": "Bad method: wrong method"}`)
 		return
 	}
 
 	//Get the json body of the post and populate the Item structure
-	var itemformat []CreateItem
+	var itemformat []assistants.CreateItem
 	err := json.NewDecoder(r.Body).Decode(&itemformat)
 	if err != nil {
-		fmt.Println("Doesn't recieve json data")
 		w.WriteHeader(400)
 		io.WriteString(w, `{"Error": "Bad request: Getting data"}`)
 		return
@@ -54,7 +38,6 @@ func (s *Server) AddItem(w http.ResponseWriter, r *http.Request) {
 	for _, v := range itemformat {
 		// i = index v = value hvilket er item her
 		if v.ListId == "" || v.ItemName == "" {
-			fmt.Println("Data is missing in the recieved json")
 			w.WriteHeader(400)
 			io.WriteString(w, `{"Error": "Missing data"}`)
 			return
@@ -65,27 +48,30 @@ func (s *Server) AddItem(w http.ResponseWriter, r *http.Request) {
 	var client database.MongClient
 	client.DbConnect(database.ConstGroceryItemsCollection)
 
-	var itemInsertFormat []CreateItem
-
+	//We insert the data obtained, into createitem datastructure, with a bson created id, for mongo.
+	var itemInsertFormat []assistants.CreateItem
 	for _, v := range itemformat {
 		newId := primitive.NewObjectID()
-		insertObj := CreateItem{string(newId.Hex()), v.ListId, v.ItemName, v.Quantity, v.Unit}
+		insertObj := assistants.CreateItem{ID: string(newId.Hex()), ListId: v.ListId, ItemName: v.ItemName, Quantity: v.Quantity, Unit: v.Unit}
 		itemInsertFormat = append(itemInsertFormat, insertObj)
 	}
 
+	//To insert many each item has to be appended to slice of interface
 	var insertItemQuery []interface{}
 	for _, v := range itemInsertFormat {
 		insertItemQuery = append(insertItemQuery, v)
 	}
 
+	//Insertmany query
 	_, err = client.Connection.InsertMany(context.TODO(), insertItemQuery)
 	if err != nil {
-		fmt.Println("failed adding item")
 		io.WriteString(w, `{"Error": "Failed creating item"}`)
 		w.WriteHeader(400)
 		return
 	}
+	defer client.DbDisconnect()
 
+	//Create json response for succes.
 	str := make(map[string]string)
 	str["Succes"] = "Item Created"
 	json.NewEncoder(w).Encode(str)

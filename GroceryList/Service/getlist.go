@@ -23,6 +23,7 @@ type ItemList struct {
 	Unit     string `json:"Unit"`
 }
 
+// GetList takes a URL parameter called ?ListId=xxx from a GET request, an returns a json object with all items associated to this list id from the mongo db.
 func (s *Server) GetList(w http.ResponseWriter, r *http.Request) {
 
 	//In any case return a json format and enable cors
@@ -36,17 +37,20 @@ func (s *Server) GetList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//Check that a url parameter exist.
 	if len(r.URL.Query()) == 0 {
 		w.WriteHeader(405)
 		io.WriteString(w, `{"Error": "No list provided"}`)
 		return
 	}
 
+	//Check if a url parameter called ListId exist
 	if r.URL.Query()["ListId"] == nil {
 		w.WriteHeader(400)
 		io.WriteString(w, `{"Error": "Wrong url param"}`)
 		return
 	}
+
 	//Receive list id from s
 	recievedListId := r.URL.Query()["ListId"][0]
 
@@ -62,7 +66,6 @@ func (s *Server) GetList(w http.ResponseWriter, r *http.Request) {
 	listClient.DbConnect(database.ConstGroceryListCollection)
 
 	//check that list exist
-	// lookfor := di.ItemName
 	filterList := bson.D{{Key: "_id", Value: recievedListId}}
 	var resultList bson.D
 
@@ -82,35 +85,23 @@ func (s *Server) GetList(w http.ResponseWriter, r *http.Request) {
 	lookfor := recievedListId
 	filter := bson.D{primitive.E{Key: "ListId", Value: lookfor}}
 
+	//Find query based on the filter
 	res, err := client.Connection.Find(context.TODO(), filter)
 	if err != nil {
 		w.WriteHeader(400)
 		io.WriteString(w, `{"Error": "No items on the list"}`)
 		return
 	}
+	defer client.DbDisconnect()
 
+	//Insert data from db into ItemList datastructure, so it can be encoded into json
 	var itemsList []ItemList
 	if err = res.All(context.TODO(), &itemsList); err != nil {
 		w.WriteHeader(400)
 		io.WriteString(w, `{"Error": "Could not retrieve list"}`)
 	}
 
+	//Encode data from itemlist into json.
 	var returndata = ItemHolder{"List Retrieved", itemsList}
-
 	json.NewEncoder(w).Encode(returndata)
 }
-
-// //Get the json body of the post and populate the GetListId structure
-// var dl GetListId
-// err := json.NewDecoder(r.Body).Decode(&dl)
-// if err != nil {
-// 	w.WriteHeader(400)
-// 	io.WriteString(w, `{"Error": "Bad request"}`)
-// 	return
-// }
-
-// if dl.ListId == "" {
-// 	w.WriteHeader(400)
-// 	io.WriteString(w, `{"Error": "No list provided"}`)
-// 	return
-// }

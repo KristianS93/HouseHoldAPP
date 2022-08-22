@@ -11,10 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-type RecieveListId struct {
-	ListId string `json:"ListId"`
-}
-
+// ClearList take a ListId, in a json body from a DELETE request, based on this list id, it deletes all items associated with the ListId
 func (s *Server) ClearList(w http.ResponseWriter, r *http.Request) {
 
 	//In any case return a json format
@@ -28,7 +25,7 @@ func (s *Server) ClearList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get list id
-	var rli RecieveListId
+	var rli assistants.RecieveId
 	err := json.NewDecoder(r.Body).Decode(&rli)
 	if err != nil {
 		w.WriteHeader(400)
@@ -36,6 +33,7 @@ func (s *Server) ClearList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//no list was provided
 	if rli.ListId == "" {
 		w.WriteHeader(400)
 		io.WriteString(w, `{"Error": "No list provided"}`)
@@ -46,10 +44,11 @@ func (s *Server) ClearList(w http.ResponseWriter, r *http.Request) {
 	var itemClient database.MongClient
 	itemClient.DbConnect(database.ConstGroceryItemsCollection)
 
+	//Create a filter to the find query
 	filter := bson.D{{Key: "ListId", Value: rli.ListId}}
-
 	var results bson.D
 
+	//findone query
 	_ = itemClient.Connection.FindOne(context.TODO(), filter).Decode(&results)
 	if results == nil {
 		w.WriteHeader(400)
@@ -57,13 +56,16 @@ func (s *Server) ClearList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//Deletemany query
 	_, err = itemClient.Connection.DeleteMany(context.TODO(), filter)
 	if err != nil {
 		w.WriteHeader(400)
 		io.WriteString(w, `{"Error": "Error deleting items in list"}`)
 		return
 	}
+	defer itemClient.DbDisconnect()
 
+	//Create succesfull json response
 	str := make(map[string]string)
 	str["Succes"] = "List Cleared"
 	json.NewEncoder(w).Encode(str)

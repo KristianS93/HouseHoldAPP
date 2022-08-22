@@ -11,10 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-type GetListId struct {
-	ListId string `json:"ListId"`
-}
-
+// DeleteList takes a json object with a ListId from a DELETE request, based on this ListId, it deletes this id from the mongo db. Return an error or succes json object.
 func (s *Server) DeleteList(w http.ResponseWriter, r *http.Request) {
 	//In any case return a json format
 	assistants.EnableCors(&w)
@@ -28,7 +25,7 @@ func (s *Server) DeleteList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Get the json body of the post and populate the dataforlist structure
-	var dl GetListId
+	var dl assistants.RecieveId
 	err := json.NewDecoder(r.Body).Decode(&dl)
 	if err != nil {
 		w.WriteHeader(400)
@@ -36,17 +33,19 @@ func (s *Server) DeleteList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//Test if listid is empty
 	if dl.ListId == "" {
 		w.WriteHeader(400)
 		io.WriteString(w, `{"Error": "No list provided"}`)
 		return
 	}
 
+	//Instantiate mongo connection
 	var client database.MongClient
 	client.DbConnect(database.ConstGroceryListCollection)
 
+	//Create filter to search for
 	lookfor := dl.ListId
-
 	filter := bson.D{{Key: "_id", Value: lookfor}}
 	var existing bson.D
 
@@ -58,13 +57,16 @@ func (s *Server) DeleteList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//Delete query based on the list id
 	_, err = client.Connection.DeleteOne(context.TODO(), filter)
 	if err != nil {
 		io.WriteString(w, `{"Error": "Failed deleting list"}`)
 		w.WriteHeader(400)
 		return
 	}
+	defer client.DbDisconnect()
 
+	//Succcesfull json.
 	str := make(map[string]string)
 	str["Succes"] = "List Deleted"
 	json.NewEncoder(w).Encode(str)

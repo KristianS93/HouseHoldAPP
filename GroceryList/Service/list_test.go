@@ -4,40 +4,20 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"grocerylist/database"
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 )
 
-var ServerIns = Server{}
-var ListClient = database.MongClient{}
-
-func TestMain(m *testing.M) {
-
-	//Initialize server settings¢
-	ServerIns.Init()
-
-	//Db connection
-	//Create test DB items collection.
-	//addint test data
-	AddTestData()
-
-	code := m.Run()
-	DeleteTestData()
-	//clearData()
-	os.Exit(code)
-}
-
-func executeRequest(req *http.Request) *httptest.ResponseRecorder {
+func ExecuteRequest(req *http.Request) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()
+	rr.Header().Set("Access-Control-Allow-Origin", "*")
 	ServerIns.Router.ServeHTTP(rr, req)
 	return rr
 }
 
-func checkResCode(t *testing.T, expected, actual int, testname string) {
+func CheckResCode(t *testing.T, expected, actual int, testname string) {
 	if expected != actual {
 		t.Errorf("Test: %s - Expected response code %d. Got %d\n", testname, expected, actual)
 	}
@@ -76,8 +56,8 @@ func TestCreateList(t *testing.T) {
 
 	for _, v := range testcasesStatusCode {
 		req, _ := http.NewRequest(v.Input.method, v.Input.url, CreateReader(v.Input.body))
-		res := executeRequest(req)
-		checkResCode(t, v.Output, res.Code, v.Name)
+		res := ExecuteRequest(req)
+		CheckResCode(t, v.Output, res.Code, v.Name)
 	}
 
 	fmt.Println("Passed CreateList Tests")
@@ -98,13 +78,13 @@ func TestGetList(t *testing.T) {
 
 	for _, v := range testcasesStatusCode {
 		req, _ := http.NewRequest(v.Input.method, v.Input.url, nil)
-		res := executeRequest(req)
-		checkResCode(t, v.Output, res.Code, v.Name)
+		res := ExecuteRequest(req)
+		CheckResCode(t, v.Output, res.Code, v.Name)
 	}
 
 	//Test specific json:
 	req, _ := http.NewRequest("GET", "/GetList?ListId=62fa8c527abec12155c907c3", nil)
-	res := executeRequest(req)
+	res := ExecuteRequest(req)
 
 	var di ItemHolder
 	err := json.NewDecoder(res.Body).Decode(&di)
@@ -132,8 +112,8 @@ func TestClearList(t *testing.T) {
 
 	for _, v := range testcasesStatusCode {
 		req, _ := http.NewRequest(v.Input.method, v.Input.url, CreateReader(v.Input.body))
-		res := executeRequest(req)
-		checkResCode(t, v.Output, res.Code, v.Name)
+		res := ExecuteRequest(req)
+		CheckResCode(t, v.Output, res.Code, v.Name)
 	}
 	fmt.Println("Passed ResetList Tests")
 }
@@ -152,8 +132,8 @@ func TestDeleteList(t *testing.T) {
 
 	for _, v := range testcasesStatusCode {
 		req, _ := http.NewRequest(v.Input.method, v.Input.url, CreateReader(v.Input.body))
-		res := executeRequest(req)
-		checkResCode(t, v.Output, res.Code, v.Name)
+		res := ExecuteRequest(req)
+		CheckResCode(t, v.Output, res.Code, v.Name)
 	}
 	fmt.Println("Passed DeleteList Tests")
 }
