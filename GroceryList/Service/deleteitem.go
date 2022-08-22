@@ -15,7 +15,7 @@ type DeleteItem struct {
 	ItemId string `json:"ItemId"`
 }
 
-//DeleteItem takes a json object with ItemId from a DELETE request, and returns a json object with either error or succes.
+// DeleteItem takes a json object with ItemId from a DELETE request, and returns a json object with either error or succes.
 func (s *Server) DeleteItem(w http.ResponseWriter, r *http.Request) {
 	//In any case return a json format
 	assistants.EnableCors(&w)
@@ -61,7 +61,7 @@ func (s *Server) DeleteItem(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(w, `{"Error": "Item does not exist"}`)
 		return
 	}
-	
+
 	//Delete one query based on the ItemId
 	_, err = client.Connection.DeleteOne(context.TODO(), filter)
 	if err != nil {
@@ -69,7 +69,8 @@ func (s *Server) DeleteItem(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)
 		return
 	}
-	
+	defer client.DbDisconnect()
+
 	//Create succesfull json response
 	str := make(map[string]string)
 	str["Succes"] = "Item Deleted"

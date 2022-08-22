@@ -64,13 +64,13 @@ func (s *Server) AddItem(w http.ResponseWriter, r *http.Request) {
 		insertObj := CreateItem{string(newId.Hex()), v.ListId, v.ItemName, v.Quantity, v.Unit}
 		itemInsertFormat = append(itemInsertFormat, insertObj)
 	}
-	
+
 	//To insert many each item has to be appended to slice of interface
 	var insertItemQuery []interface{}
 	for _, v := range itemInsertFormat {
 		insertItemQuery = append(insertItemQuery, v)
 	}
-	
+
 	//Insertmany query
 	_, err = client.Connection.InsertMany(context.TODO(), insertItemQuery)
 	if err != nil {
@@ -78,7 +78,8 @@ func (s *Server) AddItem(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)
 		return
 	}
-	
+	defer client.DbDisconnect()
+
 	//Create json response for succes.
 	str := make(map[string]string)
 	str["Succes"] = "Item Created"

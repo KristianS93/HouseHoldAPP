@@ -15,7 +15,6 @@ ChangeItem              Func:   OK      Doc:    OK      Testing:    Ok
 Generelt: 
 Brug af environment variables:
 Command til at køre tests på docker:
-Tilføje start log, igen til servicehandler så man kan se den starter.
 Evt. log beskeder, når et endpoint rammes, i stedet for json error/succes eller begge dele?
 Overvej om der skal laves en disconnect connection i mongo interface.
 

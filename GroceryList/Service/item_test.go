@@ -96,6 +96,7 @@ func TestChangeItem(t *testing.T) {
 		t.Errorf("Test: Didnt change - Expected item %s. Got %s \n", "Changed name", yt.ItemName)
 
 	}
+	defer ItemClient.DbDisconnect()
 
 	fmt.Println("Passed ChangeItem tests")
 
@@ -141,6 +142,7 @@ func TestDeleteItem(t *testing.T) {
 	if yt.ID != "" {
 		t.Errorf("Error deleting")
 	}
+	defer ItemClient.DbDisconnect()
 
 	fmt.Println("Passed DeleteItem tests")
 }

@@ -86,6 +86,7 @@ func (s *Server) CreateList(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(400)
 		return
 	}
+	defer client.DbDisconnect()
 
 	//Format the return data and serve as json.
 	type ReturnData struct {

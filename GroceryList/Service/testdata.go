@@ -21,7 +21,6 @@ func AddTestData() {
 	//Create test DB items collection.
 	var ListClient database.MongClient
 	ListClient.DbConnect(database.ConstGroceryListCollection)
-	// ListClient.DbDisconnect()
 
 	// To test getList we will need a list
 	// and a items.
@@ -33,7 +32,6 @@ func AddTestData() {
 		fmt.Println("failed inserting")
 		return
 	}
-
 	//insert items to test db.
 
 	obj1 := CreateItem{"", "62fa8c527abec12155c907c3", "Test item1", "4", "pakker"}
@@ -69,6 +67,7 @@ func AddTestData() {
 		fmt.Println("No items on the list")
 		return
 	}
+	defer ListClient.DbDisconnect()
 
 	var itemsList []ItemList
 	if err = res.All(context.TODO(), &itemsList); err != nil {
@@ -88,5 +87,6 @@ func DeleteTestData() {
 		fmt.Println("error deleting test list")
 		return
 	}
+	defer ListClient.DbDisconnect()
 
 }
