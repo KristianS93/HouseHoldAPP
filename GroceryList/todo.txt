@@ -17,7 +17,6 @@ Brug af environment variables:
 Command til at køre tests på docker:
 Tilføje start log, igen til servicehandler så man kan se den starter.
 Evt. log beskeder, når et endpoint rammes, i stedet for json error/succes eller begge dele?
-I assistants skal recieveddata fjernes, giver ikke mening og er ikke lykkedes.
 Overvej om der skal laves en disconnect connection i mongo interface.
 
 
