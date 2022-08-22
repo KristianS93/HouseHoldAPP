@@ -18,7 +18,7 @@ type ItemChange struct {
 	Quantity string `bson:"Quantity" json:"Quantity"`
 	Unit     string `bson:"Unit" json:"Unit"`
 }
-
+//ChangeItem takes a json object in the ItemChange format, KAN ÆNDRES TIL CREATEITEM SOM MÅSKE KAN BLIVE HANDLEITEM, and updates the desired item, based on the item id. 
 func (s *Server) ChangeItem(w http.ResponseWriter, r *http.Request) {
 	//In any case return a json format
 	assistants.EnableCors(&w)
@@ -68,11 +68,11 @@ func (s *Server) ChangeItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Item exist, update item
-
 	changeItem := ItemChange{ui.Id, ui.ItemName, ui.Quantity, ui.Unit}
 
 	updateItem := bson.D{{Key: "$set", Value: changeItem}}
-
+	
+	//Update one query
 	_, err = client.Connection.UpdateOne(context.TODO(), filter, updateItem)
 	if err != nil {
 		fmt.Println(err)
@@ -80,7 +80,8 @@ func (s *Server) ChangeItem(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(w, `{"Error": "Error updating item"}`)
 		return
 	}
-
+	
+	//Create json, item created.
 	str := make(map[string]string)
 	str["Succes"] = "Item Updated"
 	json.NewEncoder(w).Encode(str)
