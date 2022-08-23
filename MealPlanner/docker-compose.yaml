@@ -1,13 +1,28 @@
+# version: '3.9'
+# services:
+#   db:
+#     image: postgres:latest
+#     restart: always
+#     env_file:
+#       - ./database/.env
+#     ports:
+#       - "27019:27019"
+#     volumes:
+#       - data:/var/lib/postgresql/data
+# volumes:
+#   data:
+
 version: '3.9'
 services:
   db:
     image: postgres:latest
-    restart: always
-    env_file:
-      - ./database/.env
-    ports:
-      - "27019:27019"
     volumes:
       - data:/var/lib/postgresql/data
+    ports:
+      - "27019:27019"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=mysecretpassword
+      - POSTGRES_DB=gorm
 volumes:
   data:
