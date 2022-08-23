@@ -1,1 +1,6 @@
 https://medium.com/@pradityadhitama/simple-logger-in-golang-f72dadf2c8c6
+
+
+https://www.mitrais.com/news-updates/how-to-dockerize-a-restful-api-with-golang-and-postgres/
+
+https://blog.logrocket.com/how-to-build-a-restful-api-with-docker-postgresql-and-go-chi/
