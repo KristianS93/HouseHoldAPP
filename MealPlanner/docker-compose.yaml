@@ -4,7 +4,7 @@ services:
     image: postgres:latest
     restart: always
     env_file:
-      - .env
+      - ./database/.env
     ports:
       - "27019:27019"
     volumes:
