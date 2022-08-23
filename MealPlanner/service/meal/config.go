@@ -18,4 +18,4 @@ func DBConnection() {
 	} else {
 		log.Println("Database connection successful")
 	}
-}
+}https://gitlab.com/idoko/bucketeer
