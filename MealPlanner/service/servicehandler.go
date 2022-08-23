@@ -16,7 +16,7 @@ type Server struct {
 	HostName string
 	//Setting the host port
 	HostPort string
-	
+
 	//Loggin the current session by logging the last activity from a cookie
 	Sessions map[string]time.Time
 }

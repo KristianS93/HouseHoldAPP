@@ -1,9 +1,6 @@
 package main
 
-import (
-	"fmt"
-)
-
+import "mealplanner/service"
 
 func main() {
 	//initialize server from server/web package
