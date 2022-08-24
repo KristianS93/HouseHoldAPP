@@ -1,2 +1,5 @@
 https://www.youtube.com/watch?v=ZI6HaPKHYsg
 
+https://gitlab.com/idoko/bucketeer
+^
+Denne kan formentlig bruges lig mærke til han bruger database istedet for localhost i DSN, selvom han bruger localhost connection string.
