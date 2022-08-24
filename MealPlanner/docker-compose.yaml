@@ -15,14 +15,13 @@
 version: '3.9'
 services:
   db:
-    image: postgres:latest
+    container_name: newdb
+    image: postgres
     volumes:
-      - data:/var/lib/postgresql/data
+      - ./data/db:/var/lib/postgresql/data
     ports:
-      - "27019:27019"
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=mysecretpassword
-      - POSTGRES_DB=gorm
+      - 5432:5432
+    env_file:
+      - ./database/.env
 volumes:
   data:

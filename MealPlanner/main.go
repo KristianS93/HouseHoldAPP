@@ -1,14 +1,16 @@
 package main
 
 import (
+	"mealplanner/database"
 	"mealplanner/service"
-	"mealplanner/service/meal"
 )
 
 func main() {
 	//initialize server from server/web package
 	Server := service.Server{}
-	meal.DBConnection()
+
+	database.Connect()
+
 	// meal.DBConnection()
 	// meal.DB.AutoMigrate(meal.User{})
 	//Initialize server settings

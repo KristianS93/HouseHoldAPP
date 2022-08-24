@@ -1,21 +1,34 @@
 package meal
 
 import (
+	"database/sql"
 	"log"
 
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	_ "github.com/lib/pq"
 )
 
-var DB *gorm.DB
-var DSN = "host=localhost user=kris password=mypass dbname=gorm port=27021"
+// const host = "localhost"
+// const port = 27021
 
-func DBConnection() {
-	var error error
-	DB, error = gorm.Open(postgres.Open(DSN), &gorm.Config{})
-	if error != nil {
-		log.Fatal(error)
-	} else {
-		log.Println("Database connection successful")
+type Database struct {
+	Conn *sql.DB
+}
+
+func DbConnection(username, password, database string) (Database, error) {
+	db := Database{}
+
+	// dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, username, password, database)
+
+	conn, err := sql.Open("postgres", "PG_DATABASE://PG_USER:PG_PASS@localhost:27021/postgres")
+	if err != nil {
+		return db, err
 	}
-}https://gitlab.com/idoko/bucketeer
+
+	db.Conn = conn
+	err = db.Conn.Ping()
+	if err != nil {
+		return db, err
+	}
+	log.Println("Database connection established")
+	return db, nil
+}
