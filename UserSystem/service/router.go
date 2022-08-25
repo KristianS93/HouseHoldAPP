@@ -92,13 +92,26 @@ func (s *Service) CreateUser(w http.ResponseWriter, r *http.Request) {
 	// must check database for already existing user before creating a duplicate, possibly refactor Login
 	// should not check json, as stuff is internal - central server should check non empty etc. beforehand
 
-	_, err = s.Statements["CreateUser"].Exec(nu.Email, nu.Password, nu.FirstName, nu.LastName, nu.ListID, nu.HouseholdID)
+	result, err := s.Statements["CreateUser"].Exec(nu.Email, nu.Password, nu.FirstName, nu.LastName, nu.ListID, nu.HouseholdID)
 	if err != nil {
+		// should be a check here for whether the error is unique constraint,
+		// at which point statusconflict is returned and no further action is taken
+		// not sure how to do this though
+
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Println("CreateUser: Failed to access database and create new user, err: ", err)
 		return
 	}
+	ra, err := result.RowsAffected()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println("CreateUser: error during RowsAffected, err :", err)
+		return
+	}
+	if ra == 0 {
+		w.WriteHeader(http.StatusConflict)
+	}
 
 	// this point is only reached when a new user is successfully registered, with no errors
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusCreated)
 }

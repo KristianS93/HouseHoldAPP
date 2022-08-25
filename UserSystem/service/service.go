@@ -44,11 +44,11 @@ func (s *Service) Init() {
 
 		ns := []NewStatements{
 			{
-				"SELECT firstName, listID, householdID FROM USERS WHERE email = ? AND password = ?",
+				"SELECT firstName, listID, householdID FROM USERS WHERE email = $1 AND password = $2",
 				"Login",
 			},
 			{
-				"INSERT INTO USERS (email, password, firstName, lastName, listID, householdID) VALUES (?, ?, ?, ?, ?, ?)",
+				"INSERT INTO USERS (email, password, firstName, lastName, listID, householdID) VALUES ($1, $2, $3, $4, $5, $6)",
 				"CreateUser",
 			},
 		}
@@ -65,6 +65,7 @@ func (s *Service) Init() {
 }
 
 func (s *Service) Run() {
+	log.Println("Starting UserSystem on " + s.HostName + s.HostPort)
 	err := http.ListenAndServe((s.HostName + s.HostPort), s.Router)
 	if err != nil {
 		log.Fatalln("failed to listen and serve")

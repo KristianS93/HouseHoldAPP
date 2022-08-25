@@ -8,4 +8,5 @@ func main() {
 	Service := service.Service{}
 	Service.Init()
 	Service.Run()
+
 }
