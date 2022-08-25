@@ -41,14 +41,26 @@ func (s *Service) Init() {
 
 	if s.Statements == nil {
 		s.Statements = make(map[string]*sql.Stmt)
-		var stmt *sql.Stmt
 
-		// the following contains all prepared statements for later execution
-		stmt, err := s.DB.Prepare("SELECT email, password FROM LOGIN WHERE email = ? AND password = ?")
-		if err != nil {
-			log.Fatalln("Failed to prepare CheckLogin query: ", err)
+		ns := []NewStatements{
+			{
+				"SELECT firstName, listID, householdID FROM USERS WHERE email = ? AND password = ?",
+				"Login",
+			},
+			{
+				"INSERT INTO USERS (email, password, firstName, lastName, listID, householdID) VALUES (?, ?, ?, ?, ?, ?)",
+				"CreateUser",
+			},
 		}
-		s.Statements["CheckLogin"] = stmt
+		// the following contains all prepared statements for later execution
+
+		for _, v := range ns {
+			stmt, err := s.DB.Prepare(v.Statement)
+			if err != nil {
+				log.Fatalf("Failed to prepare %s query statement, err: %s", v.Identifier, err)
+			}
+			s.Statements[v.Identifier] = stmt
+		}
 	}
 }
 
@@ -57,4 +69,9 @@ func (s *Service) Run() {
 	if err != nil {
 		log.Fatalln("failed to listen and serve")
 	}
+}
+
+type NewStatements struct {
+	Statement  string
+	Identifier string
 }
