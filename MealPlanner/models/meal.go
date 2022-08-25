@@ -1,15 +1,17 @@
-package meal
+package models
 
 type Item struct {
+	Id       int    `json:"Id"`
 	ItemName string `json:"ItemName"`
 	Quantity string `json:"Quantity"`
 	Unit     string `json:"Unit"`
 }
 
 type Meal struct {
-	MealName   string `json:"MealName"`
-	WeekPlanId string `json:"WeekPlanId"`
-	Items      []Item `json:"Items"`
+	Id          int    `json:"Id"`
+	MealName    string `json:"MealName"`
+	Description string `json:"Description"`
+	Items       []Item `json:"Items"`
 }
 
 type WeekPlan struct {

@@ -1,0 +1,14 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 27021,
+            "driver": "PostgreSQL",
+            "name": "MP",
+            "username": "MpAdmin",
+            "password": "Vs9KVmHgNFugMD",
+            "database": "Mp"
+        }
+    ]
+}

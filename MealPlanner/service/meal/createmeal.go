@@ -5,13 +5,16 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"mealplanner/database"
+	"mealplanner/models"
 	"mealplanner/service/assistants"
 	"net/http"
 )
 
 // CreateMeal takes POST request with a json body, determining the meal name, the week associated with it and the items in the meal.
 func CreateMeal(w *http.ResponseWriter, r *http.Request) {
-
+	db := database.Connect()
+	defer db.Con.Close()
 	//Enable cors and set header to return json
 	assistants.EnableCors(w)
 	assistants.SetHeader(w)
@@ -26,7 +29,7 @@ func CreateMeal(w *http.ResponseWriter, r *http.Request) {
 	}
 
 	//Get the json body and populate meal struct
-	var mealformat Meal
+	var mealformat models.Meal
 	err := json.NewDecoder(r.Body).Decode(&mealformat)
 	if err != nil {
 		log.Println("Json didnt parse correct")
@@ -36,11 +39,16 @@ func CreateMeal(w *http.ResponseWriter, r *http.Request) {
 	}
 
 	//Check that mealname and weekplanid is not missing
-	if mealformat.MealName == "" || mealformat.WeekPlanId == "" {
-		log.Println("Missing mealname or weekplanid")
+	if mealformat.MealName == "" {
+		log.Println("Missing mealname")
 		(*w).WriteHeader(400)
 		io.WriteString((*w), `{"Error": "Bad request: Missing data"}`)
 		return
+	}
+
+	err = db.InsertMeal(&mealformat)
+	if err != nil {
+		log.Println(err)
 	}
 
 	fmt.Println("Du har tilføjet et meal.")
