@@ -51,6 +51,10 @@ func (s *Service) Init() {
 				"INSERT INTO USERS (email, password, firstName, lastName, listID, householdID) VALUES ($1, $2, $3, $4, $5, $6)",
 				"CreateUser",
 			},
+			{
+				"DELETE FROM USERS WHERE email = $1 AND password = $2",
+				"DeleteUser",
+			},
 		}
 		// the following contains all prepared statements for later execution
 

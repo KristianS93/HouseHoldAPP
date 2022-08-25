@@ -9,6 +9,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
+var UniqueError string = "UNIQUE constraint failed: USERS.email"
+
 // login is utilized internally to decode the request body
 // from login attempts and other similar actions
 type login struct {
@@ -34,6 +36,7 @@ type NewUser struct {
 func (s *Service) Routes(r *mux.Router) {
 	r.HandleFunc("/Login", s.Login)
 	r.HandleFunc("/CreateUser", s.CreateUser)
+	r.HandleFunc("/DeleteUser", s.DeleteUser)
 
 	// Create a User + Delete a User
 	// Authorize Login Attempt
@@ -51,11 +54,6 @@ func (s *Service) Login(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Println("Login: Failed to decode request body: ", err)
-		return
-	}
-
-	if data.Email == "" || data.Password == "" {
-		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
@@ -89,29 +87,53 @@ func (s *Service) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// must check database for already existing user before creating a duplicate, possibly refactor Login
-	// should not check json, as stuff is internal - central server should check non empty etc. beforehand
-
-	result, err := s.Statements["CreateUser"].Exec(nu.Email, nu.Password, nu.FirstName, nu.LastName, nu.ListID, nu.HouseholdID)
+	_, err = s.Statements["CreateUser"].Exec(nu.Email, nu.Password, nu.FirstName, nu.LastName, nu.ListID, nu.HouseholdID)
 	if err != nil {
-		// should be a check here for whether the error is unique constraint,
-		// at which point statusconflict is returned and no further action is taken
-		// not sure how to do this though
-
+		if err.Error() == UniqueError {
+			w.WriteHeader(http.StatusConflict)
+			log.Println("DeleteUser: user already exists")
+			return
+		}
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Println("CreateUser: Failed to access database and create new user, err: ", err)
 		return
 	}
-	ra, err := result.RowsAffected()
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Println("CreateUser: error during RowsAffected, err :", err)
-		return
-	}
-	if ra == 0 {
-		w.WriteHeader(http.StatusConflict)
-	}
 
 	// this point is only reached when a new user is successfully registered, with no errors
 	w.WriteHeader(http.StatusCreated)
+}
+
+func (s *Service) DeleteUser(w http.ResponseWriter, r *http.Request) {
+	var data login
+	err := json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println("DeleteUser: Failed to decode request body: ", err)
+		return
+	}
+
+	result, err := s.Statements["DeleteUser"].Exec(data.Email, data.Password)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println("DeleteUser: failed to delete user:", err)
+		return
+	}
+
+	ra, err := result.RowsAffected()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println("DeleteUser: failed to convert affect rows:", err)
+		return
+	}
+
+	switch ra {
+	case 0:
+		w.WriteHeader(http.StatusConflict)
+		log.Println("DeleteUser: user does not exist")
+	case 1:
+		w.WriteHeader(http.StatusOK)
+		log.Println("DeleteUser: deleted user successfully")
+	default:
+		log.Fatalln("DeleteUser: More than 1 row has been affected by DeleteUser, stopping service. EMAIL: ", data.Email, "PASSWORD: ", data.Password)
+	}
 }
