@@ -44,15 +44,15 @@ func (s *Service) Init() {
 
 		ns := []NewStatements{
 			{
-				"SELECT firstName, listID, householdID FROM USERS WHERE email = $1 AND password = $2",
+				"SELECT firstName, listID, householdID FROM USERS WHERE userID = $1 AND password = $2",
 				"Login",
 			},
 			{
-				"INSERT INTO USERS (email, password, firstName, lastName, listID, householdID) VALUES ($1, $2, $3, $4, $5, $6)",
+				"INSERT INTO USERS (userID, password, firstName, lastName, listID, householdID) VALUES ($1, $2, $3, $4, $5, $6)",
 				"CreateUser",
 			},
 			{
-				"DELETE FROM USERS WHERE email = $1 AND password = $2",
+				"DELETE FROM USERS WHERE userID = $1 AND password = $2",
 				"DeleteUser",
 			},
 		}

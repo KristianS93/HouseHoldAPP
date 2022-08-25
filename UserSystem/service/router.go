@@ -9,12 +9,12 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var UniqueError string = "UNIQUE constraint failed: USERS.email"
+var UniqueError string = "UNIQUE constraint failed: USERS.userID"
 
 // login is utilized internally to decode the request body
 // from login attempts and other similar actions
 type login struct {
-	Email    string `json:"Email"`
+	UserID   string `json:"UserID"`
 	Password string `json:"Password"`
 }
 
@@ -25,7 +25,7 @@ type user struct {
 }
 
 type NewUser struct {
-	Email       string `json:"Email"`
+	UserID      string `json:"UserID"`
 	Password    string `json:"Password"`
 	FirstName   string `json:"FirstName"`
 	LastName    string `json:"LastName"`
@@ -58,7 +58,7 @@ func (s *Service) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var payload user
-	err = s.Statements["Login"].QueryRow(data.Email, data.Password).Scan(&payload.FirstName, &payload.ListID, &payload.HouseholdID)
+	err = s.Statements["Login"].QueryRow(data.UserID, data.Password).Scan(&payload.FirstName, &payload.ListID, &payload.HouseholdID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			w.WriteHeader(http.StatusNotFound)
@@ -87,7 +87,7 @@ func (s *Service) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = s.Statements["CreateUser"].Exec(nu.Email, nu.Password, nu.FirstName, nu.LastName, nu.ListID, nu.HouseholdID)
+	_, err = s.Statements["CreateUser"].Exec(nu.UserID, nu.Password, nu.FirstName, nu.LastName, nu.ListID, nu.HouseholdID)
 	if err != nil {
 		if err.Error() == UniqueError {
 			w.WriteHeader(http.StatusConflict)
@@ -112,7 +112,7 @@ func (s *Service) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := s.Statements["DeleteUser"].Exec(data.Email, data.Password)
+	result, err := s.Statements["DeleteUser"].Exec(data.UserID, data.Password)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Println("DeleteUser: failed to delete user:", err)
@@ -134,6 +134,26 @@ func (s *Service) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		log.Println("DeleteUser: deleted user successfully")
 	default:
-		log.Fatalln("DeleteUser: More than 1 row has been affected by DeleteUser, stopping service. EMAIL: ", data.Email, "PASSWORD: ", data.Password)
+		log.Fatalln("DeleteUser: More than 1 row has been affected by DeleteUser, stopping service. USERID: ", data.UserID, "PASSWORD: ", data.Password)
 	}
+}
+
+func (s *Service) CreateNewList(w http.ResponseWriter, r *http.Request) {
+	// the "new" list id is coming from a json
+	// need userID to make it work
+}
+
+func (s *Service) UpdateList(w http.ResponseWriter, r *http.Request) {
+	// the "new" list id is coming from a json
+	// need userID to make it work
+}
+
+func (s *Service) CreateHousehold(w http.ResponseWriter, r *http.Request) {
+	// the householdID is created on this end
+	// need userID to make it work
+}
+
+func (s *Service) UpdateHousehold(w http.ResponseWriter, r *http.Request) {
+	// need to know which household to include someone under
+	// need userID to make it work
 }
