@@ -3,13 +3,14 @@ package service
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"github.com/mattn/go-sqlite3"
 )
-
-var UniqueError string = "UNIQUE constraint failed: USERS.userID"
 
 // login is utilized internally to decode the request body
 // from login attempts and other similar actions
@@ -37,6 +38,7 @@ func (s *Service) Routes(r *mux.Router) {
 	r.HandleFunc("/Login", s.Login)
 	r.HandleFunc("/CreateUser", s.CreateUser)
 	r.HandleFunc("/DeleteUser", s.DeleteUser)
+	r.HandleFunc("/CreateHousehold", s.CreateHousehold)
 
 	// Create a User + Delete a User
 	// Authorize Login Attempt
@@ -89,10 +91,13 @@ func (s *Service) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	_, err = s.Statements["CreateUser"].Exec(nu.UserID, nu.Password, nu.FirstName, nu.LastName, nu.ListID, nu.HouseholdID)
 	if err != nil {
-		if err.Error() == UniqueError {
-			w.WriteHeader(http.StatusConflict)
-			log.Println("DeleteUser: user already exists")
-			return
+		// following is a type assertion
+		if sqliteErr, ok := err.(sqlite3.Error); ok {
+			if errors.Is(sqliteErr.ExtendedCode, sqlite3.ErrConstraintUnique) {
+				w.WriteHeader(http.StatusConflict)
+				log.Println("CreateUser: User already exists")
+				return
+			}
 		}
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Println("CreateUser: Failed to access database and create new user, err: ", err)
@@ -126,16 +131,14 @@ func (s *Service) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	switch ra {
-	case 0:
-		w.WriteHeader(http.StatusConflict)
-		log.Println("DeleteUser: user does not exist")
-	case 1:
-		w.WriteHeader(http.StatusOK)
-		log.Println("DeleteUser: deleted user successfully")
-	default:
-		log.Fatalln("DeleteUser: More than 1 row has been affected by DeleteUser, stopping service. USERID: ", data.UserID, "PASSWORD: ", data.Password)
+	// this is bad
+	if ra != 1 {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Fatalln("DeleteUser: stopping service. USERID: ", data.UserID, "PASSWORD: ", data.Password)
+		return
 	}
+	w.WriteHeader(http.StatusOK)
+	log.Println("DeleteUser: deleted user successfully")
 }
 
 func (s *Service) CreateNewList(w http.ResponseWriter, r *http.Request) {
@@ -149,11 +152,63 @@ func (s *Service) UpdateList(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Service) CreateHousehold(w http.ResponseWriter, r *http.Request) {
-	// the householdID is created on this end
-	// need userID to make it work
+	var u login
+	err := json.NewDecoder(r.Body).Decode(&u)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println("CreateHousehold: Failed to decode request body: ", err)
+		return
+	}
+
+	result, err := s.Statements["HouseHold"].Exec(uuid.New().String(), u.UserID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println("CreateHousehold: Failed to update householdID")
+		return
+	}
+	ra, err := result.RowsAffected()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println("CreateHousehold: Failed to read affected rows")
+		return
+	}
+	// this is bad
+	if ra != 1 {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Fatalln("CreateHousehold: Very bad")
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	log.Println("CreateHousehold: HouseholdID updated succesfully")
 }
 
-func (s *Service) UpdateHousehold(w http.ResponseWriter, r *http.Request) {
-	// need to know which household to include someone under
-	// need userID to make it work
-}
+// func (s *Service) UpdateHousehold(w http.ResponseWriter, r *http.Request) {
+// 	type users struct {
+// 		StartUser string `json:"StartUser"`
+// 		DestUser  string `json:"DestUser"`
+// 	}
+// 	var u users
+// 	err := json.NewDecoder(r.Body).Decode(&u)
+// 	if err != nil {
+// 		w.WriteHeader(http.StatusInternalServerError)
+// 		log.Println("UpdateHousehold: Failed to decode request body: ", err)
+// 		return
+// 	}
+// 	var hhID string
+// 	err = s.Statements["GetHHID"].QueryRow(u.StartUser).Scan(&hhID)
+// 	if err != nil {
+// 		if err == sql.ErrNoRows {
+// 			w.WriteHeader(http.StatusNotFound)
+// 			log.Println("UpdateHousehold: user not found")
+// 			return
+// 		}
+// 		w.WriteHeader(http.StatusInternalServerError)
+// 		log.Println("UpdateHousehold: something wrong with DB, err:", err)
+// 		return
+// 	}
+
+// 	result, err := s.Statements["HouseHold"].Exec(hhID, u.DestUser)
+
+// 	// need to know which household to include someone under
+// 	// need userID to make it work
+// }

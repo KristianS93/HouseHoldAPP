@@ -55,6 +55,14 @@ func (s *Service) Init() {
 				"DELETE FROM USERS WHERE userID = $1 AND password = $2",
 				"DeleteUser",
 			},
+			{
+				"UPDATE USERS SET householdID = $1 WHERE userID = $2",
+				"HouseHold",
+			},
+			{
+				"SELECT householdID FROM USERS WHERE userID = $1",
+				"GetHHID",
+			},
 		}
 		// the following contains all prepared statements for later execution
 
