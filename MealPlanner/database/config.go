@@ -10,24 +10,6 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// const (
-//
-//	host     = "localhost"
-//	port     = 5432
-//	user     = "postgres"
-//	password = "postgres"
-//	dbname   = "postgres"
-//
-// )
-
-// const (
-// 	host     = "localhost"
-// 	port     = 5432
-// 	user     = "MpAdmin"
-// 	password = "MpPass"
-// 	dbname   = "Mp"
-// )
-
 func Connect() {
 	err := godotenv.Load("./database/.env")
 	if err != nil {
