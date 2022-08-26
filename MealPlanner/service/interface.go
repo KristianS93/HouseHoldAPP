@@ -1,6 +1,7 @@
 package service
 
 import (
+	"mealplanner/service/household"
 	"mealplanner/service/meal"
 	"mealplanner/service/plan"
 	"net/http"
@@ -8,10 +9,10 @@ import (
 
 // Meal functionalities
 func (s *Server) ICreateMeal(w http.ResponseWriter, r *http.Request) {
-	meal.CreateMeal(&w, r)
+	meal.CreateMeal(w, r)
 }
 func (s *Server) IGetMeal(w http.ResponseWriter, r *http.Request) {
-	meal.GetMeal(&w, r)
+	meal.GetMeal(w, r)
 }
 func (s *Server) IChangeMeal(w http.ResponseWriter, r *http.Request) {
 	meal.ChangeMeal(&w, r)
@@ -38,4 +39,12 @@ func (s *Server) IGenerateList(w http.ResponseWriter, r *http.Request) {
 }
 func (s *Server) IDeletePlan(w http.ResponseWriter, r *http.Request) {
 	plan.DeletePlan(&w, r)
+}
+
+// Household functionalities
+func (s *Server) ICreateHousehold(w http.ResponseWriter, r *http.Request) {
+	household.CreateHouseHold(w, r)
+}
+func (s *Server) IDeleteHousehold(w http.ResponseWriter, r *http.Request) {
+	household.DeleteHouseHold(w, r)
 }

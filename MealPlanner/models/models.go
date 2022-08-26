@@ -19,3 +19,11 @@ type WeekPlan struct {
 	HouseHoldId string `json:"HouseHoldId"`
 	Meals       []Meal `json:"Meals"`
 }
+
+type MealId struct {
+	MealId int `json:"MealId"`
+}
+
+type HouseHold struct {
+	HouseholdId string `json:"HouseholdId"`
+}
