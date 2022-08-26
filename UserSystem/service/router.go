@@ -39,10 +39,6 @@ func (s *Service) Routes(r *mux.Router) {
 	r.HandleFunc("/CreateUser", s.CreateUser)
 	r.HandleFunc("/DeleteUser", s.DeleteUser)
 	r.HandleFunc("/CreateHousehold", s.CreateHousehold)
-
-	// Create a User + Delete a User
-	// Authorize Login Attempt
-	//
 }
 
 // Login checks the LOGIN table for matching signatures
@@ -52,10 +48,9 @@ func (s *Service) Routes(r *mux.Router) {
 // and utilize in further requests and or front end display.
 func (s *Service) Login(w http.ResponseWriter, r *http.Request) {
 	var data login
-	err := json.NewDecoder(r.Body).Decode(&data)
+	err := DecodeRequest(r, &data)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Println("Login: Failed to decode request body: ", err)
 		return
 	}
 
@@ -82,10 +77,9 @@ func (s *Service) Login(w http.ResponseWriter, r *http.Request) {
 
 func (s *Service) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var nu NewUser
-	err := json.NewDecoder(r.Body).Decode(&nu)
+	err := DecodeRequest(r, &nu)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Println("CreateUser: Failed to decode request body: ", err)
 		return
 	}
 
@@ -110,10 +104,9 @@ func (s *Service) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 func (s *Service) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	var data login
-	err := json.NewDecoder(r.Body).Decode(&data)
+	err := DecodeRequest(r, &data)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Println("DeleteUser: Failed to decode request body: ", err)
 		return
 	}
 
@@ -152,15 +145,26 @@ func (s *Service) UpdateList(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Service) CreateHousehold(w http.ResponseWriter, r *http.Request) {
-	var u login
-	err := json.NewDecoder(r.Body).Decode(&u)
+	var id login
+	err := DecodeRequest(r, &id)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Println("CreateHousehold: Failed to decode request body: ", err)
 		return
 	}
+	// The following is an example of the same functionality as above, however
+	// with no side effects of the function - this would require the DecodeRequest
+	// function to return the decoded json interface and the possible error, instead of only an error.
+	//
+	// var u login
+	// temp, err := DecodeRequest(r, u)
+	// if err != nil {
+	// 	// check if there was an error in decoding
+	// }
+	// if do, ok := temp.(login); ok {
+	// 	// did my type assertion work
+	// }
 
-	result, err := s.Statements["HouseHold"].Exec(uuid.New().String(), u.UserID)
+	result, err := s.Statements["HouseHold"].Exec(uuid.New().String(), id.UserID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Println("CreateHousehold: Failed to update householdID")
@@ -175,7 +179,7 @@ func (s *Service) CreateHousehold(w http.ResponseWriter, r *http.Request) {
 	// this is bad
 	if ra != 1 {
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Fatalln("CreateHousehold: Very bad")
+		log.Fatalln("CreateHousehold: Very bad, rows affected:", ra)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
