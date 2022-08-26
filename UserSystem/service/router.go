@@ -35,10 +35,11 @@ type NewUser struct {
 }
 
 func (s *Service) Routes(r *mux.Router) {
-	r.HandleFunc("/Login", s.Login)
-	r.HandleFunc("/CreateUser", s.CreateUser)
-	r.HandleFunc("/DeleteUser", s.DeleteUser)
-	r.HandleFunc("/CreateHousehold", s.CreateHousehold)
+	r.HandleFunc("/Login", s.Login).Methods(http.MethodPost)
+	r.HandleFunc("/CreateUser", s.CreateUser).Methods(http.MethodPost)
+	r.HandleFunc("/DeleteUser", s.DeleteUser).Methods(http.MethodDelete)
+	r.HandleFunc("/CreateHousehold", s.CreateHousehold).Methods(http.MethodPost)
+	r.HandleFunc("/UpdateHousehold", s.UpdateHousehold).Methods(http.MethodPatch)
 }
 
 // Login checks the LOGIN table for matching signatures
@@ -186,33 +187,50 @@ func (s *Service) CreateHousehold(w http.ResponseWriter, r *http.Request) {
 	log.Println("CreateHousehold: HouseholdID updated succesfully")
 }
 
-// func (s *Service) UpdateHousehold(w http.ResponseWriter, r *http.Request) {
-// 	type users struct {
-// 		StartUser string `json:"StartUser"`
-// 		DestUser  string `json:"DestUser"`
-// 	}
-// 	var u users
-// 	err := json.NewDecoder(r.Body).Decode(&u)
-// 	if err != nil {
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		log.Println("UpdateHousehold: Failed to decode request body: ", err)
-// 		return
-// 	}
-// 	var hhID string
-// 	err = s.Statements["GetHHID"].QueryRow(u.StartUser).Scan(&hhID)
-// 	if err != nil {
-// 		if err == sql.ErrNoRows {
-// 			w.WriteHeader(http.StatusNotFound)
-// 			log.Println("UpdateHousehold: user not found")
-// 			return
-// 		}
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		log.Println("UpdateHousehold: something wrong with DB, err:", err)
-// 		return
-// 	}
+func (s *Service) UpdateHousehold(w http.ResponseWriter, r *http.Request) {
+	type users struct {
+		StartUser string `json:"StartUser"`
+		DestUser  string `json:"DestUser"`
+	}
+	var u users
+	err := json.NewDecoder(r.Body).Decode(&u)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println("UpdateHousehold: Failed to decode request body: ", err)
+		return
+	}
+	var hhID string
+	err = s.Statements["GetHHID"].QueryRow(u.StartUser).Scan(&hhID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			w.WriteHeader(http.StatusNotFound)
+			log.Println("UpdateHousehold: user not found")
+			return
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println("UpdateHousehold: something wrong with DB, err:", err)
+		return
+	}
 
-// 	result, err := s.Statements["HouseHold"].Exec(hhID, u.DestUser)
+	result, err := s.Statements["HouseHold"].Exec(hhID, u.DestUser)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println("UpdateHousehold: Failed to access database, err:", err)
+		return
+	}
 
-// 	// need to know which household to include someone under
-// 	// need userID to make it work
-// }
+	ra, err := result.RowsAffected()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println("UpdateHousehold: Failed to get rows affected, err:", err)
+		return
+	}
+
+	if ra != 1 {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println("UpdateHousehold: Rows affected were not 1, instead:", ra)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	log.Println("UpdateHousehold: Successfully updated HouseholdID.")
+}
