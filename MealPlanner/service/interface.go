@@ -2,10 +2,16 @@ package service
 
 import (
 	"mealplanner/service/household"
+	"mealplanner/service/item"
 	"mealplanner/service/meal"
 	"mealplanner/service/plan"
 	"net/http"
 )
+
+// Item functionalites
+func (s *Server) IAddItem(w http.ResponseWriter, r *http.Request) {
+	item.AddItem(w, r)
+}
 
 // Meal functionalities
 func (s *Server) ICreateMeal(w http.ResponseWriter, r *http.Request) {
