@@ -18,7 +18,7 @@ func (db DBConnection) InsertHousehold(householdid models.HouseHold) error {
 	return nil
 }
 
-func (db DBConnection) SelectGroceryList(household models.HouseHold) (models.HouseHold, error) {
+func (db DBConnection) SelectHousehold(household models.HouseHold) (models.HouseHold, error) {
 	var householdmodel = models.HouseHold{}
 	query := `SELECT * FROM household WHERE householdid = $1`
 	res := db.Con.QueryRow(query, household.HouseholdId).Scan(&householdmodel.Id, &householdmodel.HouseholdId, &householdmodel.Meals, &householdmodel.GroceryListId)
@@ -45,3 +45,7 @@ func (db DBConnection) UpdateHousehold(household models.HouseHold, updateField s
 	}
 	return nil
 }
+
+// func (db DBConnection) DeleteHouseHold(household models.HouseHold) error {
+// 	query := `DELETE FROM household WHERE householdid = $1`
+// }

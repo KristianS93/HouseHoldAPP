@@ -18,15 +18,6 @@ func CreateMeal(w http.ResponseWriter, r *http.Request) {
 	assistants.EnableCors(&w)
 	assistants.SetHeader(&w)
 
-	//If the method is not post, return wrong method
-	//take the request pointer, pointer to response writer and the desired method.
-	if assistants.WrongMethod(r, http.MethodPost) {
-		log.Println("Wrong method, return 405")
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		io.WriteString(w, `{"Error": "Bad method: wrong method"}`)
-		return
-	}
-
 	//Get the json body and populate meal struct
 	var mealformat models.Meal
 	err := assistants.DecodeData(r, &mealformat)

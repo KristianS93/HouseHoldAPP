@@ -33,7 +33,7 @@ func CreateGroceryList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Check and receive
-	_, err = db.SelectGroceryList(household)
+	_, err = db.SelectHousehold(household)
 	if err != nil {
 		log.Println("No household", err)
 		w.WriteHeader(http.StatusBadRequest)
