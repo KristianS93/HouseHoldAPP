@@ -49,6 +49,7 @@ func CreateGroceryList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//Succes
 	log.Println("Grocerylist added!")
 	str := make(map[string]string)
 	str["Succes"] = "Grocerylist added"
