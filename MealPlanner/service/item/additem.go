@@ -9,7 +9,6 @@ import (
 	"mealplanner/models"
 	"mealplanner/service/assistants"
 	"net/http"
-	"strconv"
 	"strings"
 )
 
@@ -39,38 +38,53 @@ func AddItem(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	//Generating value string in the format ($1, $2, $3),...
 	i := 1
 	var valuecon []string
-	for j := 0; j < 2; j++ {
-		var str []string
-		temp := "("
-		for k := 0; k < 3; k++ {
-			str = append(str, "$"+strconv.Itoa(i))
-			i++
-		}
-		temp += strings.Join(str, ",")
-		temp += ")"
-		valuecon = append(valuecon, temp)
+	for j := 0; j < len(getitems); j++ {
+		s := fmt.Sprintf("($%d, $%d, $%d)", i, i+1, i+2)
+		valuecon = append(valuecon, s)
+		i += 3
 	}
 	valueStr := strings.Join(valuecon, ",")
 
+	//Generating a slice of interfaces with the values from each object.
 	valueArgs := []interface{}{}
-	// fmt.Println(count)
 	for _, item := range getitems {
 		valueArgs = append(valueArgs, item.ItemName)
 		valueArgs = append(valueArgs, item.Quantity)
 		valueArgs = append(valueArgs, item.Unit)
 	}
 
-	fmt.Println(valueArgs)
-	fmt.Println(valueStr)
-
-	err = db.InsertItems(valueStr, valueArgs)
+	//Inserting items and returning a slice of itemids
+	ids, err := db.InsertItems(valueStr, valueArgs)
 	if err != nil {
 		log.Println("Some error")
 	}
 
+	//Generating return data with an array of ids.
+	type returndata struct {
+		ItemIds []int `json:"ItemId"`
+	}
+	returnIds := returndata{}
+	returnIds.ItemIds = append(returnIds.ItemIds, ids...)
+	json.NewEncoder(w).Encode(returnIds)
 }
+
+// MAKING THE VALUE STR GENERIC!
+// for j := 0; j < 2; j++ {
+// 	var str []string
+// 	temp := "("
+// 	for k := 0; k < 3; k++ {
+// 		str = append(str, "$"+strconv.Itoa(i))
+// 		i++
+// 	}
+// 	temp += strings.Join(str, ",")
+// 	temp += ")"
+// 	valuecon = append(valuecon, temp)
+// }
+// valueStr := strings.Join(valuecon, ",")
+// -----------------------------------------------
 
 //has to be able to insert multiple
 // INSERT INTO household (householdid, meals, grocerylist) VALUES ('testhouse', '{1, 2, 4}', 'testlist')

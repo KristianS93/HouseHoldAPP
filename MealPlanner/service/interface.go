@@ -12,6 +12,12 @@ import (
 func (s *Server) IAddItem(w http.ResponseWriter, r *http.Request) {
 	item.AddItem(w, r)
 }
+func (s *Server) IDeleteItem(w http.ResponseWriter, r *http.Request) {
+	item.DeleteItem(w, r)
+}
+func (s *Server) IUpdateItem(w http.ResponseWriter, r *http.Request) {
+	item.UpdateItem(w, r)
+}
 
 // Meal functionalities
 func (s *Server) ICreateMeal(w http.ResponseWriter, r *http.Request) {

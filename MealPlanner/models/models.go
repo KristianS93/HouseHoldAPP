@@ -30,3 +30,7 @@ type HouseHold struct {
 	Meals         string `json:"Meals"`
 	GroceryListId string `json:"GroceryListId"`
 }
+
+type ItemIds struct {
+	ItemIds []int `json:"ItemIds"`
+}

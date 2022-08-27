@@ -5,6 +5,8 @@ package service
 func (s *Server) Routes() {
 	//Item endpoints
 	s.Router.HandleFunc("/AddItem", s.IAddItem).Methods("POST")
+	s.Router.HandleFunc("/DeleteItem", s.IDeleteItem).Methods("DELETE")
+	s.Router.HandleFunc("/UpdateItem", s.IUpdateItem).Methods("PATCH")
 	//Meal endpoints
 	s.Router.HandleFunc("/CreateMeal", s.ICreateMeal).Methods("POST")
 	s.Router.HandleFunc("/GetMeal", s.IGetMeal).Methods("GET")

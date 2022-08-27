@@ -38,7 +38,7 @@ func (db DBConnection) SelectMealId(id int) (models.Meal, string, error) {
 	return meal, itemString, nil
 }
 
-func (db DBConnection) SelectMultipleItems(id []string) ([]models.Item, error) {
+func (db DBConnection) SelectMultipleItems(id []int) ([]models.Item, error) {
 	var items []models.Item
 
 	buildQuery := "SELECT * FROM item WHERE id = ANY($1::int[])"
