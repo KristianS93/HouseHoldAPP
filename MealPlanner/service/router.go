@@ -1,6 +1,6 @@
 package service
 
-//Routes handles the routing/handling of endpoints for the service
+// Routes handles the routing/handling of endpoints for the service
 // The function is a method for the Server struct, and takes a pointer to a http.servemux type
 func (s *Server) Routes() {
 	//Meal endpoints
@@ -20,4 +20,5 @@ func (s *Server) Routes() {
 	//Household endpoints
 	s.Router.HandleFunc("/CreateHousehold", s.ICreateHousehold).Methods("POST")
 	s.Router.HandleFunc("/DeleteHousehold", s.IDeleteHousehold).Methods("DELETE")
+	s.Router.HandleFunc("/CreateGroceryList", s.ICreateGroceryList).Methods("POST")
 }

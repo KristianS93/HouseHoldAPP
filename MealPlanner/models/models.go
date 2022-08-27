@@ -25,5 +25,6 @@ type MealId struct {
 }
 
 type HouseHold struct {
-	HouseholdId string `json:"HouseholdId"`
+	HouseholdId   string `json:"HouseholdId"`
+	GroceryListId string `json:"GroceryListId"`
 }

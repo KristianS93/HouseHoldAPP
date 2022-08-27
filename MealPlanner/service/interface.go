@@ -48,3 +48,6 @@ func (s *Server) ICreateHousehold(w http.ResponseWriter, r *http.Request) {
 func (s *Server) IDeleteHousehold(w http.ResponseWriter, r *http.Request) {
 	household.DeleteHouseHold(w, r)
 }
+func (s *Server) ICreateGroceryList(w http.ResponseWriter, r *http.Request) {
+	household.CreateGroceryList(w, r)
+}

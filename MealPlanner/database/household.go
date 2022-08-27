@@ -15,3 +15,7 @@ func (db DBConnection) InsertHousehold(householdid models.HouseHold) error {
 	}
 	return nil
 }
+
+func (db DBConnection) SelectGroceryList(household models.HouseHold) error {
+
+}
