@@ -38,6 +38,24 @@ func AddItem(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	valueStr, valueArgs := FormatingInsertItems(getitems)
+
+	//Inserting items and returning a slice of itemids
+	ids, err := db.InsertItems(valueStr, valueArgs)
+	if err != nil {
+		log.Println("Some error")
+	}
+
+	//Generating return data with an array of ids.
+	type returndata struct {
+		ItemIds []int `json:"ItemId"`
+	}
+	returnIds := returndata{}
+	returnIds.ItemIds = append(returnIds.ItemIds, ids...)
+	json.NewEncoder(w).Encode(returnIds)
+}
+
+func FormatingInsertItems(getitems []models.Item) (string, []interface{}) {
 	//Generating value string in the format ($1, $2, $3),...
 	i := 1
 	var valuecon []string
@@ -56,19 +74,7 @@ func AddItem(w http.ResponseWriter, r *http.Request) {
 		valueArgs = append(valueArgs, item.Unit)
 	}
 
-	//Inserting items and returning a slice of itemids
-	ids, err := db.InsertItems(valueStr, valueArgs)
-	if err != nil {
-		log.Println("Some error")
-	}
-
-	//Generating return data with an array of ids.
-	type returndata struct {
-		ItemIds []int `json:"ItemId"`
-	}
-	returnIds := returndata{}
-	returnIds.ItemIds = append(returnIds.ItemIds, ids...)
-	json.NewEncoder(w).Encode(returnIds)
+	return valueStr, valueArgs
 }
 
 // MAKING THE VALUE STR GENERIC!

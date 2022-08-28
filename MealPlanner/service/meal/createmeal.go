@@ -7,6 +7,7 @@ import (
 	"mealplanner/database"
 	"mealplanner/models"
 	"mealplanner/service/assistants"
+	"mealplanner/service/item"
 	"net/http"
 )
 
@@ -35,8 +36,31 @@ func CreateMeal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//Check that each item on the list also has a name
+
+	for _, v := range mealformat.Items {
+		if v.ItemName == "" {
+			log.Println("Item missing a name")
+			w.WriteHeader(http.StatusBadRequest)
+			io.WriteString(w, `{"Error": "Bad request: Missing data"}`)
+			return
+		}
+	}
+
+	valueStr, valueArgs := item.FormatingInsertItems(mealformat.Items)
+
+	//Create the items:
+	ids, err := db.InsertItems(valueStr, valueArgs)
+	if err != nil {
+		log.Println("Error creating items")
+		w.WriteHeader(http.StatusBadRequest)
+		io.WriteString(w, `{"Error": "Bad request: Missing data"}`)
+		return
+
+	}
+
 	//Running insertmeal query
-	err = db.InsertMeal(&mealformat)
+	err = db.InsertMeal(&mealformat, ids)
 	if err != nil {
 		log.Println(err)
 	}
