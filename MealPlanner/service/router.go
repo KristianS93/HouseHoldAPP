@@ -11,7 +11,7 @@ func (s *Server) Routes() {
 	s.Router.HandleFunc("/CreateMeal", s.ICreateMeal).Methods("POST")
 	s.Router.HandleFunc("/GetMeal", s.IGetMeal).Methods("GET")
 	s.Router.HandleFunc("/ChangeMeal", s.IChangeMeal).Methods("PATCH")
-	s.Router.HandleFunc("/DeleteMeal", s.ICreateMeal).Methods("DELETE")
+	s.Router.HandleFunc("/DeleteMeal", s.IDeleteMeal).Methods("DELETE")
 
 	//Plan endpoints
 	s.Router.HandleFunc("/CreatePlan", s.ICreatePlan).Methods("POST")

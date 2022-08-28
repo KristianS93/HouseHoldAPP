@@ -19,18 +19,18 @@ func (db DBConnection) InsertMeal(meal *models.Meal, itemIds []int) error {
 	return nil
 }
 
-func (db DBConnection) SelectMealId(id int) (models.Meal, string, error) {
-	var meal = models.Meal{}
-	var itemString string
+func (db DBConnection) SelectMealId(id int) (models.MealDB, error) {
+	var meal = models.MealDB{}
 	query := `SELECT * FROM meal WHERE id = $1`
-	err := db.Con.QueryRow(query, id).Scan(&meal.Id, &meal.MealName, &meal.Description, &itemString)
+	err := db.Con.QueryRow(query, id).Scan(&meal.Id, &meal.MealName, &meal.Description, pq.Array(&meal.Items))
 	if err != nil {
-		return meal, "", errors.New("no id found")
+		log.Println(err)
+		return meal, errors.New("no id found")
 	}
-	return meal, itemString, nil
+	return meal, nil
 }
 
-func (db DBConnection) SelectMultipleItems(id []int) ([]models.Item, error) {
+func (db DBConnection) SelectMultipleItems(id []int64) ([]models.Item, error) {
 	var items []models.Item
 
 	buildQuery := "SELECT * FROM item WHERE id = ANY($1::int[])"
@@ -46,4 +46,13 @@ func (db DBConnection) SelectMultipleItems(id []int) ([]models.Item, error) {
 		items = append(items, item)
 	}
 	return items, nil
+}
+
+func (db DBConnection) DeleteMeal(mealId int) error {
+	query := `DELETE FROM meal WHERE id = $1`
+	_, err := db.Con.Exec(query, mealId)
+	if err != nil {
+		return err
+	}
+	return nil
 }

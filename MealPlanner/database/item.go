@@ -52,7 +52,7 @@ func (db DBConnection) InsertItems(valueStr string, data []interface{}) ([]int, 
 	return ids, nil
 }
 
-func (db DBConnection) DeleteItems(ids []int) error {
+func (db DBConnection) DeleteItems(ids []int64) error {
 	items, err := db.SelectMultipleItems(ids)
 	if err != nil {
 		log.Println("Error checking if items exist")

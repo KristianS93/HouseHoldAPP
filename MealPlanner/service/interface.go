@@ -30,7 +30,7 @@ func (s *Server) IChangeMeal(w http.ResponseWriter, r *http.Request) {
 	meal.ChangeMeal(&w, r)
 }
 func (s *Server) IDeleteMeal(w http.ResponseWriter, r *http.Request) {
-	meal.DeleteMeal(&w, r)
+	meal.DeleteMeal(w, r)
 }
 
 // Plan functionalities
