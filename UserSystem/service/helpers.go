@@ -1,7 +1,9 @@
 package service
 
 import (
+	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 )
@@ -17,6 +19,18 @@ func DecodeRequest(r *http.Request, dest any) error {
 	if err != nil {
 		log.Println("Failed to decode request body: ", err)
 		return err
+	}
+	return nil
+}
+
+func CheckResult(result sql.Result) error {
+	ra, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if ra != 1 {
+		return fmt.Errorf("%d rows were affected by the query", ra)
 	}
 	return nil
 }

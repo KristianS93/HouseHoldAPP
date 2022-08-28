@@ -42,6 +42,7 @@ func (s *Service) Init() {
 	if s.Statements == nil {
 		s.Statements = make(map[string]*sql.Stmt)
 
+		// Maybe refactor into constants and prepare, close etc. in functions
 		ns := []NewStatements{
 			{
 				"SELECT firstName, listID, householdID FROM USERS WHERE userID = $1 AND password = $2",
@@ -62,6 +63,10 @@ func (s *Service) Init() {
 			{
 				"SELECT householdID FROM USERS WHERE userID = $1",
 				"GetHHID",
+			},
+			{
+				"UPDATE USERS SET listID = $1 WHERE userID = $2",
+				"GroceryList",
 			},
 		}
 		// the following contains all prepared statements for later execution

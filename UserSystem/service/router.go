@@ -40,23 +40,24 @@ func (s *Service) Routes(r *mux.Router) {
 	r.HandleFunc("/DeleteUser", s.DeleteUser).Methods(http.MethodDelete)
 	r.HandleFunc("/CreateHousehold", s.CreateHousehold).Methods(http.MethodPost)
 	r.HandleFunc("/UpdateHousehold", s.UpdateHousehold).Methods(http.MethodPatch)
+	r.HandleFunc("/UpdateGroceryList", s.UpdateGroceryList).Methods(http.MethodPatch)
 }
 
 // Login checks the LOGIN table for matching signatures
-// of provided information and if appropriate login is provided,
+// of provided information and if appropriate login data is provided,
 // the user's name, listID and householdID is returned
-// to the responsewriter, for the central server to handle
-// and utilize in further requests and or front end display.
+// to the ResponseWriter, for the frontend to handle
+// and utilize in further requests and or display purposes.
 func (s *Service) Login(w http.ResponseWriter, r *http.Request) {
-	var data login
-	err := DecodeRequest(r, &data)
+	var lg login
+	err := DecodeRequest(r, &lg)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	var payload user
-	err = s.Statements["Login"].QueryRow(data.UserID, data.Password).Scan(&payload.FirstName, &payload.ListID, &payload.HouseholdID)
+	var u user
+	err = s.Statements["Login"].QueryRow(lg.UserID, lg.Password).Scan(&u.FirstName, &u.ListID, &u.HouseholdID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			w.WriteHeader(http.StatusNotFound)
@@ -69,11 +70,13 @@ func (s *Service) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// this point is only reached when a record is found and no errors occured
-	w.WriteHeader(http.StatusOK)
-	err = json.NewEncoder(w).Encode(payload)
+	err = json.NewEncoder(w).Encode(u)
 	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		log.Println("Login: Failed to encode response.")
+		return
 	}
+	w.WriteHeader(http.StatusOK)
 }
 
 func (s *Service) CreateUser(w http.ResponseWriter, r *http.Request) {
@@ -84,7 +87,7 @@ func (s *Service) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = s.Statements["CreateUser"].Exec(nu.UserID, nu.Password, nu.FirstName, nu.LastName, nu.ListID, nu.HouseholdID)
+	result, err := s.Statements["CreateUser"].Exec(nu.UserID, nu.Password, nu.FirstName, nu.LastName, nu.ListID, nu.HouseholdID)
 	if err != nil {
 		// following is a type assertion
 		if sqliteErr, ok := err.(sqlite3.Error); ok {
@@ -96,6 +99,13 @@ func (s *Service) CreateUser(w http.ResponseWriter, r *http.Request) {
 		}
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Println("CreateUser: Failed to access database and create new user, err: ", err)
+		return
+	}
+
+	err = CheckResult(result)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println("CreateUser:", err)
 		return
 	}
 
@@ -118,31 +128,47 @@ func (s *Service) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ra, err := result.RowsAffected()
+	// this should return 404 when the user is not found, ie. 0 rows were affected
+	err = CheckResult(result)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Println("DeleteUser: failed to convert affect rows:", err)
-		return
-	}
-
-	// this is bad
-	if ra != 1 {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Fatalln("DeleteUser: stopping service. USERID: ", data.UserID, "PASSWORD: ", data.Password)
+		log.Println("DeleteUser:", err)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
 	log.Println("DeleteUser: deleted user successfully")
 }
 
-func (s *Service) CreateNewList(w http.ResponseWriter, r *http.Request) {
-	// the "new" list id is coming from a json
-	// need userID to make it work
-}
+// UpdateGroceryList updates the GroceryListID for the provided userID.
+func (s *Service) UpdateGroceryList(w http.ResponseWriter, r *http.Request) {
+	// incoming json contains userID and listID
+	type newGroceryList struct {
+		UserID string `json:"UserID"`
+		ListID string `json:"ListID"`
+	}
+	var nl newGroceryList
+	err := DecodeRequest(r, &nl)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println("UpdateGroceryList: error decoding json, err:", err)
+		return
+	}
 
-func (s *Service) UpdateList(w http.ResponseWriter, r *http.Request) {
-	// the "new" list id is coming from a json
-	// need userID to make it work
+	result, err := s.Statements["GroceryList"].Exec(nl.ListID, nl.UserID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println("UpdateGroceryList: error executing query, err:", err)
+		return
+	}
+
+	err = CheckResult(result)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println("UpdateGroceryList:", err)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	log.Println("UpdateGroceryList: Successfully updated grocerylistID.")
 }
 
 func (s *Service) CreateHousehold(w http.ResponseWriter, r *http.Request) {
@@ -171,16 +197,11 @@ func (s *Service) CreateHousehold(w http.ResponseWriter, r *http.Request) {
 		log.Println("CreateHousehold: Failed to update householdID")
 		return
 	}
-	ra, err := result.RowsAffected()
+
+	err = CheckResult(result)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Println("CreateHousehold: Failed to read affected rows")
-		return
-	}
-	// this is bad
-	if ra != 1 {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Fatalln("CreateHousehold: Very bad, rows affected:", ra)
+		log.Println("CreateHousehold:", err)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -188,17 +209,18 @@ func (s *Service) CreateHousehold(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Service) UpdateHousehold(w http.ResponseWriter, r *http.Request) {
-	type users struct {
+	type updateHousehold struct {
 		StartUser string `json:"StartUser"`
 		DestUser  string `json:"DestUser"`
 	}
-	var u users
+	var u updateHousehold
 	err := json.NewDecoder(r.Body).Decode(&u)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Println("UpdateHousehold: Failed to decode request body: ", err)
 		return
 	}
+
 	var hhID string
 	err = s.Statements["GetHHID"].QueryRow(u.StartUser).Scan(&hhID)
 	if err != nil {
@@ -219,16 +241,10 @@ func (s *Service) UpdateHousehold(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ra, err := result.RowsAffected()
+	err = CheckResult(result)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Println("UpdateHousehold: Failed to get rows affected, err:", err)
-		return
-	}
-
-	if ra != 1 {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Println("UpdateHousehold: Rows affected were not 1, instead:", ra)
+		log.Println("UpdateHousehold:", err)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
