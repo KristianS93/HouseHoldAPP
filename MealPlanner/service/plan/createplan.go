@@ -71,7 +71,7 @@ func CreatePlan(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//Creating json response
+	//Creating json response //MAYBE RETURN HOUSEHOLD ID IF IT IS OF USE TO THE FRONTEND
 	type returndata struct {
 		PlanId int64 `json:"Planid"`
 	}
