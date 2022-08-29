@@ -10,6 +10,7 @@ import (
 	"net/http"
 )
 
+// GGROCERY LIST SKAL INITIERES VIGITGT!!!!!!!!!
 func CreateHouseHold(w http.ResponseWriter, r *http.Request) {
 	db := database.Connect()
 	defer db.Con.Close()

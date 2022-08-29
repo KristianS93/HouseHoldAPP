@@ -5,6 +5,8 @@ import (
 	"errors"
 	"log"
 	"mealplanner/models"
+
+	"github.com/lib/pq"
 )
 
 func (db DBConnection) InsertHousehold(householdid models.HouseHold) error {
@@ -18,10 +20,10 @@ func (db DBConnection) InsertHousehold(householdid models.HouseHold) error {
 	return nil
 }
 
-func (db DBConnection) SelectHousehold(household models.HouseHold) (models.HouseHold, error) {
-	var householdmodel = models.HouseHold{}
+func (db DBConnection) SelectHousehold(HouseholdId string) (models.HouseHoldDB, error) {
+	var householdmodel = models.HouseHoldDB{}
 	query := `SELECT * FROM household WHERE householdid = $1`
-	res := db.Con.QueryRow(query, household.HouseholdId).Scan(&householdmodel.Id, &householdmodel.HouseholdId, &householdmodel.Meals, &householdmodel.GroceryListId)
+	res := db.Con.QueryRow(query, HouseholdId).Scan(&householdmodel.Id, &householdmodel.HouseholdId, &householdmodel.GroceryListId, pq.Array(&householdmodel.Plans), pq.Array(&householdmodel.Meals))
 	if res == sql.ErrNoRows {
 		return householdmodel, errors.New("no id found")
 	}
@@ -29,18 +31,29 @@ func (db DBConnection) SelectHousehold(household models.HouseHold) (models.House
 	return householdmodel, nil
 }
 
-func (db DBConnection) UpdateHousehold(household models.HouseHold, updateField string, itemString string) error {
+func (db DBConnection) UpdateHousehold(household models.HouseHold) error {
+
+	query := `UPDATE household SET grocerylist = $1 WHERE householdid = $2`
+	_, err := db.Con.Exec(query, household.GroceryListId, household.HouseholdId)
+	if err != nil {
+		log.Println("Failed updating household")
+		return err
+	}
+	return nil
+}
+
+func (db DBConnection) UpdateHouseholdArrays(HouseholdId string, updateField string, ids []int64) error {
+	var values []int64
+	if updateField == "meals" {
+		values = ids
+	} else if updateField == "plans" {
+		values = ids
+	}
 
 	query := `UPDATE household SET ` + updateField + ` = $1 WHERE householdid = $2`
-	var value string
-	if updateField == "grocerylist" {
-		value = household.GroceryListId
-	} else if updateField == "meals" {
-		value = itemString
-	}
-	_, err := db.Con.Exec(query, value, household.HouseholdId)
+	_, err := db.Con.Exec(query, pq.Array(values), HouseholdId)
 	if err != nil {
-		log.Printf("Failed updating household with %s ", updateField)
+		log.Println("Failed updating household")
 		return err
 	}
 	return nil

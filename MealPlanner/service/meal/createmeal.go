@@ -36,38 +36,42 @@ func CreateMeal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var ids []int
 	//Check that each item on the list also has a name
+	if len(mealformat.Items) > 0 {
+		for _, v := range mealformat.Items {
+			if v.ItemName == "" {
+				log.Println("Item missing a name")
+				w.WriteHeader(http.StatusBadRequest)
+				io.WriteString(w, `{"Error": "Bad request: Missing data"}`)
+				return
+			}
+		}
+		valueStr, valueArgs := item.FormatingInsertItems(mealformat.Items)
 
-	for _, v := range mealformat.Items {
-		if v.ItemName == "" {
-			log.Println("Item missing a name")
+		//Create the items:
+		ids, err = db.InsertItems(valueStr, valueArgs)
+		if err != nil {
+			log.Println("Error creating items")
 			w.WriteHeader(http.StatusBadRequest)
 			io.WriteString(w, `{"Error": "Bad request: Missing data"}`)
 			return
+
 		}
-	}
-
-	valueStr, valueArgs := item.FormatingInsertItems(mealformat.Items)
-
-	//Create the items:
-	ids, err := db.InsertItems(valueStr, valueArgs)
-	if err != nil {
-		log.Println("Error creating items")
-		w.WriteHeader(http.StatusBadRequest)
-		io.WriteString(w, `{"Error": "Bad request: Missing data"}`)
-		return
-
 	}
 
 	//Running insertmeal query
 	err = db.InsertMeal(&mealformat, ids)
 	if err != nil {
 		log.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		io.WriteString(w, `{"Error": "Creating meal"}`)
+		return
 	}
 
 	//Creating json response
 	type returndata struct {
-		MealId int `json:"MealId"`
+		MealId int64 `json:"MealId"`
 	}
 	rd := returndata{mealformat.Id}
 	log.Printf("Meal added")
