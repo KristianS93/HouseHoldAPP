@@ -5,6 +5,6 @@ import (
 	"net/http"
 )
 
-func CreatePlan(w *http.ResponseWriter, r *http.Request) {
+func CreatePlan(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Noget med en plan")
 }

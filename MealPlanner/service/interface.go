@@ -35,22 +35,22 @@ func (s *Server) IDeleteMeal(w http.ResponseWriter, r *http.Request) {
 
 // Plan functionalities
 func (s *Server) ICreatePlan(w http.ResponseWriter, r *http.Request) {
-	plan.CreatePlan(&w, r)
+	plan.CreatePlan(w, r)
 }
 func (s *Server) IGetPlan(w http.ResponseWriter, r *http.Request) {
-	plan.GetPlan(&w, r)
+	plan.GetPlan(w, r)
 }
 func (s *Server) IChangePlan(w http.ResponseWriter, r *http.Request) {
-	plan.ChangePlan(&w, r)
+	plan.ChangePlan(w, r)
 }
 func (s *Server) IGeneratePlan(w http.ResponseWriter, r *http.Request) {
-	plan.GeneratePlan(&w, r)
+	plan.GeneratePlan(w, r)
 }
 func (s *Server) IGenerateList(w http.ResponseWriter, r *http.Request) {
-	plan.GenerateList(&w, r)
+	plan.GenerateList(w, r)
 }
 func (s *Server) IDeletePlan(w http.ResponseWriter, r *http.Request) {
-	plan.DeletePlan(&w, r)
+	plan.DeletePlan(w, r)
 }
 
 // Household functionalities

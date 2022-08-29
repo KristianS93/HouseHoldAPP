@@ -5,6 +5,6 @@ import (
 	"net/http"
 )
 
-func DeletePlan(w *http.ResponseWriter, r *http.Request) {
+func DeletePlan(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Noget med en plan")
 }

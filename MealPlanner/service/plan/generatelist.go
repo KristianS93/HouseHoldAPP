@@ -5,6 +5,6 @@ import (
 	"net/http"
 )
 
-func GenerateList(w *http.ResponseWriter, r *http.Request) {
+func GenerateList(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Noget med en plan")
 }
