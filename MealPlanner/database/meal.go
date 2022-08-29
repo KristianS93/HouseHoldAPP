@@ -56,3 +56,12 @@ func (db DBConnection) DeleteMeal(mealId int) error {
 	}
 	return nil
 }
+
+func (db DBConnection) UpdateMeal(meal models.Meal) error {
+	query := `UPDATE meal SET name = $1, description = $2 WHERE id = $3`
+	_, err := db.Con.Exec(query, meal.MealName, meal.Description, meal.Id)
+	if err != nil {
+		return err
+	}
+	return err
+}

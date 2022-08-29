@@ -27,7 +27,7 @@ func (s *Server) IGetMeal(w http.ResponseWriter, r *http.Request) {
 	meal.GetMeal(w, r)
 }
 func (s *Server) IChangeMeal(w http.ResponseWriter, r *http.Request) {
-	meal.ChangeMeal(&w, r)
+	meal.ChangeMeal(w, r)
 }
 func (s *Server) IDeleteMeal(w http.ResponseWriter, r *http.Request) {
 	meal.DeleteMeal(w, r)
