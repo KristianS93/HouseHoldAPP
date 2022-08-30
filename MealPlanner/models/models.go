@@ -33,7 +33,8 @@ type PlanId struct {
 }
 
 type MealId struct {
-	MealId int `json:"MealId"`
+	MealId int64 `json:"MealId"`
+	HouseholdId string `json:"HouseholdId"`
 }
 
 type HouseHold struct {
