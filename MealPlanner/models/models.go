@@ -28,6 +28,10 @@ type Plan struct {
 	Meals       []Meal `json:"Meals"`
 }
 
+type PlanId struct {
+	PlanId int64 `json:"PlanId"`
+}
+
 type MealId struct {
 	MealId int `json:"MealId"`
 }
