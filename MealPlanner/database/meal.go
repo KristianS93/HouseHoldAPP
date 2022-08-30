@@ -19,7 +19,7 @@ func (db DBConnection) InsertMeal(meal *models.Meal, itemIds []int) error {
 	return nil
 }
 
-func (db DBConnection) SelectMealId(id int) (models.MealDB, error) {
+func (db DBConnection) SelectMealId(id int64) (models.MealDB, error) {
 	var meal = models.MealDB{}
 	query := `SELECT * FROM meal WHERE id = $1`
 	err := db.Con.QueryRow(query, id).Scan(&meal.Id, &meal.MealName, &meal.Description, pq.Array(&meal.Items))
@@ -48,7 +48,7 @@ func (db DBConnection) SelectMultipleItems(id []int64) ([]models.Item, error) {
 	return items, nil
 }
 
-func (db DBConnection) DeleteMeal(mealId int) error {
+func (db DBConnection) DeleteMeal(mealId int64) error {
 	query := `DELETE FROM meal WHERE id = $1`
 	_, err := db.Con.Exec(query, mealId)
 	if err != nil {

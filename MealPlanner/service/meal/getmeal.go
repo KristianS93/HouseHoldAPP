@@ -37,7 +37,7 @@ func GetMeal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Get mealid
-	mealid, err := strconv.Atoi(r.URL.Query()["MealId"][0])
+	mealid, err := strconv.ParseInt(r.URL.Query()["MealId"][0], 10, 64)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)

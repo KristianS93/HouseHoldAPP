@@ -29,11 +29,12 @@ type Plan struct {
 }
 
 type PlanId struct {
-	PlanId int64 `json:"PlanId"`
+	PlanId      int64  `json:"PlanId"`
+	HouseholdId string `json:"HouseholdId"`
 }
 
 type MealId struct {
-	MealId int64 `json:"MealId"`
+	MealId      int64  `json:"MealId"`
 	HouseholdId string `json:"HouseholdId"`
 }
 

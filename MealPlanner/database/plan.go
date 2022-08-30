@@ -16,3 +16,12 @@ func (db DBConnection) CreatePlan(data *models.Plan, mealIds []int64) error {
 	data.Id = id
 	return nil
 }
+
+func (db DBConnection) DeletePlan(planId int64) error {
+	query := `DELETE FROM plan WHERE id = $1`
+	_, err := db.Con.Exec(query, planId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
