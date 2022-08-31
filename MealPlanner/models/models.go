@@ -35,6 +35,13 @@ type PlanDB struct {
 	Meals       []int64 `json:"Meals"`
 }
 
+type ReturnPlan struct {
+	Id          int64    `json:"Id"`
+	WeekNo      int      `json:"WeekNo"`
+	HouseHoldId string   `json:"HouseHoldId"`
+	Meals       []MealDB `json:"Items"`
+}
+
 type PlanId struct {
 	PlanId      int64  `json:"PlanId"`
 	HouseholdId string `json:"HouseholdId"`

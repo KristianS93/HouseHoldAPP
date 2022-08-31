@@ -1,6 +1,8 @@
 package database
 
 import (
+	"errors"
+	"log"
 	"mealplanner/models"
 
 	"github.com/lib/pq"
@@ -33,4 +35,15 @@ func (db DBConnection) UpdatePlan(planData models.PlanDB) error {
 		return err
 	}
 	return nil
+}
+
+func (db DBConnection) SelectPlan(weekno int64, household string) (models.PlanDB, error) {
+	var rPlanData models.PlanDB
+	query := `SELECT * FROM plan WHERE weekno = $1 AND householdid = $2`
+	err := db.Con.QueryRow(query, weekno, household).Scan(&rPlanData.Id, &rPlanData.WeekNo, &rPlanData.HouseHoldId, pq.Array(&rPlanData.Meals))
+	if err != nil {
+		log.Println(err)
+		return rPlanData, errors.New("error selecting plan")
+	}
+	return rPlanData, nil
 }

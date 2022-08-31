@@ -48,6 +48,25 @@ func (db DBConnection) SelectMultipleItems(id []int64) ([]models.Item, error) {
 	return items, nil
 }
 
+func (db DBConnection) SelectMultipleMeals(id []int64) ([]models.MealDB, error) {
+	var meals []models.MealDB
+
+	buildQuery := `SELECT * FROM meal WHERE id = ANY($1::int[])`
+
+	rows, err := db.Con.Query(buildQuery, pq.Array(id))
+	if err != nil {
+		return meals, err
+	}
+
+	for rows.Next() {
+		var meal models.MealDB
+		rows.Scan(&meal.Id, &meal.MealName, &meal.Description, pq.Array(&meal.Items))
+		meals = append(meals, meal)
+	}
+
+	return meals, nil
+}
+
 func (db DBConnection) DeleteMeal(mealId int64) error {
 	query := `DELETE FROM meal WHERE id = $1`
 	_, err := db.Con.Exec(query, mealId)
