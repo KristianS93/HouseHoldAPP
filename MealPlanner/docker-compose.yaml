@@ -12,6 +12,20 @@
 # volumes:
 #   data:
 
+# version: '3.9'
+# services:
+#   db:
+#     container_name: newdb
+#     image: postgres
+#     volumes:
+#       - ./data/db:/var/lib/postgresql/data
+#     ports:
+#       - 27021:27021
+#     env_file:
+#       - ./database/.env
+# volumes:
+#   data:
+
 version: '3.9'
 services:
   db:
@@ -23,5 +37,20 @@ services:
       - 27021:27021
     env_file:
       - ./database/.env
+
+  app:
+    container_name: mealplanner
+    build:
+      dockerfile: Dockerfile
+      context: .
+    ports:
+      - 5005:5005
+    # env_file:
+    #   - ./database/.env
+    depends_on:
+      - db
+    volumes:
+      - mealplanner-service:/app
 volumes:
   data:
+  mealplanner-service:

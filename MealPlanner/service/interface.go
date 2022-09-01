@@ -1,6 +1,8 @@
 package service
 
 import (
+	"encoding/json"
+	"log"
 	"mealplanner/service/household"
 	"mealplanner/service/item"
 	"mealplanner/service/meal"
@@ -62,4 +64,13 @@ func (s *Server) IDeleteHousehold(w http.ResponseWriter, r *http.Request) {
 }
 func (s *Server) ICreateGroceryList(w http.ResponseWriter, r *http.Request) {
 	household.CreateGroceryList(w, r)
+}
+
+// test
+func (s *Server) ITest(w http.ResponseWriter, r *http.Request) {
+	//Return succes message
+	log.Println("Meal Updated")
+	str := make(map[string]string)
+	str["Succes"] = "Meal Updated"
+	json.NewEncoder(w).Encode(str)
 }
