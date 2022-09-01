@@ -11,8 +11,8 @@ import (
 
 func (db DBConnection) InsertHousehold(householdid models.HouseHold) error {
 	//Insert into household:
-	query := `INSERT INTO household (householdid) VALUES ($1)`
-	_, err := db.Con.Exec(query, householdid.HouseholdId)
+	query := `INSERT INTO household (householdid, grocerylist) VALUES ($1, $2)`
+	_, err := db.Con.Exec(query, householdid.HouseholdId, householdid.GroceryListId)
 	if err != nil {
 		log.Println("Error inserting household")
 		return err
@@ -31,7 +31,7 @@ func (db DBConnection) SelectHousehold(HouseholdId string) (models.HouseHoldDB, 
 	return householdmodel, nil
 }
 
-func (db DBConnection) UpdateHousehold(household models.HouseHold) error {
+func (db DBConnection) UpdateHouseholdGroceryList(household models.HouseHold) error {
 
 	query := `UPDATE household SET grocerylist = $1 WHERE householdid = $2`
 	_, err := db.Con.Exec(query, household.GroceryListId, household.HouseholdId)

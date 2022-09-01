@@ -10,7 +10,6 @@ import (
 	"net/http"
 )
 
-// GGROCERY LIST SKAL INITIERES VIGITGT!!!!!!!!!
 func CreateHouseHold(w http.ResponseWriter, r *http.Request) {
 	db := database.Connect()
 	defer db.Con.Close()
@@ -33,6 +32,8 @@ func CreateHouseHold(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(w, `{"Error": "Bad request: Missing data"}`)
 		return
 	}
+
+	householdid.GroceryListId = "No list"
 
 	//Insert into household
 	err = db.InsertHousehold(householdid)
