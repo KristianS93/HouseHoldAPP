@@ -47,3 +47,17 @@ func (db DBConnection) SelectPlan(weekno int64, household string) (models.PlanDB
 	}
 	return rPlanData, nil
 }
+
+func (db DBConnection) TestMultipleWeekno(weekno int, household string) bool {
+	var count int
+	query := `SELECT COUNT(*) FROM plan WHERE weekno = $1 AND householdid = $2`
+	err := db.Con.QueryRow(query, weekno, household).Scan(&count)
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+	if count > 0 {
+		return false
+	}
+	return true
+}

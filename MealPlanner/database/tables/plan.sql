@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS plan(
     id SERIAL PRIMARY KEY,
-    weekno VARCHAR(100),
+    weekno int,
     householdid VARCHAR(100),
-    meals int[]
+    meals int []
 );

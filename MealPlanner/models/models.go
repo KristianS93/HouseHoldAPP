@@ -9,6 +9,7 @@ type Item struct {
 
 type Meal struct {
 	Id          int64  `json:"Id"`
+	HouseholdId string `json:"HouseHoldId"`
 	MealName    string `json:"MealName"`
 	Description string `json:"Description"`
 	Items       []Item `json:"Items"`
@@ -70,4 +71,12 @@ type HouseHoldDB struct {
 
 type ItemIds struct {
 	ItemIds []int64 `json:"ItemIds"`
+}
+
+type GeneratePlan struct {
+	Id          int64   `json:"id"`
+	WeekNo      int     `json:"WeekNo"`
+	HouseholdId string  `json:"HouseholdId"`
+	MealAmount  int     `json:"MealAmount"`
+	Meals       []int64 `json:"Meals"`
 }

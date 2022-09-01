@@ -44,6 +44,13 @@ func CreatePlan(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	if !db.TestMultipleWeekno(getPlan.WeekNo, getPlan.HouseHoldId) {
+		log.Println("WeekNo already exist for this household")
+		w.WriteHeader(http.StatusBadRequest)
+		io.WriteString(w, `{"Error": "WeekNo already exist for this household"}`)
+		return
+	}
+
 	err = db.CreatePlan(&getPlan, mealIds)
 	if err != nil {
 		log.Println(err)

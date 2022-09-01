@@ -9,8 +9,8 @@ import (
 	"github.com/lib/pq"
 )
 
-func (db DBConnection) InsertItems(valueStr string, data []interface{}) ([]int, error) {
-	var ids []int
+func (db DBConnection) InsertItems(valueStr string, data []interface{}) ([]int64, error) {
+	var ids []int64
 	query := fmt.Sprintf("INSERT INTO item (name, quantity, unit) VALUES %s RETURNING id", valueStr)
 	// VIRKER
 	// rows, err := db.Con.Query(query, data...)
@@ -38,7 +38,7 @@ func (db DBConnection) InsertItems(valueStr string, data []interface{}) ([]int, 
 	}
 
 	for rows.Next() {
-		var itemsId int
+		var itemsId int64
 		rows.Scan(&itemsId)
 		ids = append(ids, itemsId)
 	}

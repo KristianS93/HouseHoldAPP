@@ -29,14 +29,14 @@ func CreateMeal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Check that mealname and weekplanid is not missing
-	if mealformat.MealName == "" {
+	if mealformat.MealName == "" || mealformat.HouseholdId == "" {
 		log.Println("Missing mealname")
 		w.WriteHeader(http.StatusBadRequest)
 		io.WriteString(w, `{"Error": "Bad request: Missing data"}`)
 		return
 	}
 
-	var ids []int
+	var ids []int64
 	//Check that each item on the list also has a name
 	if len(mealformat.Items) > 0 {
 		for _, v := range mealformat.Items {
@@ -66,6 +66,24 @@ func CreateMeal(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
 		io.WriteString(w, `{"Error": "Creating meal"}`)
+		return
+	}
+
+	//Selecting current household meal array
+	household, err := db.SelectHousehold(mealformat.HouseholdId)
+	if err != nil {
+		log.Println("error selectiong household")
+		w.WriteHeader(http.StatusBadRequest)
+		io.WriteString(w, `{"Error": "Selecting household"}`)
+		return
+	}
+	household.Meals = append(household.Meals, mealformat.Id)
+	//Updateing household meals
+	err = db.UpdateHouseholdArrays(mealformat.HouseholdId, "meals", household.Meals)
+	if err != nil {
+		log.Println("Error Updating household meals")
+		w.WriteHeader(http.StatusBadRequest)
+		io.WriteString(w, `{"Error": "Updating household meals"}`)
 		return
 	}
 

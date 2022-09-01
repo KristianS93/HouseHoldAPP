@@ -8,7 +8,7 @@ import (
 	"github.com/lib/pq"
 )
 
-func (db DBConnection) InsertMeal(meal *models.Meal, itemIds []int) error {
+func (db DBConnection) InsertMeal(meal *models.Meal, itemIds []int64) error {
 	var id int64
 	query := `INSERT INTO meal (name, description, items) VALUES ($1, $2, $3) RETURNING id`
 	err := db.Con.QueryRow(query, meal.MealName, meal.Description, pq.Array(itemIds)).Scan(&id)

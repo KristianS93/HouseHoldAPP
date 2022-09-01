@@ -48,7 +48,7 @@ func AddItem(w http.ResponseWriter, r *http.Request) {
 
 	//Generating return data with an array of ids.
 	type returndata struct {
-		ItemIds []int `json:"ItemId"`
+		ItemIds []int64 `json:"ItemId"`
 	}
 	returnIds := returndata{}
 	returnIds.ItemIds = append(returnIds.ItemIds, ids...)
