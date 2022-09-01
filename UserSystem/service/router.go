@@ -39,7 +39,7 @@ func (s *Service) Routes(r *mux.Router) {
 	r.HandleFunc("/CreateUser", s.CreateUser).Methods(http.MethodPost)
 	r.HandleFunc("/DeleteUser", s.DeleteUser).Methods(http.MethodDelete)
 	r.HandleFunc("/CreateHousehold", s.CreateHousehold).Methods(http.MethodPost)
-	r.HandleFunc("/UpdateHousehold", s.UpdateHousehold).Methods(http.MethodPatch)
+	r.HandleFunc("/JoinHousehold", s.JoinHousehold).Methods(http.MethodPatch)
 	r.HandleFunc("/UpdateGroceryList", s.UpdateGroceryList).Methods(http.MethodPatch)
 }
 
@@ -56,8 +56,16 @@ func (s *Service) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	stmt, err := s.DB.Prepare("SELECT firstName, listID, householdID FROM USERS WHERE userID = $1 AND password = $2")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println("Login: failed to prepare query to check login, err:", err)
+		return
+	}
+	defer stmt.Close()
+
 	var u user
-	err = s.Statements["Login"].QueryRow(lg.UserID, lg.Password).Scan(&u.FirstName, &u.ListID, &u.HouseholdID)
+	err = stmt.QueryRow(lg.UserID, lg.Password).Scan(&u.FirstName, &u.ListID, &u.HouseholdID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			w.WriteHeader(http.StatusNotFound)
@@ -87,7 +95,15 @@ func (s *Service) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := s.Statements["CreateUser"].Exec(nu.UserID, nu.Password, nu.FirstName, nu.LastName, nu.ListID, nu.HouseholdID)
+	stmt, err := s.DB.Prepare("INSERT INTO USERS (userID, password, firstName, lastName, listID, householdID) VALUES ($1, $2, $3, $4, $5, $6)")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println("CreateUser: failed to prepare query to insert user, err:", err)
+		return
+	}
+	defer stmt.Close()
+
+	result, err := stmt.Exec(nu.UserID, nu.Password, nu.FirstName, nu.LastName, nu.ListID, nu.HouseholdID)
 	if err != nil {
 		// following is a type assertion
 		if sqliteErr, ok := err.(sqlite3.Error); ok {
@@ -121,7 +137,15 @@ func (s *Service) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := s.Statements["DeleteUser"].Exec(data.UserID, data.Password)
+	stmt, err := s.DB.Prepare("DELETE FROM USERS WHERE userID = $1 AND password = $2")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println("UpdateGroceryList: failed to prepare query to update listID, err:", err)
+		return
+	}
+	defer stmt.Close()
+
+	result, err := stmt.Exec(data.UserID, data.Password)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Println("DeleteUser: failed to delete user:", err)
@@ -154,7 +178,15 @@ func (s *Service) UpdateGroceryList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := s.Statements["GroceryList"].Exec(nl.ListID, nl.UserID)
+	stmt, err := s.DB.Prepare("UPDATE USERS SET listID = $1 WHERE userID = $2")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println("UpdateGroceryList: failed to prepare query to update listID, err:", err)
+		return
+	}
+	defer stmt.Close()
+
+	result, err := stmt.Exec(nl.ListID, nl.UserID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Println("UpdateGroceryList: error executing query, err:", err)
@@ -172,13 +204,7 @@ func (s *Service) UpdateGroceryList(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Service) CreateHousehold(w http.ResponseWriter, r *http.Request) {
-	var id login
-	err := DecodeRequest(r, &id)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	// The following is an example of the same functionality as above, however
+	// The following is an example of the same functionality as below, however
 	// with no side effects of the function - this would require the DecodeRequest
 	// function to return the decoded json interface and the possible error, instead of only an error.
 	//
@@ -188,10 +214,26 @@ func (s *Service) CreateHousehold(w http.ResponseWriter, r *http.Request) {
 	// 	// check if there was an error in decoding
 	// }
 	// if do, ok := temp.(login); ok {
-	// 	// did my type assertion work
+	// 	// did the type assertion work
 	// }
 
-	result, err := s.Statements["HouseHold"].Exec(uuid.New().String(), id.UserID)
+	var id login
+	err := DecodeRequest(r, &id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	stmt, err := s.DB.Prepare("UPDATE USERS SET householdID = $1 WHERE userID = $2")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println("CreateHousehold: failed to prepare query to set household, err:", err)
+		return
+	}
+	defer stmt.Close()
+
+	newUUID := uuid.New()
+	result, err := stmt.Exec(newUUID.String(), id.UserID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Println("CreateHousehold: Failed to update householdID")
@@ -204,11 +246,18 @@ func (s *Service) CreateHousehold(w http.ResponseWriter, r *http.Request) {
 		log.Println("CreateHousehold:", err)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
+
+	// automatically writes statuscode 200
+	_, err = w.Write([]byte(newUUID.String()))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println("CreateHousehold: failed to write newUUID to response, err:", err)
+		return
+	}
 	log.Println("CreateHousehold: HouseholdID updated succesfully")
 }
 
-func (s *Service) UpdateHousehold(w http.ResponseWriter, r *http.Request) {
+func (s *Service) JoinHousehold(w http.ResponseWriter, r *http.Request) {
 	type updateHousehold struct {
 		StartUser string `json:"StartUser"`
 		DestUser  string `json:"DestUser"`
@@ -217,36 +266,51 @@ func (s *Service) UpdateHousehold(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&u)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Println("UpdateHousehold: Failed to decode request body: ", err)
+		log.Println("JoinHousehold: Failed to decode request body: ", err)
 		return
 	}
 
-	var hhID string
-	err = s.Statements["GetHHID"].QueryRow(u.StartUser).Scan(&hhID)
+	var hhID, glID string
+	stmt, err := s.DB.Prepare("SELECT householdID, listID FROM USERS WHERE userID = $1")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println("JoinHousehold: failed to prepare query to get hhID and glID, err:", err)
+		return
+	}
+
+	err = stmt.QueryRow(u.StartUser).Scan(&hhID, &glID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			w.WriteHeader(http.StatusNotFound)
-			log.Println("UpdateHousehold: user not found")
+			log.Println("JoinHousehold: user not found")
 			return
 		}
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Println("UpdateHousehold: something wrong with DB, err:", err)
+		log.Println("JoinHousehold: something wrong with DB, err:", err)
 		return
 	}
 
-	result, err := s.Statements["HouseHold"].Exec(hhID, u.DestUser)
+	stmt, err = s.DB.Prepare("UPDATE USERS SET householdID = $1, listID = $2 WHERE userID = $3")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Println("UpdateHousehold: Failed to access database, err:", err)
+		log.Println("JoinHousehold: failed to prepare query to update hhID and glID, err:", err)
+		return
+	}
+	defer stmt.Close()
+
+	result, err := stmt.Exec(hhID, glID, u.DestUser)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println("JoinHousehold: Failed to access database, err:", err)
 		return
 	}
 
 	err = CheckResult(result)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		log.Println("UpdateHousehold:", err)
+		log.Println("JoinHousehold:", err)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	log.Println("UpdateHousehold: Successfully updated HouseholdID.")
+	log.Println("JoinHousehold: Successfully updated HouseholdID.")
 }
