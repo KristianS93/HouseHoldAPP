@@ -2,6 +2,7 @@ package plan
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"mealplanner/database"
@@ -76,11 +77,54 @@ func GetPlan(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Println(meals)
+
+	// ALL item ids
+	var itemIds []int64
+	for _, v := range meals {
+		itemIds = append(itemIds, v.Items...)
+	}
+
+	itemMap := make(map[int64]models.Item)
+
+	items, err := db.SelectMultipleItems(itemIds)
+	if err != nil {
+		log.Println("error selecting items")
+	}
+
+	for _, v := range items {
+		var item models.Item
+		item.Id = v.Id
+		item.ItemName = v.ItemName
+		item.Quantity = v.Quantity
+		item.Unit = v.Unit
+		itemMap[int64(item.Id)] = item
+	}
+
+	var mealsReturn []models.Meal
+	for _, v := range meals {
+		var meal models.Meal
+		meal.Id = v.Id
+		meal.HouseholdId = householdid
+		meal.MealName = v.MealName
+		meal.Description = v.Description
+		fmt.Println(len(v.Items))
+		var newItems []models.Item
+		for _, x := range v.Items {
+			newItems = append(newItems, itemMap[x])
+		}
+		meal.Items = newItems
+		mealsReturn = append(mealsReturn, meal)
+	}
+
+	// fmt.Println(mealsReturn)
+	// meals.Items
+
 	var returnData models.ReturnPlan
 	returnData.Id = planData.Id
 	returnData.WeekNo = planData.WeekNo
 	returnData.HouseHoldId = planData.HouseHoldId
-	returnData.Meals = meals
+	returnData.Meals = mealsReturn
 
 	//Returning plan
 	log.Printf("Plan returned")
