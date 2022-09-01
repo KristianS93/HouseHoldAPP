@@ -62,29 +62,27 @@ type MealId struct {
 }
 
 type HouseHold struct {
-	Id            int    `json:"id"`
-	HouseholdId   string `json:"HouseholdId"`
-	GroceryListId string `json:"GroceryListId"`
-	Plans         []Plan `json:"Plans"`
-	Meals         []Meal `json:"Meals"`
+	Id          int    `json:"id"`
+	HouseholdId string `json:"HouseholdId"`
+	Plans       []Plan `json:"Plans"`
+	Meals       []Meal `json:"Meals"`
 }
 
 type HouseHoldDB struct {
-	Id            int     `json:"id"`
-	HouseholdId   string  `json:"HouseholdId"`
-	GroceryListId string  `json:"GroceryListId"`
-	Plans         []int64 `json:"Plans"`
-	Meals         []int64 `json:"Meals"`
+	Id          int     `json:"id"`
+	HouseholdId string  `json:"HouseholdId"`
+	Plans       []int64 `json:"Plans"`
+	Meals       []int64 `json:"Meals"`
 }
 
 type HouseholdRequest struct {
 	HouseholdId string `json:"HouseholdId"`
 }
 
-type HouseholdGroceryList struct {
-	Succes string `json:"Succes"`
-	ListId string `json:"ListId"`
-}
+// type HouseholdGroceryList struct {
+// 	Succes string `json:"Succes"`
+// 	ListId string `json:"ListId"`
+// }
 
 type ItemIds struct {
 	ItemIds []int64 `json:"ItemIds"`
@@ -96,4 +94,10 @@ type GeneratePlan struct {
 	HouseholdId string  `json:"HouseholdId"`
 	MealAmount  int     `json:"MealAmount"`
 	Meals       []int64 `json:"Meals"`
+}
+
+type GenerateList struct {
+	WeekNo        int    `json:"WeekNo"`
+	HouseholdId   string `json:"HouseholdId"`
+	GroceryListId string `json:"GroceryListId"`
 }
