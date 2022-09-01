@@ -79,11 +79,6 @@ type HouseholdRequest struct {
 	HouseholdId string `json:"HouseholdId"`
 }
 
-// type HouseholdGroceryList struct {
-// 	Succes string `json:"Succes"`
-// 	ListId string `json:"ListId"`
-// }
-
 type ItemIds struct {
 	ItemIds []int64 `json:"ItemIds"`
 }
