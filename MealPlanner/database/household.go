@@ -59,6 +59,12 @@ func (db DBConnection) UpdateHouseholdArrays(HouseholdId string, updateField str
 	return nil
 }
 
-// func (db DBConnection) DeleteHouseHold(household models.HouseHold) error {
-// 	query := `DELETE FROM household WHERE householdid = $1`
-// }
+func (db DBConnection) DeleteHouseHold(household string) error {
+	query := `DELETE FROM household WHERE householdid = $1`
+	_, err := db.Con.Exec(query, household)
+	if err != nil {
+		log.Println("Failed deleting household")
+		return err
+	}
+	return nil
+}

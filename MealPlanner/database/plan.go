@@ -28,6 +28,16 @@ func (db DBConnection) DeletePlan(planId int64) error {
 	return nil
 }
 
+func (db DBConnection) DeletePlans(ids []int64) error {
+	query := `DELETE FROM plan WHERE id = ANY($1::int[])`
+	_, err := db.Con.Exec(query, pq.Array(ids))
+	if err != nil {
+		log.Println("error executing query")
+		return err
+	}
+	return nil
+}
+
 func (db DBConnection) UpdatePlan(planData models.PlanDB) error {
 	query := `UPDATE plan SET weekno = $1, meals = $2 WHERE id = $3`
 	_, err := db.Con.Exec(query, planData.WeekNo, pq.Array(planData.Meals), planData.Id)

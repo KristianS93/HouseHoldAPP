@@ -77,8 +77,6 @@ func GetPlan(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// fmt.Println(meals)
-
 	// ALL item ids
 	var itemIds []int64
 	for _, v := range meals {

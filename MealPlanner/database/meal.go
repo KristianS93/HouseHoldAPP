@@ -76,6 +76,16 @@ func (db DBConnection) DeleteMeal(mealId int64) error {
 	return nil
 }
 
+func (db DBConnection) DeleteMeals(ids []int64) error {
+	query := `DELETE FROM meal WHERE id = ANY($1::int[])`
+	_, err := db.Con.Exec(query, pq.Array(ids))
+	if err != nil {
+		log.Println("error executing query")
+		return err
+	}
+	return nil
+}
+
 func (db DBConnection) UpdateMeal(meal models.Meal) error {
 	query := `UPDATE meal SET name = $1, description = $2 WHERE id = $3`
 	_, err := db.Con.Exec(query, meal.MealName, meal.Description, meal.Id)
