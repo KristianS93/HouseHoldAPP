@@ -3,7 +3,6 @@ package plan
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"mealplanner/database"
@@ -31,7 +30,7 @@ func GenerateList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Check specfic fields are not empty
-	if planData.WeekNo == 0 || planData.HouseHoldId == "" || len(planData.Meals) == 0 {
+	if planData.WeekNo == 0 || planData.HouseHoldId == "" {
 		log.Println("No week no. or household id provided or meals")
 		w.WriteHeader(http.StatusBadRequest)
 		io.WriteString(w, `{"Error": "No week no. or household provided or meals"}`)
@@ -55,13 +54,76 @@ func GenerateList(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(w, `{"Error": "`+errStr+`"}`)
 		return
 	}
-	//Hent items på hvert enkelt meal
-	fmt.Println("list cleared")
-	//add items til list
+	//Hent specifik plan på hvert enkelt meal
+	plan, err := db.SelectPlan(int64(planData.WeekNo), planData.HouseHoldId)
+	if err != nil {
+		log.Println("error selecting plan")
+		w.WriteHeader(http.StatusBadRequest)
+		io.WriteString(w, `{"Error": "Selecting household"}`)
+		return
+	}
 
+	//get meal ids
+	meals, err := db.SelectMultipleMeals(plan.Meals)
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		io.WriteString(w, `{"Error": "Selecting meals"}`)
+		return
+	}
+
+	var itemIds []int64
+	for _, v := range meals {
+		itemIds = append(itemIds, v.Items...)
+	}
+
+	items, err := db.SelectMultipleItems(itemIds)
+	if err != nil {
+		log.Println("error selecting items")
+		w.WriteHeader(http.StatusBadRequest)
+		io.WriteString(w, `{"Error": "error selecting items"}`)
+		return
+	}
+
+	var addItems []models.ItemRequest
+	for _, v := range items {
+		var item models.ItemRequest
+		item.ListId = household.GroceryListId
+		item.ItemName = v.ItemName
+		item.Quantity = v.Quantity
+		item.Unit = v.Unit
+		addItems = append(addItems, item)
+	}
+
+	itemJson, err := json.Marshal(addItems)
+	if err != nil {
+		log.Println("error marshal item")
+		w.WriteHeader(http.StatusBadRequest)
+		io.WriteString(w, `{"Error": "error marshal items"}`)
+		return
+
+	}
+	res, err := http.Post("http://localhost:5003/AddItem", "application/json", bytes.NewBuffer(itemJson))
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		io.WriteString(w, `{"Error": "error posting to grocerylist"}`)
+		return
+	}
+
+	if res.StatusCode != 200 {
+		log.Println("error inserting into grocerylist")
+		w.WriteHeader(http.StatusBadRequest)
+		io.WriteString(w, `{"Error": "inserting into grocerylist"}`)
+		return
+	}
 	//Succes
+	//Return succes message
+	log.Println("Grocery list Updated")
+	str := make(map[string]string)
+	str["Succes"] = "Grocery list Updated"
+	json.NewEncoder(w).Encode(str)
 
-	fmt.Println("Noget med en plan")
 }
 
 func clearList(listId string) (string, error) {

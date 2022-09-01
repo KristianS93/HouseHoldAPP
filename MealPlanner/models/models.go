@@ -7,6 +7,13 @@ type Item struct {
 	Unit     string `json:"Unit"`
 }
 
+type ItemRequest struct {
+	ListId   string `json:"ListId"`
+	ItemName string `json:"ItemName"`
+	Quantity string `json:"Quantity"`
+	Unit     string `json:"Unit"`
+}
+
 type Meal struct {
 	Id          int64  `json:"Id"`
 	HouseholdId string `json:"HouseHoldId"`
