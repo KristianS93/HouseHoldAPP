@@ -61,15 +61,30 @@
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title text-center" id="loginModalLabel">Login</h5>
+            <h5 class="modal-title" id="loginModalLabel">Login</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            There should be a form to login here.
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary">Login</button>
+            <p class="text-center">Please supply your user information to login.</p>
+            
+            <form action="/login" method="POST">
+
+              <div class="form-floating">
+                <input type="email" class="form-control" id="email" autocomplete="off" placeholder="E-mail" required>
+                <label class="form-label" for="email">E-mail</label>
+              </div> 
+<br>
+              <div class="form-floating">
+                <input type="password" class="form-control" id="password" autocomplete="off" placeholder="Password" required>
+                <label class="form-label" for="password">Password</label>
+              </div> 
+<br>
+              <div class="d-grid gap-2 col-6 mx-auto">
+                <button type="submit" class="btn btn-secondary">Login</button>
+              </div>
+
+            </form>
+
           </div>
         </div>
       </div>
@@ -80,15 +95,51 @@
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title text-center" id="signupModalLabel">Sign Up</h5>
+            <h5 class="modal-title" id="signupModalLabel">Sign Up</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            There should be a form to sign up here.
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary">Sign Up</button>
+            <p class="text-center">Register as a user to join the HouseHold platform.</p>
+
+            <form action="/signup" method="POST">
+
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-floating">
+                    <input type="text" class="form-control" id="firstName" autocomplete="off" placeholder="First Name" required>
+                    <label class="form-label" for="firstName">First Name</label>
+                  </div> 
+                </div>
+
+                <div class="col-md-6">
+                  <div class="form-floating">
+                    <input type="text" class="form-control" id="lastName" autocomplete="off" placeholder="Last Name" required>
+                    <label class="form-label" for="lastName">Last Name</label>
+                  </div> 
+                </div>
+              </div> 
+<br>
+              <div class="form-floating">
+                <input type="email" class="form-control" id="email" autocomplete="off" placeholder="E-mail" required>
+                <label class="form-label" for="email">E-mail</label>
+              </div> 
+<br>
+              <div class="form-floating">
+                <input type="password" class="form-control" id="password" autocomplete="off" placeholder="Password" required>
+                <label class="form-label" for="password">Password</label>
+              </div> 
+<br>
+              <div class="form-floating">
+                <input type="password" class="form-control" id="confPassword" autocomplete="off" placeholder="Confirm Password" required>
+                <label class="form-label" for="email">Confirm Password</label>
+              </div> 
+<br>
+              <div class="d-grid gap-2 col-6 mx-auto">
+                <button type="submit" class="btn btn-secondary">Register</button>
+              </div>
+
+            </form>
+
           </div>
         </div>
       </div>
