@@ -32,6 +32,7 @@ func (s *Server) Routes(r *mux.Router) {
 	// site endpoints
 	r.HandleFunc("/", s.index).Methods("GET")
 	r.HandleFunc("/logout", s.logout)
+	// should be protected by middleware
 	r.HandleFunc("/mealplanner", s.mealplanner)
 	r.HandleFunc("/grocerylist", s.groceryList).Methods("GET")
 
