@@ -18,6 +18,7 @@ const (
 	EmptyField    = "One field was empty, please fill all fields appropriately."
 	ItemAdded     = "Item added successfully."
 	ListCleared   = "List cleared successfully."
+	UserNotFound  = "The provided login was invalid."
 )
 
 type Alert struct {

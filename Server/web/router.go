@@ -11,13 +11,16 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
+	"golang.org/x/crypto/bcrypt"
 )
 
 const (
-	AddItemURL    string = "http://localhost:5003/AddItem"
-	ChangeItemURL string = "http://localhost:5003/ChangeItem"
-	GetListURL    string = "http://localhost:5003/GetList"
-	ClearListURL  string = "http://localhost:5003/ClearList"
+	GroceryListAddItem    string = "http://localhost:5003/AddItem"
+	GroceryListChangeItem string = "http://localhost:5003/ChangeItem"
+	GroceryListGetList    string = "http://localhost:5003/GetList"
+	GroceryListClearList  string = "http://localhost:5003/ClearList"
+	UserSystemLogin       string = "http://localhost:5001/Login"
+	UserSystemCreateUser  string = "http://localhost:5001/CreateUser"
 )
 
 // Routes is the Router of the server, spreading traffic to relevant handlerFuncs.
@@ -27,19 +30,21 @@ func (s *Server) Routes(r *mux.Router) {
 	r.PathPrefix("/css/").Handler(http.StripPrefix("/css/", http.FileServer(http.Dir("./templates/static/css"))))
 	r.PathPrefix("/js/").Handler(http.StripPrefix("/js/", http.FileServer(http.Dir("./templates/static/js"))))
 
-	r.HandleFunc("/favicon.ico", s.favIcon).Methods("GET")
+	r.HandleFunc("/favicon.ico", s.favIcon).Methods(http.MethodGet)
 
 	// site endpoints
-	r.HandleFunc("/", s.index).Methods("GET")
+	r.HandleFunc("/", s.index).Methods(http.MethodGet)
 	r.HandleFunc("/logout", s.logout)
 	// should be protected by middleware
 	r.HandleFunc("/mealplanner", s.mealplanner)
-	r.HandleFunc("/grocerylist", s.groceryList).Methods("GET")
+	r.HandleFunc("/grocerylist", s.groceryList).Methods(http.MethodGet)
 
 	// form handlers or similar non-site endpoints
-	r.HandleFunc("/changeitem", s.ChangeItem).Methods("PATCH")
-	r.HandleFunc("/additem", s.additem).Methods("POST")
-	r.HandleFunc("/clearlist", s.ClearList).Methods("GET")
+	r.HandleFunc("/changeitem", s.ChangeItem).Methods(http.MethodPatch)
+	r.HandleFunc("/additem", s.additem).Methods(http.MethodPost)
+	r.HandleFunc("/clearlist", s.ClearList).Methods(http.MethodGet)
+	r.HandleFunc("/login", s.Login).Methods(http.MethodPost)
+	r.HandleFunc("/register", s.Register).Methods(http.MethodPost)
 }
 
 // favIcon serves the favourite icon.
@@ -62,7 +67,7 @@ func (s *Server) mealplanner(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) groceryList(w http.ResponseWriter, r *http.Request) {
-	res, err := http.Get(GetListURL + "?ListId=" + "62fd4bc950c4443769551c49")
+	res, err := http.Get(GroceryListGetList + "?ListId=" + "62fd4bc950c4443769551c49")
 	if err != nil {
 		addAlert(w, Danger, "Internal error.")
 		log.Println("bad getlist: ", err)
@@ -120,7 +125,7 @@ func (s *Server) additem(w http.ResponseWriter, r *http.Request) {
 
 	// crashes program when external microservice is offline
 	// maybe fix with http.Client
-	res, err := http.Post(AddItemURL, "application/json", bytes.NewBuffer(mi))
+	res, err := http.Post(GroceryListAddItem, "application/json", bytes.NewBuffer(mi))
 	if err != nil {
 		log.Println("request to additem failed", err)
 		addAlert(w, Danger, "Internal error.")
@@ -184,7 +189,7 @@ func (s *Server) ChangeItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	req, err := http.NewRequest(http.MethodPatch, ChangeItemURL, bytes.NewBuffer(mi))
+	req, err := http.NewRequest(http.MethodPatch, GroceryListChangeItem, bytes.NewBuffer(mi))
 	if err != nil {
 		addAlert(w, Danger, "Internal error.")
 		log.Println("changeItem newRequest: ", err)
@@ -226,7 +231,7 @@ func (s *Server) ClearList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	nr, err := http.NewRequest(http.MethodDelete, ClearListURL, bytes.NewBuffer(ml))
+	nr, err := http.NewRequest(http.MethodDelete, GroceryListClearList, bytes.NewBuffer(ml))
 	if err != nil {
 		AlertLog(w, Danger, InternalError, fmt.Sprint("ClearList: Issue creating new request.", err))
 		http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
@@ -249,4 +254,93 @@ func (s *Server) ClearList(w http.ResponseWriter, r *http.Request) {
 
 	addAlert(w, Success, ListCleared)
 	http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
+}
+
+func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		addAlert(w, Danger, InternalError)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	type login struct {
+		UserID   string
+		Password string
+	}
+	var user login
+
+	tempEmail, err := bcrypt.GenerateFromPassword([]byte(r.PostFormValue("email")), bcrypt.DefaultCost)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		addAlert(w, Danger, InternalError)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+	user.UserID = string(tempEmail)
+
+	tempPassword, err := bcrypt.GenerateFromPassword([]byte(r.PostFormValue("password")), bcrypt.DefaultCost)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		addAlert(w, Danger, InternalError)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+	user.Password = string(tempPassword)
+
+	mu, err := json.Marshal(user)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		addAlert(w, Danger, InternalError)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	res, err := http.Post(UserSystemLogin, "application/json", bytes.NewBuffer(mu))
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		addAlert(w, Danger, InternalError)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	if res.StatusCode != http.StatusOK {
+		switch res.StatusCode {
+		case http.StatusInternalServerError:
+			w.WriteHeader(http.StatusInternalServerError)
+			addAlert(w, Danger, InternalError)
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+			return
+		case http.StatusNotFound:
+			w.WriteHeader(http.StatusNotFound)
+			addAlert(w, Warning, UserNotFound)
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+			return
+		default:
+			w.WriteHeader(http.StatusInternalServerError)
+			addAlert(w, Danger, InternalError)
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+			log.Fatalln("unexpected status code returned from login attempt:", res.StatusCode)
+			return
+		}
+	}
+
+	type sesInfo struct {
+		FirstName     string `json:"FirstName"`
+		GroceryListID string `json:"ListID"`
+		HouseholdID   string `json:"HouseholdID"`
+	}
+	var ns sesInfo
+
+	json.NewDecoder(r.Body).Decode(&ns)
+
+	s.StartSession(w, r, ns.GroceryListID, ns.HouseholdID, ns.FirstName)
+	w.WriteHeader(http.StatusOK)
+	log.Println("Session started")
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func (s *Server) Register(w http.ResponseWriter, r *http.Request) {
+
 }
