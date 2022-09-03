@@ -52,6 +52,10 @@ async function changeItem(id) {
         },
         body: JSON.stringify(Item)
     })
+
+    
+
+
     if (response.status != 200) {
         location.reload()
     }
