@@ -259,9 +259,9 @@ func (s *Server) ClearList(w http.ResponseWriter, r *http.Request) {
 func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
 		addAlert(w, Danger, InternalError)
 		http.Redirect(w, r, "/", http.StatusSeeOther)
+		log.Println("parseform")
 		return
 	}
 
@@ -273,52 +273,51 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 
 	tempEmail, err := bcrypt.GenerateFromPassword([]byte(r.PostFormValue("email")), bcrypt.DefaultCost)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
 		addAlert(w, Danger, InternalError)
 		http.Redirect(w, r, "/", http.StatusSeeOther)
+		log.Println("bcrypt userid")
 		return
 	}
 	user.UserID = string(tempEmail)
 
 	tempPassword, err := bcrypt.GenerateFromPassword([]byte(r.PostFormValue("password")), bcrypt.DefaultCost)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
 		addAlert(w, Danger, InternalError)
 		http.Redirect(w, r, "/", http.StatusSeeOther)
+		log.Println("bcrypt password")
 		return
 	}
 	user.Password = string(tempPassword)
 
 	mu, err := json.Marshal(user)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
 		addAlert(w, Danger, InternalError)
 		http.Redirect(w, r, "/", http.StatusSeeOther)
+		log.Println("json marshal")
 		return
 	}
 
 	res, err := http.Post(UserSystemLogin, "application/json", bytes.NewBuffer(mu))
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
 		addAlert(w, Danger, InternalError)
 		http.Redirect(w, r, "/", http.StatusSeeOther)
+		log.Println("http post")
 		return
 	}
 
 	if res.StatusCode != http.StatusOK {
 		switch res.StatusCode {
 		case http.StatusInternalServerError:
-			w.WriteHeader(http.StatusInternalServerError)
 			addAlert(w, Danger, InternalError)
 			http.Redirect(w, r, "/", http.StatusSeeOther)
+			log.Println("switch internalerror")
 			return
 		case http.StatusNotFound:
-			w.WriteHeader(http.StatusNotFound)
 			addAlert(w, Warning, UserNotFound)
 			http.Redirect(w, r, "/", http.StatusSeeOther)
+			log.Println("switch not found")
 			return
 		default:
-			w.WriteHeader(http.StatusInternalServerError)
 			addAlert(w, Danger, InternalError)
 			http.Redirect(w, r, "/", http.StatusSeeOther)
 			log.Fatalln("unexpected status code returned from login attempt:", res.StatusCode)
@@ -338,6 +337,13 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 	s.StartSession(w, r, ns.GroceryListID, ns.HouseholdID, ns.FirstName)
 	w.WriteHeader(http.StatusOK)
 	log.Println("Session started")
+
+	// this redirect does not work, to make it work
+	// a new endpoint should be made, "/loginfailed/"
+	// and then put a random something at the end of the redirect to always force a reload
+	// otherwise the form should not be a form but a fetch, and front end JS to
+	// interpret response and then show if something went wrong
+	// the latter is the correct and preferred approach, but requires front end work
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
