@@ -1,3 +1,17 @@
+let x = document.getElementById("loginEmail")
+x.addEventListener("keydown", function(e){
+    if (e.code == "Enter") {
+        login()
+    }
+})
+
+let y = document.getElementById("loginPassword")
+y.addEventListener("keydown", function(e){
+    if (e.code == "Enter") {
+        login()
+    }
+})
+
 async function login() {
     if (!checkLogin()) {
         addAlert("warning", "Invalid login credentials.", "loginModalBody")
