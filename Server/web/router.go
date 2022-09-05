@@ -55,6 +55,12 @@ func (s *Server) favIcon(w http.ResponseWriter, r *http.Request) {
 // index handles the frontpage.
 func (s *Server) index(w http.ResponseWriter, r *http.Request) {
 	// remember to get and add alerts
+
+	// these are dummy values, should possibly be middleware
+	// tpl := TmplData{
+	// 	Errors: GetAlert(w, r),
+	// }
+
 	s.serveSite(w, r, "index", nil)
 }
 
@@ -259,8 +265,7 @@ func (s *Server) ClearList(w http.ResponseWriter, r *http.Request) {
 func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
-		addAlert(w, Danger, InternalError)
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		w.WriteHeader(http.StatusInternalServerError)
 		log.Println("parseform")
 		return
 	}
@@ -273,8 +278,7 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 
 	tempEmail, err := bcrypt.GenerateFromPassword([]byte(r.PostFormValue("email")), bcrypt.DefaultCost)
 	if err != nil {
-		addAlert(w, Danger, InternalError)
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		w.WriteHeader(http.StatusInternalServerError)
 		log.Println("bcrypt userid")
 		return
 	}
@@ -282,8 +286,7 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 
 	tempPassword, err := bcrypt.GenerateFromPassword([]byte(r.PostFormValue("password")), bcrypt.DefaultCost)
 	if err != nil {
-		addAlert(w, Danger, InternalError)
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		w.WriteHeader(http.StatusInternalServerError)
 		log.Println("bcrypt password")
 		return
 	}
@@ -291,16 +294,14 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 
 	mu, err := json.Marshal(user)
 	if err != nil {
-		addAlert(w, Danger, InternalError)
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		w.WriteHeader(http.StatusInternalServerError)
 		log.Println("json marshal")
 		return
 	}
 
 	res, err := http.Post(UserSystemLogin, "application/json", bytes.NewBuffer(mu))
 	if err != nil {
-		addAlert(w, Danger, InternalError)
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		w.WriteHeader(http.StatusInternalServerError)
 		log.Println("http post")
 		return
 	}
@@ -308,18 +309,15 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 	if res.StatusCode != http.StatusOK {
 		switch res.StatusCode {
 		case http.StatusInternalServerError:
-			addAlert(w, Danger, InternalError)
-			http.Redirect(w, r, "/", http.StatusSeeOther)
+			w.WriteHeader(http.StatusInternalServerError)
 			log.Println("switch internalerror")
 			return
 		case http.StatusNotFound:
-			addAlert(w, Warning, UserNotFound)
-			http.Redirect(w, r, "/", http.StatusSeeOther)
+			w.WriteHeader(http.StatusNotFound)
 			log.Println("switch not found")
 			return
 		default:
-			addAlert(w, Danger, InternalError)
-			http.Redirect(w, r, "/", http.StatusSeeOther)
+			w.WriteHeader(http.StatusInternalServerError)
 			log.Fatalln("unexpected status code returned from login attempt:", res.StatusCode)
 			return
 		}
@@ -335,6 +333,7 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(&ns)
 
 	s.StartSession(w, r, ns.GroceryListID, ns.HouseholdID, ns.FirstName)
+	addAlert(w, Success, LoginSuccess)
 	w.WriteHeader(http.StatusOK)
 	log.Println("Session started")
 
@@ -344,7 +343,6 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 	// otherwise the form should not be a form but a fetch, and front end JS to
 	// interpret response and then show if something went wrong
 	// the latter is the correct and preferred approach, but requires front end work
-	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func (s *Server) Register(w http.ResponseWriter, r *http.Request) {

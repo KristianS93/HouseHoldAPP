@@ -19,6 +19,7 @@ const (
 	ItemAdded     = "Item added successfully."
 	ListCleared   = "List cleared successfully."
 	UserNotFound  = "The provided login was invalid."
+	LoginSuccess  = "You were sucessfully logged in."
 )
 
 type Alert struct {

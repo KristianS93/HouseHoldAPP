@@ -64,21 +64,21 @@
             <h5 class="modal-title" id="loginModalLabel">Login</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="modal-body">
+          <div id="loginModalBody" class="modal-body">
             <p class="text-center">Please supply your user information to login.</p>
 
               <div class="form-floating">
-                <input type="email" name="loginEmail" class="form-control" id="loginEmail" onchange="disableLogin()" autocomplete="off" placeholder="E-mail" required>
+                <input type="email" name="loginEmail" class="form-control" id="loginEmail" onchange="disableLogin()" autocomplete="off" placeholder="E-mail">
                 <label class="form-label" for="loginEmail">E-mail</label>
               </div> 
 <br>
               <div class="form-floating">
-                <input type="password" name="loginPassword" class="form-control" id="loginPassword" onchange="disableLogin()" autocomplete="off" placeholder="Password" required>
+                <input type="password" name="loginPassword" class="form-control" id="loginPassword" onchange="disableLogin()" autocomplete="off" placeholder="Password">
                 <label class="form-label" for="loginPassword">Password</label>
               </div> 
 <br>
               <div class="d-grid gap-2 col-6 mx-auto">
-                <button type="button" class="btn btn-secondary" id="loginButton" onclick="login()" disabled>Login</button>
+                <button type="button" class="btn btn-secondary" id="loginButton" onclick="login()">Login</button>
               </div>
 
           </div>
