@@ -263,20 +263,15 @@ func (s *Server) ClearList(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		log.Println("parseform")
-		return
-	}
-
 	type login struct {
-		UserID   string
-		Password string
+		UserID   string `json:"UserID"`
+		Password string `json:"Password"`
 	}
 	var user login
 
-	tempEmail, err := bcrypt.GenerateFromPassword([]byte(r.PostFormValue("email")), bcrypt.DefaultCost)
+	json.NewDecoder(r.Body).Decode(&user)
+
+	tempEmail, err := bcrypt.GenerateFromPassword([]byte(user.UserID), bcrypt.DefaultCost)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Println("bcrypt userid")
@@ -284,7 +279,7 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 	}
 	user.UserID = string(tempEmail)
 
-	tempPassword, err := bcrypt.GenerateFromPassword([]byte(r.PostFormValue("password")), bcrypt.DefaultCost)
+	tempPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Println("bcrypt password")

@@ -18,19 +18,16 @@ async function login() {
         return
     }
 
-    // not sure if this is bad practice or not lmao
-    let user = {
-        UserID: document.getElementById("loginEmail"),
-        Password: document.getElementById("loginPassword")
-    }
-
     let response = await fetch("http://localhost:8888/login", 
     {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(user)
+        body: JSON.stringify({
+            UserID: document.getElementById("loginEmail").value,
+            Password: document.getElementById("loginPassword").value
+        })
     })
 
     switch (response.status) {
