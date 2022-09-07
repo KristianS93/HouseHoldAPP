@@ -271,6 +271,12 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 
 	json.NewDecoder(r.Body).Decode(&user)
 
+	if !validLogin(user.UserID, user.Password) {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Println("router/Login: invalid login credentials")
+		return
+	}
+
 	tempEmail, err := bcrypt.GenerateFromPassword([]byte(user.UserID), bcrypt.DefaultCost)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

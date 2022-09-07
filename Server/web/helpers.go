@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"regexp"
 	"text/template"
 	"time"
+	"unicode"
 
 	"github.com/google/uuid"
 )
@@ -73,4 +75,64 @@ func (s *Server) templateGet(name string) *template.Template {
 	}
 
 	return s.Templates[name]
+}
+
+func validLogin(email, password string) bool {
+	if validEmail(email) && validPassword(password) {
+		return true
+	}
+	return false
+}
+
+// validPassword validates if the input password
+// upholds the criteria specified in the function.
+// By default the password must contain:
+//
+// - 1 uppercase letter
+//
+// - 1 lowercase letter
+//
+// - 1 number
+//
+// - 1 special character
+//
+// And have a length between 8 and 32, inclusive.
+func validPassword(p string) bool {
+	var (
+		hasLength  = false
+		hasUpper   = false
+		hasLower   = false
+		hasNumber  = false
+		hasSpecial = false
+	)
+
+	if len(p) >= 8 && len(p) <= 32 {
+		hasLength = true
+	} else {
+		return false
+	}
+
+	for _, char := range p {
+		switch {
+		case unicode.IsUpper(char):
+			hasUpper = true
+		case unicode.IsLower(char):
+			hasLower = true
+		case unicode.IsNumber(char):
+			hasNumber = true
+		case unicode.IsPunct(char) || unicode.IsSymbol(char):
+			hasSpecial = true
+		default:
+			return false
+		}
+	}
+
+	return hasLength && hasUpper && hasLower && hasNumber && hasSpecial
+}
+
+// validEmail validates whether the input email
+// is a valid email or not, specified by a Regex string.
+func validEmail(e string) bool {
+	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
+	return emailRegex.MatchString(e)
 }

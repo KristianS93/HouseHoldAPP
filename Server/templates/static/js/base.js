@@ -1,3 +1,11 @@
+var HTTPCode = {
+    Success: 200,
+    BadRequest: 400,
+    NotFound: 404,
+    Conflict: 409,
+    InternalServerError: 500,
+}
+
 let x = document.getElementById("loginEmail")
 x.addEventListener("keydown", function(e){
     if (e.code == "Enter") {
@@ -31,18 +39,21 @@ async function login() {
     })
 
     switch (response.status) {
-        case 200:
-            // the below does not work currently, unsure of why or how - it does not send cookies to 
+        case HTTPCode.Success:
             document.cookie = "success=Login was successful.; max-age=2"
             location.reload()
             break
-        case 404:
+        case HTTPCode.BadRequest:
+            addAlert("warning", "The provided login information are invalid.", "loginModalBody")
+            break
+        case HTTPCode.NotFound:
             addAlert("warning", "No user was found with provided credentials.", "loginModalBody")
             break
-        default:
-            // should essentially only consist of 500 status code
-            // should make Danger alert
+        case HTTPCode.InternalServerError:
             addAlert("danger", "Internal server error.", "loginModalBody")
+            break
+        default:
+            addAlert("danger", "Unknown error occured.", "loginModalBody")
             break
     }
 }
@@ -58,7 +69,7 @@ function checkLogin() {
 }
 
 function validEmail() {
-    let regEx = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
+    let regEx = /^^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`/
     if (document.getElementById("loginEmail").value.match(regEx)) {
         return true
     } else {
@@ -67,12 +78,31 @@ function validEmail() {
 }
 
 function validPassword() {
-    let l = document.getElementById("loginPassword").value.length
-    if (l >= 8 && l <= 32) {
-        return true
+    var hasLength = false, hasUpper = false, hasLower = false, hasNumber = false, hasSpecial = false
+
+    let p = document.getElementById("loginPassword").value
+    if (p.length >= 8 && p.length <= 32) {
+        hasLength = true
     } else {
         return false
     }
+
+    // this is really annoying because js is dogshit
+    // should basically uphold same criteria as found in router.go/Login
+    // however, js has really poor character checking
+    for (let i = 0; i < p.length; i++) {
+        switch (p[i]) {
+            case value:
+                
+                break;
+        
+            default:
+                break;
+        }
+    }
+
+
+    return hasLength && hasUpper && hasLower && hasNumber && hasSpecial
 }
 
 function disableRegister() {
