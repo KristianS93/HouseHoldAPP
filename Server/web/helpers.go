@@ -3,8 +3,9 @@ package web
 import (
 	"fmt"
 	"log"
+	"net"
 	"net/http"
-	"regexp"
+	"strings"
 	"text/template"
 	"time"
 	"unicode"
@@ -77,11 +78,53 @@ func (s *Server) templateGet(name string) *template.Template {
 	return s.Templates[name]
 }
 
+// validLogin is a wrapper for validEmail and validPassword.
 func validLogin(email, password string) bool {
-	if validEmail(email) && validPassword(password) {
-		return true
+	return validEmail(email) && validPassword(password)
+}
+
+// validEmail validates whether the input email
+// is a valid email or not, also does an MX lookup on domain.
+func validEmail(e string) bool {
+	// a valid email only contains one @
+	if strings.Count(e, "@") != 1 {
+		return false
 	}
-	return false
+
+	// splitting in prefix and domain
+	xs := strings.Split(e, "@")
+
+	// checking prefix format, may contains a-z, A-Z, 0-9 and .-_ (however not consecutive)
+	// anything other than this, or consecutive cases of .-_ is considered invalid
+	for i, v := range xs[0] {
+		switch {
+		case unicode.IsUpper(v) || unicode.IsLower(v) || unicode.IsNumber(v):
+			continue
+		default:
+			if strings.ContainsAny(string(v), ".-_") {
+				// checking not out of bounds and if consecutive case of .-_
+				if (i+1 <= len(xs[0])) && (strings.ContainsAny(string(xs[0][i+1]), ".-_")) {
+					return false
+				}
+				// valid case of punctuation => skip to next rune
+				continue
+			}
+			// only reached if invalid rune
+			return false
+		}
+	}
+
+	// looking up domain, returns a list of valid domains under lookup
+	// err is returned when no host under specified domain exists
+	// very very giga unlikely, but technically error could be
+	// caused by the DNS message not being unmarshalled correctly
+	_, err := net.LookupMX(xs[1])
+	return err == nil
+
+	// should technically do an email verification at this point
+	// both to double check, but also to verify that the correct
+	// email is associated with a given user, as they might have
+	// misspelled or had a typo when entering their email
 }
 
 // validPassword validates if the input password
@@ -97,6 +140,9 @@ func validLogin(email, password string) bool {
 // - 1 special character
 //
 // And have a length between 8 and 32, inclusive.
+//
+// Additionally, the function validates that no invalid
+// characters are present in the input password.
 func validPassword(p string) bool {
 	var (
 		hasLength  = false
@@ -128,11 +174,4 @@ func validPassword(p string) bool {
 	}
 
 	return hasLength && hasUpper && hasLower && hasNumber && hasSpecial
-}
-
-// validEmail validates whether the input email
-// is a valid email or not, specified by a Regex string.
-func validEmail(e string) bool {
-	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
-	return emailRegex.MatchString(e)
 }
