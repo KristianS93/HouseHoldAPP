@@ -68,42 +68,15 @@ function checkLogin() {
     }
 }
 
-function validEmail() {
-    let regEx = /^^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`/
-    if (document.getElementById("loginEmail").value.match(regEx)) {
-        return true
-    } else {
-        return false
-    }
-}
-
-function validPassword() {
-    var hasLength = false, hasUpper = false, hasLower = false, hasNumber = false, hasSpecial = false
-
-    let p = document.getElementById("loginPassword").value
-    if (p.length >= 8 && p.length <= 32) {
-        hasLength = true
-    } else {
-        return false
-    }
-
-    // this is really annoying because js is dogshit
-    // should basically uphold same criteria as found in router.go/Login
-    // however, js has really poor character checking
-    for (let i = 0; i < p.length; i++) {
-        switch (p[i]) {
-            case value:
-                
-                break;
-        
-            default:
-                break;
-        }
-    }
-
-
-    return hasLength && hasUpper && hasLower && hasNumber && hasSpecial
-}
+// should remake to fit backend more
+// function validEmail() {
+//     let regEx = /^^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`/
+//     if (document.getElementById("loginEmail").value.match(regEx)) {
+//         return true
+//     } else {
+//         return false
+//     }
+// }
 
 function disableRegister() {
     // same as above, just for register
@@ -124,40 +97,48 @@ function addAlert(alertLevel, alertMessage, target) {
     element.insertAdjacentHTML("afterbegin", alert)
 }
 
-// var RegEx = {
-//     LowerCase: /[a-z]/,
-//     UpperCase: /[A-Z]/,
-//     Number: /[0-9]/,
-//     Special: /[!@#$%^&*]/
-//   }
+var RegEx = {
+    LowerCase: /[a-z]/,
+    UpperCase: /[A-Z]/,
+    Number: /[0-9]/,
+    Special: /[!@#$%^&*]/
+  }
   
-//   function password(s) {
-//     let hasLength = false, hasUpper = false, hasLower = false, hasNumber = false, hasSpecial = false
-  
-//     if (s.length >= 8 && s.length <= 32) {
-//       hasLength = true
-//     } else {
-//       return false
-//     }
-  
-//     for (let i = 0; i < s.length; i++) {
-//       console.log(s[i])
-//       switch (undefined) {
-//         case RegEx.LowerCase.test(String(s[i])):
-//           console.log("lower")
-//           hasLower = true
-//           break
-//         case RegEx.Special.test(s[i]):
-//           break
-//         default:
-//           console.log("default")
-//           return false
-//       }
-//     }
-  
-//     return true
-//   }
-  
-//   console.log(password("aaaaaaaaaaaaaaaaaaaaaaa"))
-  
-//   console.log("lowercase "+ RegEx.LowerCase.test("aaaa"))
+function validPassword() {
+    let hasLength = false, hasUpper = false, hasLower = false, hasNumber = false, hasSpecial = false
+
+    let p = document.getElementById("loginPassword").value
+    if (p.length >= 8 && p.length <= 32) {
+        hasLength = true
+    } else {
+        return false
+    }
+
+    for (const char of p) {
+        if (RegEx.LowerCase.test(char)) {
+            hasLower = true
+        }
+        if (RegEx.UpperCase.test(char)) {
+            hasUpper = true
+        }
+        if (RegEx.Number.test(char)) {
+            hasNumber = true
+        }
+        if (RegEx.Special.test(char)) {
+            hasSpecial = true
+        }
+    }
+
+    return hasLength && hasUpper && hasLower && hasNumber && hasSpecial
+}
+
+// test cases for password
+// console.log("aaaaaaaaaaa " + password("aaaaaaaaaaa"))
+// console.log("AAAAAAAAAAA " + password("AAAAAAAAAAA"))
+// console.log("11111111111 " + password("11111111111"))
+// console.log("########### " + password("###########"))
+// console.log("PEYAPsPukyYj$pfY4D^3m$x$49*p2Tt8 " + password("PEYAPsPukyYj$pfY4D^3m$x$49*p2Tt8"))
+// console.log("r8kq4dmxj*y%b3xtv$@b953&r@i$!o^u " + password("r8kq4dmxj*y%b3xtv$@b953&r@i$!o^u"))
+// console.log("2TKE5U%GZCC3^62S7UW*U%UKYQZBCMA8 " + password("2TKE5U%GZCC3^62S7UW*U%UKYQZBCMA8"))
+// console.log("sQECZ*cgacDZ&*iqPYqhHwg@fogQb*R^ " + password("sQECZ*cgacDZ&*iqPYqhHwg@fogQb*R^"))
+// console.log("HQsbYxfGgYw4FT3t6fKAhS93YPqHpeFT " + password("HQsbYxfGgYw4FT3t6fKAhS93YPqHpeFT"))
