@@ -48,7 +48,7 @@
                 <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#loginModal">Login</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#signupModal">Sign Up</a>
+                <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#registerModal">Sign Up</a>
               </li>
             {{end}}
           </ul>
@@ -68,12 +68,12 @@
             <p class="text-center">Please supply your user information to login.</p>
 
               <div class="form-floating">
-                <input type="email" name="loginEmail" class="form-control" id="loginEmail" onchange="disableLogin()" autocomplete="off" placeholder="E-mail">
+                <input type="email" name="loginEmail" class="form-control" id="loginEmail" autocomplete="off" placeholder="E-mail">
                 <label class="form-label" for="loginEmail">E-mail</label>
               </div> 
 <br>
               <div class="form-floating">
-                <input type="password" name="loginPassword" class="form-control" id="loginPassword" onchange="disableLogin()" autocomplete="off" placeholder="Password">
+                <input type="password" name="loginPassword" class="form-control" id="loginPassword" autocomplete="off" placeholder="Password">
                 <label class="form-label" for="loginPassword">Password</label>
               </div> 
 <br>
@@ -87,54 +87,50 @@
     </div>
 
     {{/* The following is the signup modal that pops up when a user presses the signup button at the top right. */}}
-    <div class="modal fade" id="signupModal" tabindex="-1" aria-labelledby="signupModalLabel" aria-hidden="true">
+    <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="signupModalLabel">Sign Up</h5>
+            <h5 class="modal-title" id="registerModalLabel">Sign Up</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="modal-body">
+          <div id="registerModalBody" class="modal-body">
             <p class="text-center">Register as a user to join the HouseHold platform.</p>
-
-            <form action="/signup" method="POST">
 
               <div class="row">
                 <div class="col-md-6">
                   <div class="form-floating">
-                    <input type="text" class="form-control" id="firstName" autocomplete="off" placeholder="First Name" required>
-                    <label class="form-label" for="firstName">First Name</label>
+                    <input type="text" class="form-control" id="registerFirstName" autocomplete="off" placeholder="First Name">
+                    <label class="form-label" for="registerFirstName">First Name</label>
                   </div> 
                 </div>
 
                 <div class="col-md-6">
                   <div class="form-floating">
-                    <input type="text" class="form-control" id="lastName" autocomplete="off" placeholder="Last Name" required>
-                    <label class="form-label" for="lastName">Last Name</label>
+                    <input type="text" class="form-control" id="registerLastName" autocomplete="off" placeholder="Last Name">
+                    <label class="form-label" for="registerLastName">Last Name</label>
                   </div> 
                 </div>
               </div> 
 <br>
               <div class="form-floating">
-                <input type="email" class="form-control" id="email" autocomplete="off" placeholder="E-mail" required>
-                <label class="form-label" for="email">E-mail</label>
+                <input type="email" class="form-control" id="registerEmail" autocomplete="off" placeholder="E-mail">
+                <label class="form-label" for="registerEmail">E-mail</label>
               </div> 
 <br>
               <div class="form-floating">
-                <input type="password" class="form-control" id="password" autocomplete="off" placeholder="Password" required>
-                <label class="form-label" for="password">Password</label>
+                <input type="password" class="form-control" id="registerPassword" autocomplete="off" placeholder="Password">
+                <label class="form-label" for="registerPassword">Password</label>
               </div> 
 <br>
               <div class="form-floating">
-                <input type="password" class="form-control" id="confPassword" autocomplete="off" placeholder="Confirm Password" required>
-                <label class="form-label" for="email">Confirm Password</label>
+                <input type="password" class="form-control" id="registerPasswordConfirm" autocomplete="off" placeholder="Confirm Password">
+                <label class="form-label" for="registerPasswordConfirm">Confirm Password</label>
               </div> 
 <br>
               <div class="d-grid gap-2 col-6 mx-auto">
-                <button type="submit" class="btn btn-secondary">Register</button>
+                <button type="button" class="btn btn-secondary" id="registerButton" onclick="register()">Register</button>
               </div>
-
-            </form>
 
           </div>
         </div>

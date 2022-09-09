@@ -6,6 +6,27 @@ var HTTPCode = {
     InternalServerError: 500,
 }
 
+var Elements = {
+    LoginEmail: "loginEmail",
+    LoginPassword: "loginPassword",
+    LoginModalBody: "loginModalBody",
+    RegisterFirstName: "registerFirstName",
+    RegisterLastName: "registerLastName",
+    RegisterEmail: "registerEmail",
+    RegisterPassword: "registerPassword",
+    RegisterPasswordConfirm: "registerPasswordConfirm",
+    RegisterModalBody: "registerModalBody"
+}
+
+var RegEx = {
+    LowerCase: /[a-z]/,
+    UpperCase: /[A-Z]/,
+    Number: /[0-9]/,
+    Special: /[!@#$%^&*]/,
+    EmailIdentifier: /[a-zA-Z._-]/g,
+    Names: /[a-zA-Z'-]/g,
+}
+
 let x = document.getElementById("loginEmail")
 x.addEventListener("keydown", function(e){
     if (e.code == "Enter") {
@@ -19,69 +40,6 @@ y.addEventListener("keydown", function(e){
         login()
     }
 })
-
-async function login() {
-    if (!checkLogin()) {
-        addAlert("warning", "Invalid login credentials.", "loginModalBody")
-        return
-    }
-
-    let response = await fetch("http://localhost:8888/login", 
-    {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            UserID: document.getElementById("loginEmail").value,
-            Password: document.getElementById("loginPassword").value
-        })
-    })
-
-    switch (response.status) {
-        case HTTPCode.Success:
-            document.cookie = "success=Login was successful.; max-age=2"
-            location.reload()
-            break
-        case HTTPCode.BadRequest:
-            addAlert("warning", "The provided login information are invalid.", "loginModalBody")
-            break
-        case HTTPCode.NotFound:
-            addAlert("warning", "No user was found with provided credentials.", "loginModalBody")
-            break
-        case HTTPCode.InternalServerError:
-            addAlert("danger", "Internal server error.", "loginModalBody")
-            break
-        default:
-            addAlert("danger", "Unknown error occured.", "loginModalBody")
-            break
-    }
-}
-
-// currently only updates login button based on focus changing from one of the text input fields
-// possibly find another solution, or instead remove disable part and instead show a warning if login is tried without acceptable input
-function checkLogin() {
-    if (validEmail() && validPassword()) {
-        return true
-    } else {
-        return false
-    }
-}
-
-// should remake to fit backend more
-// function validEmail() {
-//     let regEx = /^^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`/
-//     if (document.getElementById("loginEmail").value.match(regEx)) {
-//         return true
-//     } else {
-//         return false
-//     }
-// }
-
-function disableRegister() {
-    // same as above, just for register
-    // should also have helper to check password length, if something is an email, and password + repassword match
-}
 
 function addAlert(alertLevel, alertMessage, target) {
     let alert = 
@@ -97,24 +55,118 @@ function addAlert(alertLevel, alertMessage, target) {
     element.insertAdjacentHTML("afterbegin", alert)
 }
 
-var RegEx = {
-    LowerCase: /[a-z]/,
-    UpperCase: /[A-Z]/,
-    Number: /[0-9]/,
-    Special: /[!@#$%^&*]/
-  }
-  
-function validPassword() {
+async function register() {
+    let errorMessage = checkRegistration()
+    if (errorMessage != "") {
+        addAlert("warning", errorMessage, Elements.RegisterModalBody)
+        return
+    }
+}
+
+function checkRegistration() {
+    let listStart = `<p class="mb-0">`, listEnd = `</p>`
+    let returnString = ""
+    if (validName(Elements.RegisterFirstName)) {
+        returnString += listStart+"First Name does not fit required format."+listEnd
+    }
+    if (validName(Elements.RegisterLastName)) {
+        returnString += listStart+"Last Name does not fit required format."+listEnd
+    }
+    if (!validEmail(Elements.RegisterEmail)) {
+        returnString += listStart+"Email format is invalid."+listEnd
+    }
+    if (document.getElementById(Elements.RegisterPassword) != document.getElementById(Elements.RegisterPasswordConfirm)) {
+        returnString += listStart+"Passwords do not match."+listEnd
+    }
+    if (!validPassword(Elements.RegisterPassword)) {
+        returnString += listStart+"Password does not match required criteria."+listEnd
+    }
+    return returnString
+}
+
+// this needs to be fixed
+function validName(name) {
+    if (name.match(RegEx.Names)) {
+        return true
+    }
+    return false
+}
+
+async function login() {
+    if (!checkLogin(Elements.LoginEmail, Elements.LoginPassword)) {
+        addAlert("warning", "The provided login information are invalid.", Elements.LoginModalBody)
+        console.log("validation: client")
+        return
+    }
+
+    let response = await fetch("http://localhost:8888/login", 
+    {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            UserID: document.getElementById(Elements.LoginEmail).value,
+            Password: document.getElementById(Elements.LoginPassword).value
+        })
+    })
+
+    switch (response.status) {
+        case HTTPCode.Success:
+            document.cookie = "success=Login was successful.; max-age=2"
+            location.reload()
+            break
+        case HTTPCode.BadRequest:
+            addAlert("warning", "The provided login information are invalid. (S)", Elements.LoginModalBody)
+            console.log("validation: server")
+            break
+        case HTTPCode.NotFound:
+            addAlert("warning", "No user was found with provided credentials.", Elements.LoginModalBody)
+            break
+        case HTTPCode.InternalServerError:
+            addAlert("danger", "Internal server error.", Elements.LoginModalBody)
+            break
+        default:
+            addAlert("danger", "Unknown error occured.", Elements.LoginModalBody)
+            break
+    }
+}
+
+// currently only updates login button based on focus changing from one of the text input fields
+// possibly find another solution, or instead remove disable part and instead show a warning if login is tried without acceptable input
+function checkLogin() {
+    if (validEmail(Elements.LoginEmail) && validPassword(Elements.LoginPassword)) {
+        return true
+    } else {
+        return false
+    }
+}
+
+function validEmail(targetID) {
+    let email = document.getElementById(targetID).value
+    let splitEmail = email.split("@")
+
+    if (splitEmail.length != 2) {
+        return false
+    }
+
+    if (splitEmail[0].match(RegEx.EmailIdentifier) && splitEmail[1].match(/[.]/)) {
+        return true
+    }
+    return false
+}
+
+function validPassword(targetID) {
+    let password = document.getElementById(targetID).value
     let hasLength = false, hasUpper = false, hasLower = false, hasNumber = false, hasSpecial = false
 
-    let p = document.getElementById("loginPassword").value
-    if (p.length >= 8 && p.length <= 32) {
+    if (password.length >= 8 && password.length <= 32) {
         hasLength = true
     } else {
         return false
     }
 
-    for (const char of p) {
+    for (const char of password) {
         if (RegEx.LowerCase.test(char)) {
             hasLower = true
         }
@@ -128,7 +180,6 @@ function validPassword() {
             hasSpecial = true
         }
     }
-
     return hasLength && hasUpper && hasLower && hasNumber && hasSpecial
 }
 
