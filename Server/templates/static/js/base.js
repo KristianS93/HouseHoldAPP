@@ -123,3 +123,41 @@ function addAlert(alertLevel, alertMessage, target) {
     let element = document.getElementById(target)
     element.insertAdjacentHTML("afterbegin", alert)
 }
+
+// var RegEx = {
+//     LowerCase: /[a-z]/,
+//     UpperCase: /[A-Z]/,
+//     Number: /[0-9]/,
+//     Special: /[!@#$%^&*]/
+//   }
+  
+//   function password(s) {
+//     let hasLength = false, hasUpper = false, hasLower = false, hasNumber = false, hasSpecial = false
+  
+//     if (s.length >= 8 && s.length <= 32) {
+//       hasLength = true
+//     } else {
+//       return false
+//     }
+  
+//     for (let i = 0; i < s.length; i++) {
+//       console.log(s[i])
+//       switch (undefined) {
+//         case RegEx.LowerCase.test(String(s[i])):
+//           console.log("lower")
+//           hasLower = true
+//           break
+//         case RegEx.Special.test(s[i]):
+//           break
+//         default:
+//           console.log("default")
+//           return false
+//       }
+//     }
+  
+//     return true
+//   }
+  
+//   console.log(password("aaaaaaaaaaaaaaaaaaaaaaa"))
+  
+//   console.log("lowercase "+ RegEx.LowerCase.test("aaaa"))

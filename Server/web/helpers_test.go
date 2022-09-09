@@ -50,3 +50,9 @@ func TestValidEmail(t *testing.T) {
 		}
 	}
 }
+
+func BenchmarkValidEmail(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		validEmail("very.common@example.com")
+	}
+}

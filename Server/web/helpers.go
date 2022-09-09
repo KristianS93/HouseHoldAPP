@@ -79,20 +79,25 @@ func (s *Server) templateGet(name string) *template.Template {
 }
 
 // validLogin is a wrapper for validEmail and validPassword.
+//
+// Returns: a bool representing the validity of the provided login;
+// true if both email and password are valid, false if one of or both are invalid.
 func validLogin(email, password string) bool {
 	return validEmail(email) && validPassword(password)
 }
 
 // validEmail validates whether the input email
 // is a valid email or not, also does an MX lookup on domain.
+//
+// Returns: a bool representing the validity of the provided email
+// true meaning valid and false meaning invalid.
 func validEmail(e string) bool {
-	// a valid email only contains one @
-	if strings.Count(e, "@") != 1 {
-		return false
-	}
-
 	// splitting in prefix and domain
 	xs := strings.Split(e, "@")
+	if len(xs) != 2 {
+		// a valid email only contains one instance of @
+		return false
+	}
 
 	// checking prefix format, may contains a-z, A-Z, 0-9 and .-_ (however not consecutive)
 	// anything other than this, or consecutive cases of .-_ is considered invalid
@@ -137,12 +142,15 @@ func validEmail(e string) bool {
 //
 // - 1 number
 //
-// - 1 special character
+// - 1 special character (! @ # $ % ^ & *)
 //
 // And have a length between 8 and 32, inclusive.
 //
 // Additionally, the function validates that no invalid
 // characters are present in the input password.
+//
+// Returns: a bool representing the validity of the provided password,
+// true for a valid password and false for an invalid password.
 func validPassword(p string) bool {
 	var (
 		hasLength  = false
@@ -166,7 +174,7 @@ func validPassword(p string) bool {
 			hasLower = true
 		case unicode.IsNumber(char):
 			hasNumber = true
-		case unicode.IsPunct(char) || unicode.IsSymbol(char):
+		case strings.ContainsAny(string(char), "!@#$%^&*"):
 			hasSpecial = true
 		default:
 			return false
