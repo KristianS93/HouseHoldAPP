@@ -18,15 +18,6 @@ var Elements = {
     RegisterModalBody: "registerModalBody"
 }
 
-var RegEx = {
-    LowerCase: /[a-z]/,
-    UpperCase: /[A-Z]/,
-    Number: /[0-9]/,
-    Special: /[!@#$%^&*]/,
-    EmailIdentifier: /[a-zA-Z._-]/g,
-    Names: /[a-zA-Z'-]/g,
-}
-
 let x = document.getElementById("loginEmail")
 x.addEventListener("keydown", function(e){
     if (e.code == "Enter") {
@@ -67,29 +58,21 @@ function checkRegistration() {
     let listStart = `<p class="mb-0">`, listEnd = `</p>`
     let returnString = ""
     if (validName(Elements.RegisterFirstName)) {
-        returnString += listStart+"First Name does not fit required format."+listEnd
+        returnString += listStart+"First Name is empty."+listEnd
     }
     if (validName(Elements.RegisterLastName)) {
-        returnString += listStart+"Last Name does not fit required format."+listEnd
+        returnString += listStart+"Last Name is empty."+listEnd
     }
     if (!validEmail(Elements.RegisterEmail)) {
         returnString += listStart+"Email format is invalid."+listEnd
     }
-    if (document.getElementById(Elements.RegisterPassword) != document.getElementById(Elements.RegisterPasswordConfirm)) {
+    if (document.getElementById(Elements.RegisterPassword).value != document.getElementById(Elements.RegisterPasswordConfirm).value) {
         returnString += listStart+"Passwords do not match."+listEnd
     }
     if (!validPassword(Elements.RegisterPassword)) {
-        returnString += listStart+"Password does not match required criteria."+listEnd
+        returnString += listStart+"Password is not an appropriate length."+listEnd
     }
     return returnString
-}
-
-// this needs to be fixed
-function validName(name) {
-    if (name.match(RegEx.Names)) {
-        return true
-    }
-    return false
 }
 
 async function login() {
@@ -113,7 +96,8 @@ async function login() {
 
     switch (response.status) {
         case HTTPCode.Success:
-            document.cookie = "success=Login was successful.; max-age=2"
+            addAlert("success", "Login was successful.", Elements.LoginModalBody)
+            await sleep(2000)
             location.reload()
             break
         case HTTPCode.BadRequest:
@@ -128,6 +112,7 @@ async function login() {
             break
         default:
             addAlert("danger", "Unknown error occured.", Elements.LoginModalBody)
+            console.log("Login attempt status code: " + response.status)
             break
     }
 }
@@ -142,54 +127,34 @@ function checkLogin() {
     }
 }
 
+// only checks for @ and non empty
 function validEmail(targetID) {
     let email = document.getElementById(targetID).value
-    let splitEmail = email.split("@")
-
-    if (splitEmail.length != 2) {
+    if (email == "" || !email.includes("@")) {
         return false
     }
-
-    if (splitEmail[0].match(RegEx.EmailIdentifier) && splitEmail[1].match(/[.]/)) {
-        return true
-    }
-    return false
+    return true
 }
 
+// only checkcs length
 function validPassword(targetID) {
     let password = document.getElementById(targetID).value
-    let hasLength = false, hasUpper = false, hasLower = false, hasNumber = false, hasSpecial = false
-
     if (password.length >= 8 && password.length <= 32) {
-        hasLength = true
+        return true
     } else {
         return false
     }
-
-    for (const char of password) {
-        if (RegEx.LowerCase.test(char)) {
-            hasLower = true
-        }
-        if (RegEx.UpperCase.test(char)) {
-            hasUpper = true
-        }
-        if (RegEx.Number.test(char)) {
-            hasNumber = true
-        }
-        if (RegEx.Special.test(char)) {
-            hasSpecial = true
-        }
-    }
-    return hasLength && hasUpper && hasLower && hasNumber && hasSpecial
 }
 
-// test cases for password
-// console.log("aaaaaaaaaaa " + password("aaaaaaaaaaa"))
-// console.log("AAAAAAAAAAA " + password("AAAAAAAAAAA"))
-// console.log("11111111111 " + password("11111111111"))
-// console.log("########### " + password("###########"))
-// console.log("PEYAPsPukyYj$pfY4D^3m$x$49*p2Tt8 " + password("PEYAPsPukyYj$pfY4D^3m$x$49*p2Tt8"))
-// console.log("r8kq4dmxj*y%b3xtv$@b953&r@i$!o^u " + password("r8kq4dmxj*y%b3xtv$@b953&r@i$!o^u"))
-// console.log("2TKE5U%GZCC3^62S7UW*U%UKYQZBCMA8 " + password("2TKE5U%GZCC3^62S7UW*U%UKYQZBCMA8"))
-// console.log("sQECZ*cgacDZ&*iqPYqhHwg@fogQb*R^ " + password("sQECZ*cgacDZ&*iqPYqhHwg@fogQb*R^"))
-// console.log("HQsbYxfGgYw4FT3t6fKAhS93YPqHpeFT " + password("HQsbYxfGgYw4FT3t6fKAhS93YPqHpeFT"))
+// checks non empty
+function validName(target) {
+    let name = document.getElementById(target).value
+    if (name == "") {
+        return false
+    }
+    return true
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms))
+}
