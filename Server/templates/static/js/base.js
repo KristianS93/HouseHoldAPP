@@ -52,27 +52,74 @@ async function register() {
         addAlert("warning", errorMessage, Elements.RegisterModalBody)
         return
     }
+
+    let response = await fetch("http://localhost:8888/register", 
+    {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            FirstName: document.getElementById(Elements.RegisterFirstName).value,
+            LastName: document.getElementById(Elements.RegisterLastName).value,
+            UserID: document.getElementById(Elements.RegisterEmail).value,
+            Password: document.getElementById(Elements.RegisterPassword).value,
+            ConfirmPassword: document.getElementById(Elements.RegisterPasswordConfirm)
+        })
+    })
+
+    switch (response.status) {
+        case HTTPCode.Success:
+            // should read the session cookie sent from registration backend
+            // and set it serverside, so that a reload will login the user (as session is already active)
+            addAlert("success", alertParagraph("Registration was successful."), Elements.RegisterModalBody)
+            await sleep(2000)
+            location.reload()
+            break
+        case HTTPCode.BadRequest:
+            console.log("bad request")
+            let body = await response.json()
+            let concatErr = ""
+            for(let error of body.Errors) {
+                concatErr += alertParagraph(error)
+            }
+            addAlert("warning", concatErr, Elements.RegisterModalBody)
+            break
+        case HTTPCode.Conflict:
+            addAlert("warning", alertParagraph("A user is already registered with that email."), Elements.RegisterModalBody)
+            break
+        case HTTPCode.InternalServerError:
+            addAlert("danger", alertParagraph("Internal server error."), Elements.RegisterModalBody)
+            break
+        default:
+            addAlert("danger", alertParagraph("Unknown error occured."), Elements.RegisterModalBody)
+            console.log("Register attempt status code: " + response.status)
+            break
+    }
 }
 
 function checkRegistration() {
-    let listStart = `<p class="mb-0">`, listEnd = `</p>`
     let returnString = ""
-    if (validName(Elements.RegisterFirstName)) {
-        returnString += listStart+"First Name is empty."+listEnd
+    if (!validName(Elements.RegisterFirstName)) {
+        returnString += alertParagraph("First Name is empty.")
     }
-    if (validName(Elements.RegisterLastName)) {
-        returnString += listStart+"Last Name is empty."+listEnd
+    if (!validName(Elements.RegisterLastName)) {
+        returnString += alertParagraph("Last Name is empty.")
     }
     if (!validEmail(Elements.RegisterEmail)) {
-        returnString += listStart+"Email format is invalid."+listEnd
+        returnString += alertParagraph("Email format is invalid.")
     }
     if (document.getElementById(Elements.RegisterPassword).value != document.getElementById(Elements.RegisterPasswordConfirm).value) {
-        returnString += listStart+"Passwords do not match."+listEnd
+        returnString += alertParagraph("Passwords do not match.")
     }
     if (!validPassword(Elements.RegisterPassword)) {
-        returnString += listStart+"Password is not an appropriate length."+listEnd
+        returnString += alertParagraph("Password is not an appropriate length.")
     }
     return returnString
+}
+
+function alertParagraph(message) {
+    return `<p class="mb-0">${message}</p>`
 }
 
 async function login() {
@@ -96,22 +143,22 @@ async function login() {
 
     switch (response.status) {
         case HTTPCode.Success:
-            addAlert("success", "Login was successful.", Elements.LoginModalBody)
+            addAlert("success", alertParagraph("Login was successful."), Elements.LoginModalBody)
             await sleep(2000)
             location.reload()
             break
         case HTTPCode.BadRequest:
-            addAlert("warning", "The provided login information are invalid. (S)", Elements.LoginModalBody)
+            addAlert("warning", alertParagraph("The provided login information are invalid. (S)"), Elements.LoginModalBody)
             console.log("validation: server")
             break
         case HTTPCode.NotFound:
-            addAlert("warning", "No user was found with provided credentials.", Elements.LoginModalBody)
+            addAlert("warning", alertParagraph("No user was found with provided credentials."), Elements.LoginModalBody)
             break
         case HTTPCode.InternalServerError:
-            addAlert("danger", "Internal server error.", Elements.LoginModalBody)
+            addAlert("danger", alertParagraph("Internal server error."), Elements.LoginModalBody)
             break
         default:
-            addAlert("danger", "Unknown error occured.", Elements.LoginModalBody)
+            addAlert("danger", alertParagraph("Unknown error occured."), Elements.LoginModalBody)
             console.log("Login attempt status code: " + response.status)
             break
     }

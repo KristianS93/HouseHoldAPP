@@ -347,5 +347,13 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) Register(w http.ResponseWriter, r *http.Request) {
-
+	// was just testing, but this works with the front end
+	type errors struct {
+		Errors []string `json:"Errors"`
+	}
+	e := errors{
+		Errors: []string{"Testing", "Testing123", "still testing"},
+	}
+	w.WriteHeader(http.StatusBadRequest)
+	json.NewEncoder(w).Encode(e)
 }
