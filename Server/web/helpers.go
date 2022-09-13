@@ -82,9 +82,9 @@ func (s *Server) templateGet(name string) *template.Template {
 //
 // Returns: a bool representing the validity of the provided login;
 // true if both email and password are valid, false if one of or both are invalid.
-func validLogin(email, password string) bool {
-	return validEmail(email) && validPassword(password)
-}
+// func validLogin(email, password string) bool {
+// 	return validEmail(email) && validPassword(password)
+// }
 
 // validEmail validates whether the input email
 // is a valid email or not, also does an MX lookup on domain.
@@ -151,19 +151,18 @@ func validEmail(e string) bool {
 //
 // Returns: a bool representing the validity of the provided password,
 // true for a valid password and false for an invalid password.
-func validPassword(p string) bool {
+func validPassword(p string) []string {
 	var (
-		hasLength  = false
-		hasUpper   = false
-		hasLower   = false
-		hasNumber  = false
-		hasSpecial = false
+		hasLength    = false
+		hasUpper     = false
+		hasLower     = false
+		hasNumber    = false
+		hasSymbol    = false
+		invalidChars []rune
 	)
 
 	if len(p) >= 8 && len(p) <= 32 {
 		hasLength = true
-	} else {
-		return false
 	}
 
 	for _, char := range p {
@@ -175,11 +174,37 @@ func validPassword(p string) bool {
 		case unicode.IsNumber(char):
 			hasNumber = true
 		case strings.ContainsAny(string(char), "!@#$%^&*"):
-			hasSpecial = true
+			hasSymbol = true
 		default:
-			return false
+			invalidChars = append(invalidChars, char)
 		}
 	}
 
-	return hasLength && hasUpper && hasLower && hasNumber && hasSpecial
+	var warnings []string
+	if !hasLength {
+		warnings = append(warnings, "Password is not an appropriate length.")
+	}
+	if !hasUpper {
+		warnings = append(warnings, "Password does not contain an upper case letter.")
+	}
+	if !hasLower {
+		warnings = append(warnings, "Password does not contain a lower case letter.")
+	}
+	if !hasNumber {
+		warnings = append(warnings, "Password does not contain a number.")
+	}
+	if !hasSymbol {
+		warnings = append(warnings, "Password does not contain a symbol.")
+	}
+	if len(invalidChars) != 0 {
+		for _, v := range invalidChars {
+			warnings = append(warnings, fmt.Sprintf("Password contains an invalid character: %c", v))
+		}
+	}
+
+	if len(warnings) != 0 {
+		return warnings
+	} else {
+		return nil
+	}
 }

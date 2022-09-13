@@ -73,7 +73,7 @@ async function register() {
             // should read the session cookie sent from registration backend
             // and set it serverside, so that a reload will login the user (as session is already active)
             addAlert("success", alertParagraph("Registration was successful."), Elements.RegisterModalBody)
-            await sleep(2000)
+            await sleep(1000)
             location.reload()
             break
         case HTTPCode.BadRequest:
@@ -144,7 +144,7 @@ async function login() {
     switch (response.status) {
         case HTTPCode.Success:
             addAlert("success", alertParagraph("Login was successful."), Elements.LoginModalBody)
-            await sleep(2000)
+            await sleep(1000)
             location.reload()
             break
         case HTTPCode.BadRequest:

@@ -11,7 +11,7 @@ func BenchmarkPasswordNoRegex(b *testing.B) {
 }
 
 func TestValidation(t *testing.T) {
-	if !validPassword("wp*Vr5#rSwDQ4XKafa8a*Xt3Vgd8X3^s") {
+	if errs := validPassword("wp*Vr5#rSwDQ4XKafa8a*Xt3Vgd8X3^s"); errs != nil {
 		t.Error("noregex: failed")
 	}
 }
