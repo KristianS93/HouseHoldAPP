@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"server/web/validation"
 	"strconv"
 	"strings"
 
@@ -272,11 +273,17 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 
 	json.NewDecoder(r.Body).Decode(&user)
 
-	// if !validLogin(user.UserID, user.Password) {
-	// 	w.WriteHeader(http.StatusBadRequest)
-	// 	log.Println("router/Login: invalid login credentials")
-	// 	return
-	// }
+	if errs := validation.CheckEmail(user.UserID); !errs {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Println("login: bad email")
+		return
+	}
+
+	if errs := validation.CheckPassword(user.Password); len(errs) != 0 {
+		w.WriteHeader(http.StatusBadRequest)
+		log.Println("login: bad password")
+		return
+	}
 
 	tempEmail, err := bcrypt.GenerateFromPassword([]byte(user.UserID), bcrypt.DefaultCost)
 	if err != nil {
