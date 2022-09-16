@@ -273,7 +273,7 @@ func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
 
 	json.NewDecoder(r.Body).Decode(&user)
 
-	if errs := validation.CheckEmail(user.UserID); !errs {
+	if errs := validation.CheckEmail(user.UserID); len(errs) != 0 {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Println("login: bad email")
 		return
