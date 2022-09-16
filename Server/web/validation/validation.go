@@ -1,6 +1,7 @@
 package validation
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"strings"
@@ -12,16 +13,18 @@ import (
 //
 // Returns: a bool representing the validity of the provided email
 // true meaning valid and false meaning invalid.
-func CheckEmail(e string) bool {
+func CheckEmail(e string) []string {
 	// splitting in prefix and domain
+	//! should refactor magic strings, also possibly invalidChar helpers
 	xs := strings.Split(e, "@")
 	if len(xs) != 2 {
 		// a valid email only contains one instance of @
-		return false
+		return []string{"An email must only contain one instance of @."}
 	}
 
 	// checking prefix format, may contains a-z, A-Z, 0-9 and .-_ (however not consecutive)
 	// anything other than this, or consecutive cases of .-_ is considered invalid
+	var invalidChars, errMessages []string
 	for i, v := range xs[0] {
 		switch {
 		case unicode.IsUpper(v) || unicode.IsLower(v) || unicode.IsNumber(v):
@@ -30,13 +33,13 @@ func CheckEmail(e string) bool {
 			if strings.ContainsAny(string(v), ".-_") {
 				// checking not out of bounds and if consecutive case of .-_
 				if (i+1 <= len(xs[0])) && (strings.ContainsAny(string(xs[0][i+1]), ".-_")) {
-					return false
+					errMessages = append(errMessages, "Invalid case of repeated punctuation (.-_).")
 				}
 				// valid case of punctuation => skip to next rune
 				continue
 			}
 			// only reached if invalid rune
-			return false
+			invalidChars = append(invalidChars, string(v))
 		}
 	}
 
@@ -45,12 +48,28 @@ func CheckEmail(e string) bool {
 	// very very giga unlikely, but technically error could be
 	// caused by the DNS message not being unmarshalled correctly
 	_, err := net.LookupMX(xs[1])
-	return err == nil
+	if err != nil {
+		if errors.Is(err, errors.New("no such host")) {
+			errMessages = append(errMessages, "Email host is invalid.")
+		} else {
+			return []string{"External DNS error."}
+		}
+	}
 
+	if len(invalidChars) != 0 {
+		errMessages = append(errMessages, emailErrInvalidChar(invalidChars))
+	}
+
+	return errMessages
+	//todo: testing for the function is not done currently
 	// should technically do an email verification at this point
 	// both to double check, but also to verify that the correct
 	// email is associated with a given user, as they might have
 	// misspelled or had a typo when entering their email
+}
+
+func emailErrInvalidChar(xs []string) string {
+	return fmt.Sprintf("Email contains invalid characters: %s", strings.Join(xs, ", "))
 }
 
 type errNrPassword uint8
