@@ -13,6 +13,7 @@ import (
 // Returns: a bool representing the validity of the provided email
 // true meaning valid and false meaning invalid.
 func CheckEmail(e string) bool {
+	//! remember to change function and return type to []string
 	// splitting in prefix and domain
 	xs := strings.Split(e, "@")
 	if len(xs) != 2 {

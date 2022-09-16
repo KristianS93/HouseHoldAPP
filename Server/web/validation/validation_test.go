@@ -6,6 +6,7 @@ import (
 
 const errorFormat string = "\nGot: %v\nWant: %v\nGiven: %v\n"
 
+// reflect.DeepEqual was not appropriate in this scenario
 func testSliceEquality(t testing.TB, a, b []string) bool {
 	t.Helper()
 	if len(a) != len(b) {
