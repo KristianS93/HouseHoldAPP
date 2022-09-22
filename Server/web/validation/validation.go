@@ -8,6 +8,13 @@ import (
 	"unicode"
 )
 
+const (
+	emailErrAt          = "An email must only contain one instance of @."
+	emailErrPunctuation = "Invalid case of repeated punctuation (.-_)."
+	emailErrDomain      = "Email host/domain is invalid."
+	emailErrDNS         = "External DNS error."
+)
+
 // CheckEmail validates whether the input email
 // is a valid email or not, also does an MX lookup on domain.
 //
@@ -15,11 +22,20 @@ import (
 // true meaning valid and false meaning invalid.
 func CheckEmail(e string) []string {
 	// splitting in prefix and domain
-	//! should refactor magic strings, also possibly invalidChar helpers
 	xs := strings.Split(e, "@")
 	if len(xs) != 2 {
 		// a valid email only contains one instance of @
-		return []string{"An email must only contain one instance of @."}
+		return []string{emailErrAt}
+	}
+
+	// looking up domain, returns a list of valid domains under lookup
+	// err is returned when no host under specified domain exists
+	// very very giga unlikely, but technically error could be
+	// caused by the DNS message not being unmarshalled correctly
+	_, err := net.LookupMX(xs[1])
+	var dnsError *net.DNSError
+	if errors.As(err, &dnsError) {
+		return []string{emailErrDomain}
 	}
 
 	// checking prefix format, may contains a-z, A-Z, 0-9 and .-_ (however not consecutive)
@@ -32,8 +48,8 @@ func CheckEmail(e string) []string {
 		default:
 			if strings.ContainsAny(string(v), ".-_") {
 				// checking not out of bounds and if consecutive case of .-_
-				if (i+1 <= len(xs[0])) && (strings.ContainsAny(string(xs[0][i+1]), ".-_")) {
-					errMessages = append(errMessages, "Invalid case of repeated punctuation (.-_).")
+				if (i+1 < len(xs[0])) && (strings.ContainsAny(string(xs[0][i+1]), ".-_")) {
+					errMessages = append(errMessages, emailErrPunctuation)
 				}
 				// valid case of punctuation => skip to next rune
 				continue
@@ -43,25 +59,11 @@ func CheckEmail(e string) []string {
 		}
 	}
 
-	// looking up domain, returns a list of valid domains under lookup
-	// err is returned when no host under specified domain exists
-	// very very giga unlikely, but technically error could be
-	// caused by the DNS message not being unmarshalled correctly
-	_, err := net.LookupMX(xs[1])
-	if err != nil {
-		if errors.Is(err, errors.New("no such host")) {
-			errMessages = append(errMessages, "Email host is invalid.")
-		} else {
-			return []string{"External DNS error."}
-		}
-	}
-
 	if len(invalidChars) != 0 {
 		errMessages = append(errMessages, emailErrInvalidChar(invalidChars))
 	}
 
 	return errMessages
-	//todo: testing for the function is not done currently
 	// should technically do an email verification at this point
 	// both to double check, but also to verify that the correct
 	// email is associated with a given user, as they might have

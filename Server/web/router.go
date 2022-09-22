@@ -46,6 +46,14 @@ func (s *Server) Routes(r *mux.Router) {
 	r.HandleFunc("/clearlist", s.ClearList).Methods(http.MethodGet)
 	r.HandleFunc("/login", s.Login).Methods(http.MethodPost)
 	r.HandleFunc("/register", s.Register).Methods(http.MethodPost)
+
+	// any default traffic
+	r.NotFoundHandler = http.HandlerFunc(handle404)
+}
+
+func handle404(w http.ResponseWriter, r *http.Request) {
+	log.Println("user found a non existent endpoint")
+	w.Write([]byte("Hello, site not found."))
 }
 
 // favIcon serves the favourite icon.
