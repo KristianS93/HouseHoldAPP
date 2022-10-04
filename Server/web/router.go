@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -82,6 +83,7 @@ func Index(c *fiber.Ctx) error {
 	})
 }
 
+// Remember to add alerts?
 func GroceryList(c *fiber.Ctx) error {
 	listID := "62fd4bc950c4443769551c49"
 	res, err := http.Get(fmt.Sprintf("%s?ListId=%s", GroceryListGetList, listID))
@@ -123,6 +125,7 @@ func GroceryList(c *fiber.Ctx) error {
 // 	io.WriteString(w, "Meal Planner")
 // }
 
+// Remember to add alerts
 func Additem(c *fiber.Ctx) error {
 	item := Item{
 		ListId:   "62fd4bc950c4443769551c49",
@@ -158,75 +161,71 @@ func Additem(c *fiber.Ctx) error {
 	return c.Redirect("grocerylist", fiber.StatusSeeOther)
 }
 
-// func (s *Server) ChangeItem(w http.ResponseWriter, r *http.Request) {
-// 	type changeItem struct {
-// 		Id       string `json:"Id"`
-// 		ItemName string `json:"ItemName"`
-// 		Quantity string `json:"Quantity"`
-// 		Unit     string `json:"Unit"`
-// 	}
-// 	var uItem changeItem
+func ChangeItem(c *fiber.Ctx) error {
+	type changeItem struct {
+		Id       string `json:"Id"`
+		ItemName string `json:"ItemName"`
+		Quantity string `json:"Quantity"`
+		Unit     string `json:"Unit"`
+	}
+	var uItem changeItem
 
-// 	err := json.NewDecoder(r.Body).Decode(&uItem)
-// 	if err != nil {
-// 		log.Println(err)
-// 	}
+	err := json.Unmarshal(c.Body(), &uItem)
+	if err != nil {
+		log.Println(err)
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
 
-// 	// stripping leading a from html element
-// 	// leading a is important due to document.querySelectorAll
-// 	// not accepting id's with leading digits
-// 	uItem.Id = uItem.Id[1:]
+	// stripping leading a from html element
+	// leading a is important due to document.querySelectorAll
+	// not accepting id's with leading digits
+	uItem.Id = uItem.Id[1:]
 
-// 	if uItem.Id == "" || uItem.ItemName == "" || uItem.Quantity == "" || uItem.Unit == "" {
-// 		addAlert(w, Warning, "One field was empty, please fill all fields appropriately.")
-// 		w.WriteHeader(http.StatusBadRequest)
-// 		return
-// 	}
+	if uItem.Id == "" || uItem.ItemName == "" || uItem.Quantity == "" || uItem.Unit == "" {
+		//addAlert(w, Warning, "One field was empty, please fill all fields appropriately.")
+		return c.SendStatus(fiber.StatusBadRequest)
+	}
 
-// 	n, err := strconv.Atoi(uItem.Quantity)
-// 	if err != nil {
-// 		addAlert(w, Danger, "Internal error.")
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		return
-// 	}
-// 	if n < 1 {
-// 		addAlert(w, Danger, "Quantity must be at least 1.")
-// 		w.WriteHeader(http.StatusBadRequest)
-// 		return
-// 	}
+	n, err := strconv.Atoi(uItem.Quantity)
+	if err != nil {
+		// addAlert(w, Danger, "Internal error.")
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
+	if n < 1 {
+		// addAlert(w, Danger, "Quantity must be at least 1.")
+		return c.SendStatus(fiber.StatusBadRequest)
+	}
 
-// 	mi, err := json.Marshal(uItem)
-// 	if err != nil {
-// 		addAlert(w, Danger, "Internal error.")
-// 		log.Println("changeItem failed to marshal: ", err)
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		return
-// 	}
+	mi, err := json.Marshal(uItem)
+	if err != nil {
+		// addAlert(w, Danger, "Internal error.")
+		log.Println("changeItem failed to marshal: ", err)
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
 
-// 	req, err := http.NewRequest(http.MethodPatch, GroceryListChangeItem, bytes.NewBuffer(mi))
-// 	if err != nil {
-// 		addAlert(w, Danger, "Internal error.")
-// 		log.Println("changeItem newRequest: ", err)
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		return
-// 	}
+	req, err := http.NewRequest(http.MethodPatch, GroceryListChangeItem, bytes.NewBuffer(mi))
+	if err != nil {
+		// addAlert(w, Danger, "Internal error.")
+		log.Println("changeItem newRequest: ", err)
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
 
-// 	client := &http.Client{}
-// 	res, err := client.Do(req)
-// 	if err != nil {
-// 		addAlert(w, Danger, "Internal error.")
-// 		log.Println("changeItem DO: ", err)
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		return
-// 	}
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		// addAlert(w, Danger, "Internal error.")
+		log.Println("changeItem DO: ", err)
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
 
-// 	if res.StatusCode != http.StatusOK {
-// 		addAlert(w, Danger, "Internal error.")
-// 		log.Println("changeItem unexpected status code")
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		return
-// 	}
-// }
+	if res.StatusCode != http.StatusOK {
+		// addAlert(w, Danger, "Internal error.")
+		log.Println("changeItem unexpected status code")
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
+
+	return c.SendStatus(fiber.StatusOK)
+}
 
 // func (s *Server) ClearList(w http.ResponseWriter, r *http.Request) {
 // 	// the id should be retrieved from the session cookie

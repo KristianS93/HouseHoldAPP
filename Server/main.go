@@ -14,7 +14,6 @@ func main() {
 	app := fiber.New(fiber.Config{
 		StrictRouting:     true,
 		CaseSensitive:     true,
-		ServerHeader:      "Fiber",
 		AppName:           "HouseHoldApp x Fiber v0.1",
 		Views:             engine,
 		EnablePrintRoutes: true,
@@ -25,6 +24,8 @@ func main() {
 	app.Get("/grocerylist", web.GroceryList)
 
 	app.Post("/additem", web.Additem)
+
+	app.Patch("changeitem", web.ChangeItem)
 
 	log.Fatal(app.Listen("localhost:8888"))
 }
