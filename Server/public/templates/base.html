@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+   {{template "navbar" .NavBar }}
+   <body>
+      <div class="container">
+         {{range $error := .Errors}}
+         <div class="alert alert-{{$error.Level}} alert-dismissible fade show w-50 mx-auto" role="alert">
+            {{$error.Message}}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+         </div>
+         {{end}}
+      </div>
+      <br>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa" crossorigin="anonymous"></script>
+      <script src="/js/base.js"></script>
+   </body>
+</html>

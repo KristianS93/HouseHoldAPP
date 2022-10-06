@@ -1,86 +1,86 @@
 package web
 
-import (
-	"log"
-	"net/http"
-	"text/template"
-	"time"
+// import (
+// 	"log"
+// 	"net/http"
+// 	"text/template"
+// 	"time"
 
-	"github.com/gorilla/mux"
-)
+// 	"github.com/gorilla/mux"
+// )
 
-const (
-	// The amount of seconds a session should stay active, before a new login is required
-	// to continue utilizing the service.
-	SessionTimeOut = 1200
-)
+// const (
+// 	// The amount of seconds a session should stay active, before a new login is required
+// 	// to continue utilizing the service.
+// 	SessionTimeOut = 1200
+// )
 
-type Session struct {
-	LastActivity time.Time
-	ListID       string
-	HouseHoldID  string
-	Name         string
-}
+// type Session struct {
+// 	LastActivity time.Time
+// 	ListID       string
+// 	HouseHoldID  string
+// 	Name         string
+// }
 
-type Server struct {
-	// Will serve as the router used to route incoming requests properly.
-	Router *mux.Router
+// type Server struct {
+// 	// Will serve as the router used to route incoming requests properly.
+// 	Router *mux.Router
 
-	// Domain and port, locally would be "localhost" and ":8080", or similar ports.
-	HostName string
-	HostPort string
+// 	// Domain and port, locally would be "localhost" and ":8080", or similar ports.
+// 	HostName string
+// 	HostPort string
 
-	// Storing all current templates, to be ready for execution.
-	Templates map[string]*template.Template
+// 	// Storing all current templates, to be ready for execution.
+// 	Templates map[string]*template.Template
 
-	// Keeping track of current sessions by logging last activity on cookie key.
-	Sessions map[string]Session
-}
+// 	// Keeping track of current sessions by logging last activity on cookie key.
+// 	Sessions map[string]Session
+// }
 
-type UserData struct {
-	Name     string
-	LoggedIn bool
-}
+// type UserData struct {
+// 	Name     string
+// 	LoggedIn bool
+// }
 
-type TmplData struct {
-	Data   interface{}
-	Errors []Alert
-	User   UserData
-}
+// type TmplData struct {
+// 	Data   interface{}
+// 	Errors []Alert
+// 	User   UserData
+// }
 
-func (s *Server) Init() {
-	if s.Router == nil {
-		// This ensures that incoming traffic reaches the designated router.
-		s.Router = mux.NewRouter()
-		s.Routes(s.Router)
-	}
+// func (s *Server) Init() {
+// 	if s.Router == nil {
+// 		// This ensures that incoming traffic reaches the designated router.
+// 		s.Router = mux.NewRouter()
+// 		s.Routes(s.Router)
+// 	}
 
-	if s.Templates == nil {
-		s.Templates = make(map[string]*template.Template)
-		s.parseTemplate("grocerylist", "")
-		s.parseTemplate("index", "")
-		// new templates are parsed here
-	}
+// 	if s.Templates == nil {
+// 		s.Templates = make(map[string]*template.Template)
+// 		s.parseTemplate("grocerylist", "")
+// 		s.parseTemplate("index", "")
+// 		// new templates are parsed here
+// 	}
 
-	if s.Sessions == nil {
-		s.Sessions = make(map[string]Session)
-	}
+// 	if s.Sessions == nil {
+// 		s.Sessions = make(map[string]Session)
+// 	}
 
-	if s.HostName == "" {
-		s.HostName = "localhost"
-		log.Println("No HostName specified, defaulting to localhost")
-	}
-	if s.HostPort == "" {
-		s.HostPort = ":8888"
-		log.Println("No HostPort specified, defaulting to :8888")
-	}
-}
+// 	if s.HostName == "" {
+// 		s.HostName = "localhost"
+// 		log.Println("No HostName specified, defaulting to localhost")
+// 	}
+// 	if s.HostPort == "" {
+// 		s.HostPort = ":8888"
+// 		log.Println("No HostPort specified, defaulting to :8888")
+// 	}
+// }
 
-// Run launches a LAS on the specified HostName and Port,
-// while using the Server.Router as the ServeMux.
-func (s *Server) Run() {
-	err := http.ListenAndServe((s.HostName + s.HostPort), s.Router)
-	if err != nil {
-		log.Fatalln("Failed to start a server, closing application.")
-	}
-}
+// // Run launches a LAS on the specified HostName and Port,
+// // while using the Server.Router as the ServeMux.
+// func (s *Server) Run() {
+// 	err := http.ListenAndServe((s.HostName + s.HostPort), s.Router)
+// 	if err != nil {
+// 		log.Fatalln("Failed to start a server, closing application.")
+// 	}
+// }
