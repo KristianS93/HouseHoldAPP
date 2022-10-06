@@ -3,13 +3,16 @@ package web
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
+	"server/web/validation"
 	"strconv"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // import (
@@ -76,10 +79,10 @@ type NavbarData struct {
 // index handles the frontpage.
 func Index(c *fiber.Ctx) error {
 	return c.Render("index", fiber.Map{
-		"NavBar": NavbarData{
-			LoggedIn: true,
-			Name:     "Krath",
-		},
+		// "NavBar": NavbarData{
+		// 	LoggedIn: true,
+		// 	Name:     "Krath",
+		// },
 	})
 }
 
@@ -227,130 +230,110 @@ func ChangeItem(c *fiber.Ctx) error {
 	return c.SendStatus(fiber.StatusOK)
 }
 
-// func (s *Server) ClearList(w http.ResponseWriter, r *http.Request) {
-// 	// the id should be retrieved from the session cookie
-// 	// and session runtime database
-// 	listID := "62fd4bc950c4443769551c49"
-// 	listObj := struct {
-// 		ListId string
-// 	}{
-// 		ListId: listID,
-// 	}
+func ClearList(c *fiber.Ctx) error {
+	// the id should be retrieved from the session cookie
+	// and session runtime database
+	listID := "62fd4bc950c4443769551c49"
+	listObj := struct {
+		ListId string
+	}{
+		ListId: listID,
+	}
 
-// 	ml, err := json.Marshal(listObj)
-// 	if err != nil {
-// 		AlertLog(w, Danger, InternalError, fmt.Sprint("ClearList: Marshal gone bad.", err))
-// 		http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
-// 		return
-// 	}
+	ml, err := json.Marshal(listObj)
+	if err != nil {
+		// AlertLog(w, Danger, InternalError, fmt.Sprint("ClearList: Marshal gone bad.", err))
+		return c.Redirect("/grocerylist", fiber.StatusSeeOther)
+	}
 
-// 	nr, err := http.NewRequest(http.MethodDelete, GroceryListClearList, bytes.NewBuffer(ml))
-// 	if err != nil {
-// 		AlertLog(w, Danger, InternalError, fmt.Sprint("ClearList: Issue creating new request.", err))
-// 		http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
-// 		return
-// 	}
+	nr, err := http.NewRequest(http.MethodDelete, GroceryListClearList, bytes.NewBuffer(ml))
+	if err != nil {
+		// AlertLog(w, Danger, InternalError, fmt.Sprint("ClearList: Issue creating new request.", err))
+		return c.Redirect("grocerylist", fiber.StatusSeeOther)
+	}
 
-// 	client := http.Client{}
-// 	res, err := client.Do(nr)
-// 	if err != nil {
-// 		AlertLog(w, Danger, InternalError, fmt.Sprint("ClearList: Issue performing new request.", err))
-// 		http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
-// 		return
-// 	}
+	client := http.Client{}
+	res, err := client.Do(nr)
+	if err != nil {
+		// AlertLog(w, Danger, InternalError, fmt.Sprint("ClearList: Issue performing new request.", err))
+		return err
+	}
 
-// 	if res.StatusCode != http.StatusOK {
-// 		AlertLog(w, Danger, InternalError, fmt.Sprint("ClearList: Wrong StatusCode in response.", err))
-// 		http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
-// 		return
-// 	}
+	if res.StatusCode != http.StatusOK {
+		// AlertLog(w, Danger, InternalError, fmt.Sprint("ClearList: Wrong StatusCode in response.", err))
+		return errors.New("clearlist: unexpected status code")
+	}
 
-// 	addAlert(w, Success, ListCleared)
-// 	http.Redirect(w, r, "/grocerylist", http.StatusSeeOther)
-// }
+	// addAlert(w, Success, ListCleared)
+	return c.Redirect("grocerylist", fiber.StatusSeeOther)
+}
 
-// func (s *Server) Login(w http.ResponseWriter, r *http.Request) {
-// 	type login struct {
-// 		UserID   string `json:"UserID"`
-// 		Password string `json:"Password"`
-// 	}
-// 	var user login
+func Login(c *fiber.Ctx) error {
+	type login struct {
+		UserID   string `json:"UserID"`
+		Password string `json:"Password"`
+	}
+	var user login
 
-// 	json.NewDecoder(r.Body).Decode(&user)
+	err := json.Unmarshal(c.Body(), &user)
+	if err != nil {
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
 
-// 	if errs := validation.CheckEmail(user.UserID); len(errs) != 0 {
-// 		w.WriteHeader(http.StatusBadRequest)
-// 		log.Println("login: bad email")
-// 		return
-// 	}
+	if errs := validation.CheckEmail(user.UserID); len(errs) != 0 {
+		return c.SendStatus(fiber.StatusBadRequest)
+	}
 
-// 	if errs := validation.CheckPassword(user.Password); len(errs) != 0 {
-// 		w.WriteHeader(http.StatusBadRequest)
-// 		log.Println("login: bad password")
-// 		return
-// 	}
+	if errs := validation.CheckPassword(user.Password); len(errs) != 0 {
+		return c.SendStatus(fiber.StatusBadRequest)
+	}
 
-// 	tempEmail, err := bcrypt.GenerateFromPassword([]byte(user.UserID), bcrypt.DefaultCost)
-// 	if err != nil {
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		log.Println("bcrypt userid")
-// 		return
-// 	}
-// 	user.UserID = string(tempEmail)
+	tempEmail, err := bcrypt.GenerateFromPassword([]byte(user.UserID), bcrypt.DefaultCost)
+	if err != nil {
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
 
-// 	tempPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-// 	if err != nil {
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		log.Println("bcrypt password")
-// 		return
-// 	}
-// 	user.Password = string(tempPassword)
+	tempPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
+	user.UserID = string(tempEmail)
+	user.Password = string(tempPassword)
 
-// 	mu, err := json.Marshal(user)
-// 	if err != nil {
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		log.Println("json marshal")
-// 		return
-// 	}
+	mu, err := json.Marshal(user)
+	if err != nil {
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
 
-// 	res, err := http.Post(UserSystemLogin, "application/json", bytes.NewBuffer(mu))
-// 	if err != nil {
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		log.Println("http post")
-// 		return
-// 	}
+	res, err := http.Post(UserSystemLogin, "application/json", bytes.NewBuffer(mu))
+	if err != nil {
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
 
-// 	if res.StatusCode != http.StatusOK {
-// 		switch res.StatusCode {
-// 		case http.StatusInternalServerError:
-// 			w.WriteHeader(http.StatusInternalServerError)
-// 			log.Println("switch internalerror")
-// 			return
-// 		case http.StatusNotFound:
-// 			w.WriteHeader(http.StatusNotFound)
-// 			log.Println("switch not found")
-// 			return
-// 		default:
-// 			w.WriteHeader(http.StatusInternalServerError)
-// 			log.Fatalln("unexpected status code returned from login attempt:", res.StatusCode)
-// 			return
-// 		}
-// 	}
+	if res.StatusCode != http.StatusOK {
+		switch res.StatusCode {
+		case http.StatusInternalServerError:
+			return c.SendStatus(fiber.StatusInternalServerError)
+		case http.StatusNotFound:
+			return c.SendStatus(fiber.StatusNotFound)
+		default:
+			return c.SendStatus(fiber.StatusInternalServerError)
+		}
+	}
 
-// 	type sesInfo struct {
-// 		FirstName     string `json:"FirstName"`
-// 		GroceryListID string `json:"ListID"`
-// 		HouseholdID   string `json:"HouseholdID"`
-// 	}
-// 	var ns sesInfo
+	// type sesInfo struct {
+	// 	FirstName     string `json:"FirstName"`
+	// 	GroceryListID string `json:"ListID"`
+	// 	HouseholdID   string `json:"HouseholdID"`
+	// }
+	// var ns sesInfo
 
-// 	json.NewDecoder(r.Body).Decode(&ns)
+	// json.NewDecoder(r.Body).Decode(&ns)
 
-// 	s.StartSession(w, r, ns.GroceryListID, ns.HouseholdID, ns.FirstName)
-// 	addAlert(w, Success, LoginSuccess)
-// 	w.WriteHeader(http.StatusOK)
-// 	log.Println("Session started")
-// }
+	// s.StartSession(w, r, ns.GroceryListID, ns.HouseholdID, ns.FirstName)
+	// addAlert(w, Success, LoginSuccess)
+	return c.SendStatus(fiber.StatusOK)
+}
 
 // func (s *Server) Register(w http.ResponseWriter, r *http.Request) {
 // 	// was just testing, but this works with the front end

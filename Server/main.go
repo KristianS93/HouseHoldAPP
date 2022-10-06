@@ -24,8 +24,12 @@ func main() {
 	app.Get("/grocerylist", web.GroceryList)
 
 	app.Post("/additem", web.Additem)
+	app.Post("login", web.Login)
 
-	app.Patch("changeitem", web.ChangeItem)
+	app.Patch("/changeitem", web.ChangeItem)
+
+	// should be changed to fetch instead of hyperlink frontend, should also change to delete method
+	app.Get("/clearlist", web.ClearList)
 
 	log.Fatal(app.Listen("localhost:8888"))
 }

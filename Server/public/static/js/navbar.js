@@ -124,7 +124,7 @@ function alertParagraph(message) {
 
 async function login() {
     if (!checkLogin(Elements.LoginEmail, Elements.LoginPassword)) {
-        addAlert("warning", "The provided login information are invalid.", Elements.LoginModalBody)
+        addAlert("warning", "The provided login information is invalid.", Elements.LoginModalBody)
         console.log("validation: client")
         return
     }
