@@ -346,3 +346,22 @@ func Login(c *fiber.Ctx) error {
 // 	w.WriteHeader(http.StatusBadRequest)
 // 	json.NewEncoder(w).Encode(e)
 // }
+
+func ErrorHandler(c *fiber.Ctx, err error) error {
+	code := fiber.StatusInternalServerError
+
+	if e, ok := err.(*fiber.Error); ok {
+		code = e.Code
+	}
+
+	switch code {
+	case fiber.StatusNotFound:
+		return NotFound(c)
+	}
+
+	return nil
+}
+
+func NotFound(c *fiber.Ctx) error {
+	return c.Status(404).Render("notfound", nil)
+}
