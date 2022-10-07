@@ -1,86 +1,33 @@
 package web
 
-// import (
-// 	"log"
-// 	"net/http"
-// 	"text/template"
-// 	"time"
+import (
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/template/html"
+)
 
-// 	"github.com/gorilla/mux"
-// )
+func GetApp() *fiber.App {
+	engine := html.New("./public/templates", ".html")
 
-// const (
-// 	// The amount of seconds a session should stay active, before a new login is required
-// 	// to continue utilizing the service.
-// 	SessionTimeOut = 1200
-// )
+	app := fiber.New(fiber.Config{
+		AppName:           "HouseHoldApp x Fiber v0.1",
+		StrictRouting:     true,
+		CaseSensitive:     true,
+		Views:             engine,
+		EnablePrintRoutes: true,
+		ErrorHandler:      ErrorHandler,
+	})
+	app.Static("/", "./public/static")
 
-// type Session struct {
-// 	LastActivity time.Time
-// 	ListID       string
-// 	HouseHoldID  string
-// 	Name         string
-// }
+	app.Get("/", Index)
+	app.Get("/grocerylist", GroceryList)
 
-// type Server struct {
-// 	// Will serve as the router used to route incoming requests properly.
-// 	Router *mux.Router
+	app.Post("/additem", Additem)
+	app.Post("login", Login)
 
-// 	// Domain and port, locally would be "localhost" and ":8080", or similar ports.
-// 	HostName string
-// 	HostPort string
+	app.Patch("/changeitem", ChangeItem)
 
-// 	// Storing all current templates, to be ready for execution.
-// 	Templates map[string]*template.Template
+	// should be changed to fetch instead of hyperlink frontend, should also change to delete method
+	app.Get("/clearlist", ClearList)
 
-// 	// Keeping track of current sessions by logging last activity on cookie key.
-// 	Sessions map[string]Session
-// }
-
-// type UserData struct {
-// 	Name     string
-// 	LoggedIn bool
-// }
-
-// type TmplData struct {
-// 	Data   interface{}
-// 	Errors []Alert
-// 	User   UserData
-// }
-
-// func (s *Server) Init() {
-// 	if s.Router == nil {
-// 		// This ensures that incoming traffic reaches the designated router.
-// 		s.Router = mux.NewRouter()
-// 		s.Routes(s.Router)
-// 	}
-
-// 	if s.Templates == nil {
-// 		s.Templates = make(map[string]*template.Template)
-// 		s.parseTemplate("grocerylist", "")
-// 		s.parseTemplate("index", "")
-// 		// new templates are parsed here
-// 	}
-
-// 	if s.Sessions == nil {
-// 		s.Sessions = make(map[string]Session)
-// 	}
-
-// 	if s.HostName == "" {
-// 		s.HostName = "localhost"
-// 		log.Println("No HostName specified, defaulting to localhost")
-// 	}
-// 	if s.HostPort == "" {
-// 		s.HostPort = ":8888"
-// 		log.Println("No HostPort specified, defaulting to :8888")
-// 	}
-// }
-
-// // Run launches a LAS on the specified HostName and Port,
-// // while using the Server.Router as the ServeMux.
-// func (s *Server) Run() {
-// 	err := http.ListenAndServe((s.HostName + s.HostPort), s.Router)
-// 	if err != nil {
-// 		log.Fatalln("Failed to start a server, closing application.")
-// 	}
-// }
+	return app
+}
