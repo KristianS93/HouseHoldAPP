@@ -1,3 +1,5 @@
+// npx tailwindcss -o ./public/static/css/styles.css
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: 'class',
