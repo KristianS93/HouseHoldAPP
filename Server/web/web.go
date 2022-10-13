@@ -28,6 +28,6 @@ func GetApp() *fiber.App {
 
 	// should be changed to fetch instead of hyperlink frontend, should also change to delete method
 	app.Get("/clearlist", ClearList)
-
+	
 	return app
 }
