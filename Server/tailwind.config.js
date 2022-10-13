@@ -14,3 +14,12 @@ module.exports = {
     require('autoprefixer'),
   ],
 }
+
+
+// Color scheme should most likely have:
+// Primary Dark - Light
+// Secondary Dark - Light
+// Third Dark - Light
+// Text Dark - Light
+// Hover Text Dark - Light
+// Hover BG Dark - Light
