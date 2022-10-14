@@ -1,24 +1,23 @@
 {{define "navbar"}}
 
-<nav
-  class="px-2 bg-gray-200 border-gray-400 dark:bg-gray-900 dark:border-gray-700">
+<nav class="px-2 bg-secondary_light dark:bg-secondary_dark">
   <div class="container flex flex-wrap justify-between items-center mx-auto">
     <a
-      href="#"
+      href="/"
       class="flex items-center">
       <img
         src="images/favicon.ico"
         class="mr-3 h-6 sm:h-10"
         alt="Flowbite Logo" />
       <span
-        class="self-center text-xl font-semibold whitespace-nowrap dark:text-white"
+        class="self-center text-xl font-semibold whitespace-nowrap text-text_light dark:text-text_dark"
         >HouseHold</span
       >
     </a>
     <button
       data-collapse-toggle="mobile-menu"
       type="button"
-      class="inline-flex justify-center items-center ml-3 text-gray-400 rounded-lg md:hidden hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-300 dark:text-gray-400 dark:hover:text-white dark:focus:ring-gray-500"
+      class="inline-flex justify-center items-center ml-3 text-text_light rounded-lg md:hidden hover:text-text_light_hover dark:text-text_dark dark:hover:text-text_dark_hover"
       aria-controls="mobile-menu-2"
       aria-expanded="false">
       <span class="sr-only">Open main menu</span>
@@ -38,18 +37,18 @@
       class="hidden w-full md:block md:w-auto"
       id="mobile-menu">
       <ul
-        class="flex flex-col p-4 mt-4 bg-gray-200 rounded-lg border border-gray-100 md:flex-row md:space-x-8 md:mt-0 md:text-sm md:font-medium md:border-0 md:bg-gray-200 dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
+        class="flex flex-col p-4 mt-4 rounded-lg border md:flex-row md:space-x-8 md:mt-0 md:text-sm md:font-medium md:border-0">
         <li>
           <a
             href="/grocerylist"
-            class="text-lg block align py-2 pr-4 pl-3 text-gray-700 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-gray-400 md:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+            class="text-lg block align py-2 pr-4 pl-3 text-text_light rounded md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-text_dark md:dark:hover:text-text_dark_hover dark:hover:text-text_dark_hover md:dark:hover:bg-transparent"
             >Grocery List</a
           >
         </li>
         <li>
           <a
             href="/mealplanner"
-            class="text-lg block py-2 pr-4 pl-3 text-gray-700 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-gray-400 md:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+            class="text-lg block py-2 pr-4 pl-3 text-text_light rounded md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-text_dark md:dark:hover:text-text_dark_hover dark:hover:text-text_dark_hover md:dark:hover:bg-transparent"
             >Meal Planner</a
           >
         </li>
@@ -58,7 +57,7 @@
           <button
             id="dropdownNavbarLink"
             data-dropdown-toggle="dropdownNavbar"
-            class="flex justify-between text-lg items-center py-2 pr-4 pl-3 w-full font-medium text-gray-700 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 md:w-auto dark:text-gray-400 dark:hover:text-white dark:focus:text-white dark:border-gray-700 dark:hover:bg-gray-700 md:dark:hover:bg-transparent">
+            class="flex justify-between text-lg items-center py-2 pr-4 pl-3 w-full font-medium text-text_light rounded md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 md:w-auto dark:text-text_dark dark:hover:text-text_dark_hover dark:focus:text-text_dark_hover md:dark:hover:bg-transparent">
             {{.Name}}
             <svg
               class="ml-1 w-5 h-5"
@@ -75,7 +74,7 @@
           <!-- Dropdown menu -->
           <div
             id="dropdownNavbar"
-            class="hidden z-10 w-44 font-normal bg-gray-200 rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600"
+            class="hidden z-10 w-44 font-normal bg-secondary_light rounded divide-y divide-gray-100 shadow dark:bg-secondary_dark dark:divide-gray-600"
             style="
               position: absolute;
               inset: 0px auto auto 0px;
@@ -86,12 +85,12 @@
             data-popper-escaped=""
             data-popper-placement="bottom">
             <ul
-              class="py-1 text-sm text-gray-700 dark:text-gray-400"
+              class="py-1 text-sm text-text_light dark:text-text_dark"
               aria-labelledby="dropdownLargeButton">
               <li>
                 <a
                   href="/account"
-                  class="block text-lg py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                  class="block text-lg py-2 px-4 hover:text-text_light_hover dark:hover:text-text_dark_hover"
                   >Account</a
                 >
               </li>
@@ -99,7 +98,7 @@
             <div class="py-1">
               <a
                 href="/logout"
-                class="block text-lg py-2 px-4 text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-400 dark:hover:text-white"
+                class="block text-lg py-2 px-4 text-text_light hover:text-text_light_hover dark:text-text_dark dark:hover:text-text_dark_hover"
                 >Sign out</a
               >
             </div>
@@ -109,7 +108,7 @@
         <li>
           <a
             href="#"
-            class="block text-lg py-2 pr-4 pl-3 text-gray-700 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-gray-400 md:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+            class="block text-lg py-2 pr-4 pl-3 text-text_light rounded md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-text_dark md:dark:hover:text-text_dark_hover dark:hover:text-text_dark_hover md:dark:hover:bg-transparent"
             data-modal-toggle="authentication-modal"
             >Login</a
           >
@@ -117,7 +116,7 @@
         <li>
           <a
             href="/register"
-            class="block text-lg py-2 pr-4 pl-3 text-gray-700 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-gray-400 md:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+            class="block text-lg py-2 pr-4 pl-3 text-text_light rounded md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-text_dark md:dark:hover:text-text_dark_hover dark:hover:text-text_dark_hover md:dark:hover:bg-transparent"
             >Sign Up</a
           >
         </li>
@@ -125,7 +124,7 @@
         <button
           id="theme-toggle"
           type="button"
-          class="block text-lg py-2 pr-4 pl-3 text-gray-700 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-gray-400 md:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">
+          class="block text-lg py-2 pr-4 pl-3 text-text_light rounded md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-text_dark md:dark:hover:text-text_dark_hover dark:hover:text-text_dark_hover md:dark:hover:bg-transparent">
           <svg
             id="theme-toggle-dark-icon"
             class="hidden w-5 h-5"
@@ -160,10 +159,11 @@
   class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 w-full md:inset-0 h-modal md:h-full justify-center items-center">
   <div class="relative p-4 w-full max-w-md h-full md:h-auto">
     <!-- Modal content -->
-    <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+    <div
+      class="relative bg-primary_light rounded-lg shadow dark:bg-primary_dark">
       <button
         type="button"
-        class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-800 dark:hover:text-white"
+        class="absolute top-3 right-2.5 text-text_light bg-transparent hover:text-text_light_hover rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:text-text_dark dark:hover:text-text_dark_hover"
         data-modal-toggle="authentication-modal">
         <svg
           aria-hidden="true"
@@ -179,7 +179,8 @@
         <span class="sr-only">Close modal</span>
       </button>
       <div class="py-6 px-6 lg:px-8">
-        <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">
+        <h3
+          class="mb-4 text-xl font-medium text-text_light dark:text-text_dark">
           Sign in to your HouseHold account
         </h3>
         <form
@@ -188,21 +189,21 @@
           <div>
             <label
               for="email"
-              class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+              class="block mb-2 text-sm font-medium text-text_light dark:text-text_dark"
               >Your email</label
             >
             <input
               type="email"
               name="email"
               id="email"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+              class="bg-gray-50 border border-gray-300 text-text_light text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-text_dark"
               placeholder="name@company.com"
               required="" />
           </div>
           <div>
             <label
               for="password"
-              class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+              class="block mb-2 text-sm font-medium text-text_light dark:text-text_dark"
               >Your password</label
             >
             <input
@@ -210,7 +211,7 @@
               name="password"
               id="password"
               placeholder="••••••••"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+              class="bg-gray-50 border border-gray-300 text-text_light text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-text_dark"
               required="" />
           </div>
           <div class="flex justify-between">
@@ -225,7 +226,7 @@
               </div>
               <label
                 for="remember"
-                class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                class="ml-2 text-sm font-medium text-text_light dark:text-text_dark"
                 >Remember me</label
               >
             </div>
@@ -237,10 +238,10 @@
           </div>
           <button
             type="submit"
-            class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+            class="w-full text-text_light bg-secondary_light hover:bg-bg_light_hover focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-secondary_dark dark:hover:bg-bg_dark_hover dark:focus:ring-blue-800">
             Login to your account
           </button>
-          <div class="text-sm font-medium text-gray-500 dark:text-gray-300">
+          <div class="text-sm font-medium text-text_light dark:text-text_dark">
             Not registered?
             <a
               href="#"

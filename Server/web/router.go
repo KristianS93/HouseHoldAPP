@@ -79,10 +79,11 @@ type NavbarData struct {
 // index handles the frontpage.
 func Index(c *fiber.Ctx) error {
 	return c.Render("index", fiber.Map{
-		// "NavBar": NavbarData{
-		// 	LoggedIn: true,
-		// 	Name:     "Krath",
-		// },
+		"Title": "HouseHold",
+		"NavBar": NavbarData{
+			LoggedIn: true,
+			Name:     "Krath",
+		},
 	})
 }
 
@@ -363,5 +364,7 @@ func ErrorHandler(c *fiber.Ctx, err error) error {
 }
 
 func NotFound(c *fiber.Ctx) error {
-	return c.Status(404).Render("notfound", nil)
+	return c.Status(404).Render("notfound", fiber.Map{
+		"Title": "404 Page Not Found",
+	})
 }
